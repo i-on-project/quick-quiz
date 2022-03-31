@@ -1,1 +1,1 @@
-# quick-quizz
+# quick-quiz
