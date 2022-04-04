@@ -50,7 +50,6 @@
 | --- |
 ```json
 {
-    "_comment": "USER",
     "User_Id": String,
     "User_Name": String,
     "Alias": String,
