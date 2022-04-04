@@ -6,6 +6,7 @@
 	"Session_Id": String,
 	"Session_Owner": String,
     "Participants_Limit": Int,
+    "Session_Date": String,
 	"Session_State": {
         "Status": String,
         "Release_Type": String,
