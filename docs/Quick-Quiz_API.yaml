@@ -115,9 +115,8 @@ paths:
       responses:
         200:
           description: request is always accepted
-
   /guest/logmein:
-     post:
+     get:
       tags:
       - guest
       summary: Guest Logs in 
@@ -126,12 +125,18 @@ paths:
       produces:
       - application/json
       parameters:
-      - in: body
-        name: body
-        description: UserName and userAccountIdentifier
+      - name: UserName
+        in: query
+        description: username / email address
         required: true
-        schema:
-          $ref: '#/definitions/User'
+        type: string
+        format: alphanumeric
+      - name: UserAccountIdentifer
+        in: query
+        description: Guest unique Identifier
+        required: true
+        type: string
+        format: alphanumeric
       responses:
         202:
           description: User Logged in successfully
@@ -141,6 +146,436 @@ paths:
           description: Invalid UserAccountIdentifer
         500:
           description: Unkown error
+  /guest/sessionsummary:
+     get:
+      tags:
+      - guest
+      summary: Guest requests all questions and its answers
+      description: Summary of the guest questions and answers
+      operationId: getSessionSummary
+      produces:
+      - application/json
+      parameters:
+        - name: sessionId
+          in: query
+          description: SessionId
+          required: true
+          type: string
+          format: alphanumeric
+        - name: guestId
+          in: query
+          description: Guest unique Identifier
+          required: true
+          type: string
+          format: alphanumeric
+      responses:
+        200:
+          description: Requested fulfilled 
+        400:
+          description: Bad request
+        404:
+          description: SessionSummary no longer available for guest
+        500:
+          description: Unkown error
+  /user/createsession:
+      post:
+        tags:
+        - user
+        summary: Create a session
+        description: User creates a session with all of the respective configurations
+        operationId: createSession
+        produces:
+        - application/json
+        parameters:
+        - in: body
+          name: body
+          description: Session required information
+          required: true
+          schema:
+            $ref: '#/definitions/Session'
+        responses:
+          201:
+            description: Session successfully created
+          400:
+            description: Bad request
+          409:
+            description: Session Name already exists
+          500:
+            description: Unkown error
+  /user/createtemplate:
+    post:
+      tags:
+      - user
+      summary: Create a template
+      description: User creates a template
+      operationId: createTemplate
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Template required information
+        required: true
+        schema:
+          $ref: '#/definitions/Template'
+      responses:
+        201:
+          description: Template successfully created
+        400:
+          description: Bad request
+        409:
+          description: Template Name already exists
+        500:
+          description: Unkown error
+  /user/updatesessionstatus:
+    post:
+      tags:
+      - user
+      summary: Updates a Session state
+      description: Updates a Session state, for example, status, like open satus / number of users in session ....
+      operationId: updateSessionState
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Template required information
+        required: true
+        schema:
+          $ref: '#/definitions/SessionState'
+      responses:
+        202:
+          description: Session state successfully updated
+        400:
+          description: Bad request
+        500:
+          description: Unkown error
+  /user/updatesession:
+    post:
+      tags:
+      - user
+      summary: Updates a Session 
+      description: Updates a Session 
+      operationId: updateSession
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Template required information
+        required: true
+        schema:
+          $ref: '#/definitions/Session'
+      responses:
+        201:
+          description: Session successfully updated
+        400:
+          description: Bad request
+        409:
+          description: Template Name already exists
+        500:
+          description: Unkown error
+  /user/updatetemplate:
+    post:
+      tags:
+      - user
+      summary: Updates a template 
+      description: Updates a template 
+      operationId: updateTemplate
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Template required information
+        required: true
+        schema:
+          $ref: '#/definitions/Template'
+      responses:
+        201:
+          description: Template successfully updated
+        400:
+          description: Bad request
+        409:
+          description: Template Name already exists
+        500:
+          description: Unkown error
+  /user/updatequiz:
+    post:
+      tags:
+      - user
+      summary: Updates a quiz 
+      description: Updates a quiz 
+      operationId: updateQuiz
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Quiz required information
+        required: true
+        schema:
+          $ref: '#/definitions/Quiz'
+      responses:
+        201:
+          description: Quiz successfully updated
+        400:
+          description: Bad request
+        409:
+          description: Quiz Name already exists
+        500:
+          description: Unkown error
+  /user/deletesession:
+    post:
+      tags:
+      - user
+      summary: Deletes a Session 
+      description: deletes a Session 
+      operationId: uSession
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: session required information
+        required: true
+        schema:
+          $ref: '#/definitions/Session'
+      responses:
+        202:
+          description: Session successfully deleted
+        400:
+          description: Bad request
+        403:
+          description: User is not allowed to perform this action on the given session
+        404:
+          description: Session does not exist
+        500:
+          description: Unkown error
+  /user/deletetemplate:
+    delete:
+      tags:
+      - user
+      summary: Deletes a template 
+      description: Deletes a template 
+      operationId: deleteTemplate
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Template required information
+        required: true
+        schema:
+          $ref: '#/definitions/Template'
+      responses:
+        202:
+          description: Template successfully deleted
+        400:
+          description: Bad request
+        403:
+          description: User is not allowed to perform this action on the given template
+        404:
+          description: Template does not exist
+        500:
+          description: Unkown error
+  /user/deletequiz:
+    delete:
+      tags:
+      - user
+      summary: Deletes a quiz 
+      description: Deletes a quiz 
+      operationId: deleteQuiz
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Template required information
+        required: true
+        schema:
+          $ref: '#/definitions/Quiz'
+      responses:
+        202:
+          description: Quiz successfully deleted
+        400:
+          description: Bad request
+        403:
+          description: User is not allowed to perform this action on the given quiz
+        404:
+          description: Quiz does not exist
+        500:
+          description: Unkown error
+  /user/getallsessions:
+     get:
+      tags:
+      - user
+      summary: user requests a list of all its sessions
+      description: user request a list of all its sessions
+      operationId: getAllSessions
+      produces:
+      - application/json
+      parameters:
+        - name: userId
+          in: query
+          description: user unique Identifier
+          required: true
+          type: string
+          format: alphanumeric
+      responses:
+        200:
+          description: Requested fulfilled 
+        400:
+          description: Bad request
+        404:
+          description: No Sessions found
+        500:
+          description: Unkown error
+  /user/getsession:
+     get:
+      tags:
+      - user
+      summary: user requests a session
+      description: user request a session
+      operationId: getSession
+      produces:
+      - application/json
+      parameters:
+        - name: userId
+          in: query
+          description: user unique Identifier
+          required: true
+          type: string
+          format: alphanumeric
+        - name: sessionId
+          in: query
+          description: Session unique Identifier
+          required: true
+          type: string
+          format: alphanumeric
+      responses:
+        200:
+          description: Requested fulfilled 
+        400:
+          description: Bad request
+        404:
+          description: No Sessions found
+        500:
+          description: Unkown error
+  /user/getallTemplates:
+     get:
+      tags:
+      - user
+      summary: user requests a list of all its templates
+      description: user request a list of all its templates
+      operationId: getAllTemplates
+      produces:
+      - application/json
+      parameters:
+        - name: userId
+          in: query
+          description: user unique Identifier
+          required: true
+          type: string
+          format: alphanumeric
+      responses:
+        200:
+          description: Requested fulfilled 
+        400:
+          description: Bad request
+        404:
+          description: No Sessions found
+        500:
+          description: Unkown error
+  /user/gettemplate:
+     get:
+      tags:
+      - user
+      summary: user requests a template
+      description: user request a template
+      operationId: getTemplate
+      produces:
+      - application/json
+      parameters:
+        - name: userId
+          in: query
+          description: User unique Identifier
+          required: true
+          type: string
+          format: alphanumeric
+        - name: sessionId
+          in: query
+          description: Session unique Identifier
+          required: true
+          type: string
+          format: alphanumeric
+      responses:
+        200:
+          description: Requested fulfilled 
+        400:
+          description: Bad request
+        404:
+          description: No Sessions found
+        500:
+          description: Unkown error
+  /user/getallquizzes:
+     get:
+      tags:
+      - user
+      summary: user requests a list of all its quizzes
+      description: user request a list of all its quizzes
+      operationId: getAllQuizzes
+      produces:
+      - application/json
+      parameters:
+        - name: userId
+          in: query
+          description: user unique Identifier
+          required: true
+          type: string
+          format: alphanumeric
+      responses:
+        200:
+          description: Requested fulfilled 
+        400:
+          description: Bad request
+        404:
+          description: No Sessions found
+        500:
+          description: Unkown error
+  /user/getquiz:
+     get:
+      tags:
+      - user
+      summary: user requests a quiz
+      description: user request a quiz
+      operationId: getQuiz
+      produces:
+      - application/json
+      parameters:
+        - name: userId
+          in: query
+          description: User unique Identifier
+          required: true
+          type: string
+          format: alphanumeric
+        - name: sessionId
+          in: query
+          description: Quiz unique Identifier
+          required: true
+          type: string
+          format: alphanumeric
+      responses:
+        200:
+          description: Requested fulfilled 
+        400:
+          description: Bad request
+        404:
+          description: No Sessions found
+        500:
+          description: Unkown error
+
+
 
 ### NOT Defined from here on  ###
 securityDefinitions:
@@ -155,6 +590,7 @@ securityDefinitions:
     type: apiKey
     name: api_key
     in: header
+
 definitions:
  
   Session: ## Example ##
@@ -179,6 +615,28 @@ definitions:
         type: integer
         format: int64
 
+  Template: ## Example ##
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+  
+  Quiz: ## Example ##
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+
+
+
+  SessionState: ## Example ##
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
 
   ApiResponse:
     type: object
