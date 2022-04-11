@@ -21,7 +21,7 @@ tags:
 # schemes:
 # - http
 paths:
-  /guest/joinsession:
+  /guest/join_session:
     post:
       tags:
       - guest
@@ -32,7 +32,7 @@ paths:
       - application/json
       parameters:
       - in: body
-        name: body
+        name: Session
         description: Session required information (sessionId, geoLocation info)
         required: true
         schema:
