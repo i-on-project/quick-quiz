@@ -3,7 +3,7 @@ package pt.isel.ps.qq.data
 data class JoinSession(
     val guestId: String,
     val sessionId: String,
-    val location: String?
+    val location: String? = null
 )
 
 data class GiveAnswer(
@@ -12,10 +12,12 @@ data class GiveAnswer(
     val guestId: String,
     val questionType: String,
     val questionNumber: Int,
-    val answerNumber: Int?,
-    val answerText: String?
+    val answerNumber: Int? = null,
+    val answerText: String? = null
 )
 
 
-
-
+data class User(
+    val userName: String,
+    val emailAddress: String
+)

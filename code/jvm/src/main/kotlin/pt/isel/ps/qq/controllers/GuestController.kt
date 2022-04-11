@@ -1,32 +1,31 @@
 package pt.isel.ps.qq.controllers
 
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+import pt.isel.ps.qq.data.GiveAnswer
+import pt.isel.ps.qq.data.JoinSession
+import pt.isel.ps.qq.data.User
 
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.*
-import pt.isel.ps.qq.data.InputModel
-import pt.isel.ps.qq.service.GuestService
-import pt.isel.ps.qq.service.IGuestService
 
 @RestController
-@RequestMapping("/api/web/guest")
+@RequestMapping("/api/web/v1.0/guest")
 class GuestController {
 
     @PostMapping("/join_session")
-    fun guestJoinSession(input: InputModel): InputModel {
-        return input
+    fun guestJoinSession(inputModel: JoinSession): JoinSession {
+        return inputModel
     }
-
 
     @PostMapping("/answer")
-    fun guestGiveAnswer(@RequestBody input: InputModel) {
+    fun guestGiveAnswer(inputModel: GiveAnswer): GiveAnswer {
+        return inputModel
     }
+
 
     @PostMapping("/register")
-    fun guestRegister(input: InputModel) {
+    fun guestRegister(inputModel: User): User {
+        return inputModel
     }
 }
 
-@ResponseStatus(HttpStatus.BAD_REQUEST)
-class BadRequestException : RuntimeException() { //
-}
