@@ -14,10 +14,10 @@
 
 > **Session Template:** A template with all the quizzes a user wishes to use on a session with respective configurations, for example, how to release the quizzes (1 by 1, all, etc.), timeout for the session, number of guests that can join the session, guests need to provide geolocation, radius of geolocation, etc...
 
-
 ## User
 
 Once a authenticated the user will be directed to a user dashboard. On the Dashboard the user will be able to select the following options:
+
 - Start a session
 - Create a session template
 - View sessions history
@@ -27,14 +27,16 @@ Once a authenticated the user will be directed to a user dashboard. On the Dashb
 ## Guest
 
 Everyone that is not authenticated is a guest and can do the following:
+
 - Join a session using a session code provided by a user (session owner)
 - Log in (Authenticate)
 - Register a new user
 
 ## Session
 
-A Session is created by a user based on a session template or an empty session where quizzes are created within the session. This action generates a session code which can be shared with guests to join this session. 
+A Session is created by a user based on a session template or an empty session where quizzes are created within the session. This action generates a session code which can be shared with guests to join this session.
 A user will be able to control the session state:
+
 - Manage Session status (started, closed)
 - See how many guests have joined (after session is started)
 - Release quizzes for guests to answer
@@ -46,13 +48,13 @@ A guest is able to join a session by adding the session code, sharing its locati
 
 Once the session is closed, a guest can download the contents of the session (quizzes and its own answers) if allowed by the session owner for a pre- determined time. The session is added to the users session history where the user is able to access the quizzes (from the template or created during the session) and all answers given byt the guests.
 
-
 ## Other considerations
+
 To prevent the abuse of the system, for example, a bot regitering users, or unwanted guests joing a session we have thought of the use of some solutions that can mitigate the problem:
 
 - Registering:
   - On Registering a user, a valid email needs to be provided. Once the form is submited, an email is generated with a link. Once the user navigates to that link, the registration is accepted.
-  - Use google's Recaptcha, "I'm Not A Robot" (for example) 
+  - Use google's Recaptcha, "I'm Not A Robot" (for example)
 
 - Log in / Authenticate
   - Guest submits an email and if email exists the guest will receive a link to login
@@ -63,4 +65,5 @@ To prevent the abuse of the system, for example, a bot regitering users, or unwa
   - If email does not exist, no email is sent
 
 ### Registration workflow
+
 ![Registration workflow](RegisterUser.png)
