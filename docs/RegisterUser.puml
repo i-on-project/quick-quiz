@@ -18,7 +18,8 @@ guest->email:Go to email and navigate to link
 guest->qq: Link directs guest to App
 qq->qq: Get query string
 qq->api: Send query string info\nother api required information
-api->api: validates information
+api->api: Validates information
+api->api: Updates User Registration status
 api->api: Generates login token
 api->qq: sends token and some user information
 qq->qq: Generates login cookies with the info provided
