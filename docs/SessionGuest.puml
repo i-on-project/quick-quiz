@@ -1,0 +1,34 @@
+@startuml SessionGuest
+
+actor Guest as guest
+participant QQApp as qq
+participant API as api
+
+guest->qq: Submit request to join Session\nproviding Session shared code
+qq->api: Sends submited information\nother api required information
+api->api: Validates information provided 
+api->api: Generates Unique Guest Identifier
+api->api: Generates Guest Session Record (2)
+api->api: Updates Session State\n(number of participants)
+api->qq: Send response with the necessary information\nand acceptance information
+qq->guest: Sends info to build the Guet Session Dashboard
+...
+
+qq->guest: Sends quiz info to guest dashboard
+guest->qq: Submits answer
+qq->api: send answer and required info
+api->api: Validates information provided 
+api->api: Updates guest session Record
+api->qq: Sends info of session state
+qq->guest: Send necessary info
+qq->qq: Updates Dashboard accordingly
+...
+qq->guest: Sends info that Session is closed\nwith link for session download
+guest->qq: Clicks link
+qq->api: Request necessary information
+api->qq: Provides necessary information
+qq->qq: Produces a pdf (for example)
+qq->guest: Provide pdf for download
+...
+
+@enduml

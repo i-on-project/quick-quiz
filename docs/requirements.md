@@ -67,3 +67,25 @@ To prevent the abuse of the system, for example, a bot regitering users, or unwa
 ### Registration workflow
 
 ![Registration workflow](RegisterUser.png)
+
+- (1) -> Email, Display Name.
+- (2) -> Validates if email already exists
+- (3) -> Generates a Unique Registration/Login identifier and persists it on the new User record
+- (4) -> query string will contain the email and registration/login identifier encoded in base64
+
+### Login workflow
+
+![Registration workflow](LoginUser.png)
+
+- (1) -> Email
+- (2) -> Validates if email already exists
+- (3) -> Generates a Unique Login identifier and persists it on the new User record
+- (4) -> Query string will contain the email and registration/login identifier encoded in base64
+
+### Session workflow (User)
+
+![Registration workflow](SessionUser.png)
+
+### Session workflow (Guest)
+
+![Registration workflow](SessionGuest.png)

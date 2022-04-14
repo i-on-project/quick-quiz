@@ -1,0 +1,28 @@
+@startuml SessionUser
+
+actor User as user
+participant QQApp as qq
+participant API as api
+
+user->qq: Submit request for Session to be created (1)
+qq->api: Sends submited information\nother api required information
+api->api: Validates information provided 
+api->api: Generates Unique Guest Session Identifier
+api->api: Generates Session Record (2)
+api->qq: Send response with the necessary information\nand acceptance information
+qq->user: Sends info to build the Session Dashboard
+user->qq: Submits start session
+qq->api: Sends required info to the api
+api->api: Update session state
+api->qq: Send info of session state
+qq->user: Send necessary info
+qq->Guest: Send info to guests that already joined the session
+...
+user->qq: User submits quiz status change
+qq->api: Sends necessary info
+api->api: Updates quiz status
+api->qq: Sends info of quiz state
+qq->user: Sends Necessary info
+qq->Guest: Send info to all guests in session session
+
+@enduml

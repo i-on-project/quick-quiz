@@ -1,17 +1,16 @@
-@startuml RegisterUser
+@startuml LoginUser
 
 actor Guest as guest
 participant QQApp as qq
 participant API as api
 participant UserEmail as email
-guest->qq: Register form
-guest->qq: Provides necessary information (1)
+guest->qq: Login form requiring email
 guest->qq: Validates "I'm Not a Robot"
 guest->qq: Submits information
 qq->api: Sends submited information\nother api required information
 qq->guest: Send message to check email
 api->api: Validates information provided (2)
-api->api: Generate unique identifiers (3)\napi->api: Creates User Registration record in \nstatus 'Waiting Validation'
+api->api: Generate unique identifiers (3)\napi->api: Updates User record in \nAuthenticationStatus 'Authentication Requested'
 api->qq: Send response with the identifiers\nand acceptance information
 qq->qq: Generate link with the identifiers provided by the API
 qq->email: email link with the query string (4)
@@ -20,11 +19,11 @@ guest->qq: Link directs guest to App
 qq->qq: Get query string
 qq->api: Send query string info\nother api required information
 api->api: Validates information
-api->api: updates User Registration record in \nstatus 'Validated'
-api->api: Generates registration  token
+api->api: updates User Registration record in \nstatus 'Authenticated'
+api->api: Generates authentication  token
 api->qq: sends token and some user information
 qq->qq: Generates login cookies with the info provided
 qq->guest: Redirects Guest to its User Dashboard\nAnd provides required cookies to keep\nuser authenticated
-note right of guest : Guest is now registered\nand authenticated
+note right of guest : Guest is now authenticated
 
 @enduml
