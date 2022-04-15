@@ -1,20 +1,23 @@
 package pt.isel.ps.qq.service
 
-/*import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import pt.isel.ps.qq.data.User
+import pt.isel.ps.qq.data.UserDto
+import pt.isel.ps.qq.data.UserTokenDto
+import pt.isel.ps.qq.database.InMemoryDatabase
+import java.util.UUID
 
 @Component
-interface IGuestService {
-    fun processBody(body: Body?) : String;
-}
+class GuestService(
+    private val database: InMemoryDatabase
+) {
 
-@Component
-class GuestService : IGuestService {
-
-    override fun processBody(body: Body?) : String {
-        return when(body) {
-            null -> "Body processed is Null"
-            else -> body.type.name + " -> Fields: " + body.type.fields
-        }
+    fun registerUser(dto: UserDto): UserTokenDto {
+        val uid = UUID.randomUUID()
+        if(dto.displayName == null) throw java.lang.IllegalStateException("This should NEVER happen")
+        val user = User(userName = dto.userName, displayName = dto.displayName, id = uid.toString())
+        database.createUser(user)
+        return UserTokenDto(token = uid.toString(), dto)
     }
-}*/
+
+}
