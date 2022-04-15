@@ -1,4 +1,6 @@
-package pt.isel.ps.qq.data
+package pt.isel.ps.qq.data.dto
+
+import pt.isel.ps.qq.data.dto.UserDto
 
 data class UserTokenDto(
     val token: String,

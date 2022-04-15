@@ -3,7 +3,7 @@ package pt.isel.ps.qq.filters
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
-import pt.isel.ps.qq.data.ErrorDto
+import pt.isel.ps.qq.data.dto.ErrorDto
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpFilter
 import javax.servlet.http.HttpServletRequest

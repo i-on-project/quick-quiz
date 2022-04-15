@@ -1,4 +1,4 @@
-package pt.isel.ps.qq.data
+package pt.isel.ps.qq.data.dto
 
 data class UserDto(
     val userName: String,
