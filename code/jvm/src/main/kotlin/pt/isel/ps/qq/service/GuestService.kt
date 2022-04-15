@@ -2,8 +2,8 @@ package pt.isel.ps.qq.service
 
 import org.springframework.stereotype.Component
 import pt.isel.ps.qq.data.User
-import pt.isel.ps.qq.data.UserDto
-import pt.isel.ps.qq.data.UserTokenDto
+import pt.isel.ps.qq.data.dto.UserDto
+import pt.isel.ps.qq.data.dto.UserTokenDto
 import pt.isel.ps.qq.database.InMemoryDatabase
 import pt.isel.ps.qq.exceptions.InvalidTokenException
 import java.util.UUID

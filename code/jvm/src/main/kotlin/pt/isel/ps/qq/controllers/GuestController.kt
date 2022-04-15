@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import pt.isel.ps.qq.data.ErrorDto
-import pt.isel.ps.qq.data.UserDto
-import pt.isel.ps.qq.data.UserTokenDto
+import pt.isel.ps.qq.data.dto.ErrorDto
+import pt.isel.ps.qq.data.dto.UserDto
+import pt.isel.ps.qq.data.dto.UserTokenDto
 import pt.isel.ps.qq.exceptions.AlreadyExistsException
 import pt.isel.ps.qq.exceptions.InvalidTokenException
 import pt.isel.ps.qq.exceptions.UserNotFoundException
