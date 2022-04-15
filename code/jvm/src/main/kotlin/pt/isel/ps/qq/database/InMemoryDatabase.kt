@@ -16,4 +16,10 @@ class InMemoryDatabase {
     }
 
     fun getUser(username: String): User = userTable[username] ?: throw UserNotFoundException()
+
+    fun updateUser(user: User) {
+        userTable[user.userName] ?: throw UserNotFoundException()
+        userTable[user.userName] = user
+    }
+
 }
