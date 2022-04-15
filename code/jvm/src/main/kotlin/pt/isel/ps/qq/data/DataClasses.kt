@@ -15,9 +15,3 @@ data class GiveAnswer(
     val answerNumber: Int? = null,
     val answerText: String? = null
 )
-
-
-data class User(
-    val userName: String,
-    val emailAddress: String
-)
