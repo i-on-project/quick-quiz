@@ -86,6 +86,10 @@ To prevent the abuse of the system, for example, a bot regitering users, or unwa
 
 ![Registration workflow](SessionUser.png)
 
+- (1) ->
+
 ### Session workflow (Guest)
 
 ![Registration workflow](SessionGuest.png)
+
+- (1) ->
