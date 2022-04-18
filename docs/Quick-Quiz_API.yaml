@@ -88,14 +88,8 @@ paths:
         schema:
           $ref: '#/definitions/User'
       responses:
-        201:
-          description: User Registered successfully
-        400:
-          description: Bad request
-        409:
-          description: User Already Exists
-        500:
-          description: Unkown error
+        - in: body
+
   /guest/login:
      post:
       tags:
@@ -611,9 +605,23 @@ definitions:
   User: ## Example ##
     type: object
     properties:
-      id:
-        type: integer
-        format: int64
+      UserName: 
+        type: string
+        format: email
+      DisplayName:
+        type: string
+        format: text
+      
+  UserToken:
+    type: object
+    properties:
+      Token:
+        type: string
+        format: text
+      UserName:
+  	    type: string
+        format: email
+
 
   Template: ## Example ##
     type: object
