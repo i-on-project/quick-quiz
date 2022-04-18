@@ -7,7 +7,7 @@ import pt.isel.ps.qq.exceptions.AlreadyExistsException
 import pt.isel.ps.qq.exceptions.UserNotFoundException
 
 @Component
-class InMemoryDatabase {
+class InMemoryDatabase: IDatabase {
 
     private val userTable: HashMap<String, User> = HashMap()
     private val sessionTable: HashMap<String, Session> = HashMap()

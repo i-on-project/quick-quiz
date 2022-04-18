@@ -113,8 +113,6 @@ definitions:
       NumberOfParticipants:
         type: integer
         format: int32
-      UsedGeoLocation:
-        type: boolean
       GeoLocation:
         type: object
       EndDate:

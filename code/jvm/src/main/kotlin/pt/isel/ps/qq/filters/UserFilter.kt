@@ -1,7 +1,6 @@
 package pt.isel.ps.qq.filters
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
@@ -17,16 +16,16 @@ class UserFilter(   private val mapper: ObjectMapper
 ): HttpFilter() {
 
     companion object {
-        const val API_KEY_NOT_AVAILABLE = "Bad api-key"
+        const val USER_TOKEN_EXPIRED = "User Token Expired/User does not exist"
     }
 
     override fun doFilter(request: HttpServletRequest?, response: HttpServletResponse?, chain: FilterChain?) {
         println("I was in User Filter")
-        if(!validateApiKey(request?.getHeader("API-KEY"))) {
+        if(!validateAuthorization(request?.getHeader("Authorization"))) {
             val code = HttpStatus.FORBIDDEN.value()
             response?.status = code
             response?.addHeader("Content-Type", "application/json")
-            val str = mapper.writeValueAsString(ErrorDto(code = code, reason = API_KEY_NOT_AVAILABLE))
+            val str = mapper.writeValueAsString(ErrorDto(code = code, reason = USER_TOKEN_EXPIRED))
             response?.writer?.write(str)
             return
         }
@@ -34,7 +33,11 @@ class UserFilter(   private val mapper: ObjectMapper
         chain?.doFilter(request, response)
     }
 
-    private fun validateApiKey(key: String?): Boolean = key != null
+    private fun validateAuthorization(auth: String?): Boolean {
+        //TODO: Need to get info from DB
+
+        return true;
+    }
 
 }
 
