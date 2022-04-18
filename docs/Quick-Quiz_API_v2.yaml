@@ -38,6 +38,26 @@
           - in: body
             schema:
               $ref: '#/definitions/Error'
+  
+/guest/login:
+    post:
+    parameters:
+    - in: body
+      schema:
+        $ref: '#/definitions/UserToken'
+    responses:
+      200:
+        description: User Exists and generates a new token for link creation
+        parameters:
+        - in: body
+          schema:
+            $ref: '#/definitions/UserToken'
+      400:
+        description: User or token missmatch
+        parameters:
+        - in: body
+          schema:
+            $ref: '#/definitions/Error'
 
 /user/createsession:
    post:

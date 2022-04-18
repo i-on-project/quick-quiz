@@ -43,9 +43,17 @@ class GuestController(
         }
     }
 
-    //TODO: missing request login
+    @PostMapping("/login")
+    fun requestLogin(@RequestBody userName: UserDto): ResponseEntity<Any> {
+        return try {
+            ResponseEntity.ok().body(service.requestLogin(userName))
+        } catch(e: InvalidTokenException) {
+            ResponseEntity.badRequest().body(ErrorDto(code = HttpStatus.BAD_REQUEST.value(), USER_INVALID_TOKEN))
+        } catch(e: UserNotFoundException) {
+            ResponseEntity.badRequest().body(ErrorDto(code = HttpStatus.BAD_REQUEST.value(), USER_NOT_REGISTERED))
+        }
 
-
+    }
 
     @PostMapping("/logmein")
     fun loginUser(@RequestBody token: UserTokenDto): ResponseEntity<Any> {

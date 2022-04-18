@@ -30,6 +30,7 @@ class QqApplicationTests {
 	fun contextLoads() {
 		assertThat(controller).isNotNull
 	}*/
+	private val mainPath = "/api/web/v1.0/guest"
 
 	@Autowired
 	private val mockMvc: MockMvc? = null
@@ -41,7 +42,7 @@ class QqApplicationTests {
 	@Throws(Exception::class)
 	fun `when API-Key is missing from header validation is FORBIDEN`()  {
 		val expected = ErrorDto(HttpStatus.FORBIDDEN.value(), "Bad api-key")
-		mockMvc!!.post("/register") {
+		mockMvc!!.post("${mainPath}/register") {
 			contentType = MediaType.APPLICATION_JSON
 			accept = MediaType.APPLICATION_JSON
 		}.andExpect {
@@ -53,21 +54,16 @@ class QqApplicationTests {
 	@Test
 	@Throws(Exception::class)
 	fun `when info is missing for Register validation is BAD REQUEST`()  {
-		val expected = ErrorDto(HttpStatus.FORBIDDEN.value(), "Bad api-key")
-
-		val user = UserDto("Test")
-		println(mapper!!.writeValueAsString(user))
-
-		mockMvc!!.post("/register") {
+		val expected = ErrorDto(HttpStatus.BAD_REQUEST.value(), "displayName required")
+		val user = UserDto(userName = "Test")
+		mockMvc!!.post("${mainPath}/register") {
 			contentType = MediaType.APPLICATION_JSON
 			header("API-KEY", "qwertyuiopasdfghjkzxcvbnm")
-			//accept = MediaType.APPLICATION_JSON
 			content = mapper!!.writeValueAsString(user)
 
 		}.andExpect {
 			status { isBadRequest() }
-			//content { json(mapper!!.writeValueAsString(expected)) }
-
+			content { json(mapper!!.writeValueAsString(expected)) }
 		}
 	}
 }

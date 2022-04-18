@@ -38,4 +38,12 @@ class GuestService(
         return token
     }
 
+    fun requestLogin(dto: UserDto): UserTokenDto {
+        val user = database.getUser(dto.userName)
+        val uid = UUID.randomUUID()
+        val updatedUser = User(userName = user.userName, displayName = user.displayName , id = uid.toString())
+        database.updateUser(updatedUser)
+        return UserTokenDto(token = uid.toString(), updatedUser)
+    }
+
 }
