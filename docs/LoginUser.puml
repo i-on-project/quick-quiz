@@ -4,8 +4,8 @@ actor Guest as guest
 participant QQApp as qq
 participant API as api
 participant UserEmail as email
-guest->qq: Login form requiring email
-guest->qq: Validates "I'm Not a Robot"
+guest->guest: Login form requiring email
+guest->guest: Validates "I'm Not a Robot"
 guest->qq: Submits information
 qq->api: Sends submited information\nother api required information
 qq->guest: Send message to check email
