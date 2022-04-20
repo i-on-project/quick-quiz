@@ -2,8 +2,12 @@ package pt.isel.ps.qq.service
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import pt.isel.ps.qq.data.User
 import pt.isel.ps.qq.data.dto.UserDto
 import pt.isel.ps.qq.data.dto.UserTokenDto
+import pt.isel.ps.qq.data.dto.input.LoginInputModel
+import pt.isel.ps.qq.data.dto.input.LoginMeInputModel
+import pt.isel.ps.qq.data.dto.input.RegisterInputModel
 import pt.isel.ps.qq.database.UserElasticRepository
 import pt.isel.ps.qq.database.elasticdocs.UserDoc
 import pt.isel.ps.qq.exceptions.*
@@ -22,49 +26,22 @@ class GuestService() {
         const val REGISTRATION_TOKEN_TIMEOUT: Long = 3600
     }
 
-    fun register(dto: UserDto): UserTokenDto {
+    fun register(input: RegisterInputModel): UserTokenDto {
         try {
-            if (userRepo?.findById(dto.userName) != null) throw AlreadyExistsException()
+            if (userRepo?.findById(input.userName) != null) throw AlreadyExistsException()
         } catch (e: Exception) {
-            println(e)
+            if(e.toString().contains("AlreadyExistsException")) throw AlreadyExistsException()
+            println(e) //index does not exist
         }
         val uid = UUID.randomUUID()
-        if (dto.displayName == null) throw java.lang.IllegalStateException("This should NEVER happen") //done on the registerInputModel
-        val user = UserDoc(userName = dto.userName, displayName = dto.displayName, loginToken = uid.toString(), tokenExpireDate = getRegistrationTimeout(), status = "pending validation")
+        if (input.displayName == null) throw java.lang.IllegalStateException("This should NEVER happen") //done on the registerInputModel
+        val user = UserDoc(userName = input.userName, displayName = input.displayName, loginToken = uid.toString(), tokenExpireDate = getRegistrationTimeout(), status = "pending validation")
         userRepo?.save(user)
-        return UserTokenDto(token = uid.toString(), dto)
+        return UserTokenDto(token = uid.toString(), User(userName = input.userName,displayName =  input.displayName, id = uid.toString()))
     }
 
-    fun logmein(dto: UserTokenDto): UserTokenDto {
-        val user = userRepo?.findById(dto.user.userName)!!.get()
-
-        validateUserRegistrationInfo(user)
-        validateUserStatus(user)
-        validateLoginToken(user, dto)
-
-        val otherUid = UUID.randomUUID().toString()
-        val timeout = getTimeout()
-        val token = UserTokenDto(otherUid, user = UserDto(user.userName, user.displayName), timeout)
-        userRepo.save(UserDoc(dto.user.userName, user.displayName, otherUid, timeout,"enabled"))
-        return token
-    }
-
-    private fun validateLoginToken(user: UserDoc, dto: UserTokenDto) {
-        if(user.loginToken != dto.token) throw InvalidTokenException()
-    }
-
-    private fun validateUserRegistrationInfo(user: UserDoc) {
-        if(!validTokenTimeOut(user.tokenExpireDate) && user.status == "pending validation"){
-            userRepo?.delete(user)
-            throw RegistrationTimedOutException()
-        }
-    }
-
-    private fun validTokenTimeOut(tokenExpireDate: Long?): Boolean =
-        !(tokenExpireDate == null || getCurrentTimeInSeconds() > tokenExpireDate);
-
-    fun requestLogin(dto: UserDto): UserTokenDto {
-        val user = userRepo?.findById(dto.userName)!!.get()
+    fun requestLogin(userName: LoginInputModel): UserTokenDto {
+        val user = userRepo?.findById(userName.userName)!!.get()
         validateUserStatus(user)
         val uid = UUID.randomUUID()
         val timeout = getTimeout()
@@ -81,6 +58,36 @@ class GuestService() {
             expireDate = timeout
         )
     }
+
+    fun logmein(input: LoginMeInputModel): UserTokenDto {
+        val user = userRepo?.findById(input.userName)!!.get()
+
+        validateUserRegistrationInfo(user)
+        validateUserStatus(user)
+        validateLoginToken(user, input.loginToken)
+
+        val otherUid = UUID.randomUUID().toString()
+        val timeout = getTimeout()
+        val token = UserTokenDto(otherUid, user = UserDto(user.userName, user.displayName), timeout)
+        userRepo.save(UserDoc(input.userName, user.displayName, otherUid, timeout,"enabled"))
+        return token
+    }
+
+    private fun validateLoginToken(user: UserDoc, inputToken: String) {
+        if(user.loginToken != inputToken) throw InvalidTokenException()
+    }
+
+    private fun validateUserRegistrationInfo(user: UserDoc) {
+        if(!validTokenTimeOut(user.tokenExpireDate) && user.status == "pending validation"){
+            userRepo?.delete(user)
+            throw RegistrationTimedOutException()
+        }
+    }
+
+    private fun validTokenTimeOut(tokenExpireDate: Long?): Boolean =
+        !(tokenExpireDate == null || getCurrentTimeInSeconds() > tokenExpireDate);
+
+
 
     private fun validateUserStatus(user: UserDoc) {
         when(user.status){

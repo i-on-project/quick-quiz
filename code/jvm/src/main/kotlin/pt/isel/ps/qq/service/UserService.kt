@@ -16,7 +16,7 @@ class UserService() {
         var guestCode = sessionId.hashCode()
         while(!validateGuestCode(guestCode)) guestCode *= 31
         //TODO find the template
-        val session = Session(input = input, sessionId = sessionId, sessionOwner = username, guestCode = guestCode, templates = emptyList(), state = SessionState.getInitialState())
+        //val session = Session(input = input, sessionId = sessionId, sessionOwner = username, guestCode = guestCode, templates = emptyList(), state = SessionState.getInitialState())
         //database.createSession(session)
     }
 

@@ -14,7 +14,7 @@ class UserController(
 ) {
 
     @PostMapping("/create_session")
-    fun createSession(@RequestBody session: SessionInputModel) {
-
+    fun createSession(@RequestBody session: SessionInputModel): SessionInputModel {
+        return session
     }
 }

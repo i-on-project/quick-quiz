@@ -30,16 +30,16 @@ data class Session(
     val templates: List<Quizzes>,
     var state: SessionState
 ) {
-    constructor(input: SessionInputModel, guestCode: Int, sessionOwner: String, sessionId: String, templates: List<Quizzes>, state: SessionState): this(
+/*    constructor(input: SessionInputModel, guestCode: Int, sessionOwner: String, sessionId: String, templates: List<Quizzes>, state: SessionState): this(
         name = input.name,
         limitOfParticipants = input.limitOfParticipants,
-        useGeolocation = input.useGeolocation,
+*//*        useGeolocation = input.useGeolocation,
         geolocation = input.geolocation,
-        endDate = input.endDate,
-        guestCode = guestCode,
+        endDate = input.endDate,*//*
+*//*        guestCode = guestCode,
         sessionOwner = sessionOwner,
         sessionId = sessionId,
         templates = templates,
-        state = state
-    )
+        state = state*//*
+    )*/
 }
