@@ -28,7 +28,7 @@ data class Session(
     val geolocation: GeolocationInputModel?,
     val endDate: Long, //seconds
     val templates: List<Quizzes>,
-    val state: SessionState
+    var state: SessionState
 ) {
     constructor(input: SessionInputModel, guestCode: Int, sessionOwner: String, sessionId: String, templates: List<Quizzes>, state: SessionState): this(
         name = input.name,

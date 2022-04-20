@@ -2,7 +2,7 @@ package pt.isel.ps.qq.data
 
 data class User(
     val userName: String,
-    val displayName: String,
+    var displayName: String,
     val id: String,
     val idExpiredDate: Long? = null
 ) {

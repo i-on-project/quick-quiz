@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.stereotype.Component
 import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+
 import pt.isel.ps.qq.filters.UserFilter
 import pt.isel.ps.qq.resolver.InputModelProcessor
 import pt.isel.ps.qq.resolver.RequestBodyParser

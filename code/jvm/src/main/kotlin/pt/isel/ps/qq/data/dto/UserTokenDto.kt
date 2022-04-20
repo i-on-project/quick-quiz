@@ -9,4 +9,5 @@ data class UserTokenDto(
     val expireDate: Long? = null
 ) {
     constructor(token: String, user: User): this(token = token, user = UserDto(userName = user.userName, displayName = user.displayName), expireDate=user.idExpiredDate)
+
 }
