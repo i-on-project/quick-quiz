@@ -1,27 +1,21 @@
 package pt.isel.ps.qq.filters
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.jsonMapper
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
-import org.springframework.stereotype.Component
 import pt.isel.ps.qq.data.dto.ErrorDto
-import pt.isel.ps.qq.data.dto.input.LoginMeInputModel
-import pt.isel.ps.qq.database.UserElasticRepository
+import pt.isel.ps.qq.repositories.UserElasticRepository
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpFilter
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-@Component
+
 @Order(1)
-class UserFilter(   private val mapper: ObjectMapper
+class UserFilter(   private val mapper: ObjectMapper, private val userRepo: UserElasticRepository?
 ): HttpFilter() {
 
-    @Autowired
-    private val userRepo: UserElasticRepository? = null
+
 
     companion object {
         const val USER_TOKEN_EXPIRED = "User Token Expired/User does not exist"

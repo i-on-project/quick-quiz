@@ -1,8 +1,8 @@
-package pt.isel.ps.qq.database
+package pt.isel.ps.qq.repositories
 
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 import org.springframework.stereotype.Repository
-import pt.isel.ps.qq.database.elasticdocs.UserDoc
+import pt.isel.ps.qq.repositories.elasticdocs.UserDoc
 
 @Repository
 interface UserElasticRepository: ElasticsearchRepository<UserDoc, String>

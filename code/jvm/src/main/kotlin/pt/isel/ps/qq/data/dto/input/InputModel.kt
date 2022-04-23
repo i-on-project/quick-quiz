@@ -4,20 +4,20 @@ import java.util.UUID
 
 private val emailRegex = Regex("^[a-zA-Z0-9_!#\$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+\$")
 
-data class GeolocationInputModel(
+/*data class GeolocationInputModel(
     val latitude: Double,
     val longitude: Double,
     val radius: Double,
     val radiusUnit: String
-)
+)*/
 
 data class SessionInputModel(
     val name: String,
-    val limitOfParticipants: Int
-/*    val useGeolocation: Boolean,
-    val geolocation: GeolocationInputModel?,
-    val endDate: Long, //seconds
-    val templateId: String? = null*/
+    val owner: String,
+    val limitOfParticipants: Int,
+    val geolocation: String?,
+    val endDate: Long?, //seconds
+    val templateId: String? = null
 )
 
 data class RegisterInputModel(
@@ -47,3 +47,7 @@ data class LoginMeInputModel(
         require(UUID.fromString(loginToken) != null) {"Invalid Token"}
     }
 }
+
+data class JoinSessionInputModel(
+    val sessionCode: Int
+)

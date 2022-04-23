@@ -1,25 +1,28 @@
 package pt.isel.ps.qq.service
 
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import pt.isel.ps.qq.data.User
 import pt.isel.ps.qq.data.dto.UserDto
 import pt.isel.ps.qq.data.dto.UserTokenDto
-import pt.isel.ps.qq.data.dto.input.LoginInputModel
-import pt.isel.ps.qq.data.dto.input.LoginMeInputModel
-import pt.isel.ps.qq.data.dto.input.RegisterInputModel
-import pt.isel.ps.qq.database.UserElasticRepository
-import pt.isel.ps.qq.database.elasticdocs.UserDoc
+import pt.isel.ps.qq.data.dto.input.*
+import pt.isel.ps.qq.repositories.SessionElasticRepository
+import pt.isel.ps.qq.repositories.UserElasticRepository
+import pt.isel.ps.qq.repositories.elasticdocs.SessionDoc
+import pt.isel.ps.qq.repositories.elasticdocs.UserDoc
 import pt.isel.ps.qq.exceptions.*
 import java.util.*
 
 //TODO: elastic time triggers ?! -> status management
 
-@Component
+@Service
 class GuestService() {
 
     @Autowired
     private val userRepo: UserElasticRepository? = null
+
+    @Autowired
+    private val sessionRepo: SessionElasticRepository? = null
 
     companion object {
         const val TOKEN_TIMEOUT: Long = 604800
@@ -27,17 +30,30 @@ class GuestService() {
     }
 
     fun register(input: RegisterInputModel): UserTokenDto {
+
         try {
-            if (userRepo?.findById(input.userName) != null) throw AlreadyExistsException()
+            val registeredUser = userRepo?.findById(input.userName)
+            if(registeredUser!!.isEmpty) throw AlreadyExistsException()
+
+            val uid = UUID.randomUUID()
+            if (input.displayName == null) throw java.lang.IllegalStateException("This should NEVER happen") //done on the registerInputModel
+            val user = UserDoc(
+                userName = input.userName,
+                displayName = input.displayName,
+                loginToken = uid.toString(),
+                tokenExpireDate = getRegistrationTimeout(),
+                status = "pending validation"
+            )
+            userRepo?.save(user)
+            return UserTokenDto(
+                token = uid.toString(),
+                User(userName = input.userName, displayName = input.displayName, id = uid.toString())
+            )
         } catch (e: Exception) {
-            if(e.toString().contains("AlreadyExistsException")) throw AlreadyExistsException()
+
             println(e) //index does not exist
+            throw e;
         }
-        val uid = UUID.randomUUID()
-        if (input.displayName == null) throw java.lang.IllegalStateException("This should NEVER happen") //done on the registerInputModel
-        val user = UserDoc(userName = input.userName, displayName = input.displayName, loginToken = uid.toString(), tokenExpireDate = getRegistrationTimeout(), status = "pending validation")
-        userRepo?.save(user)
-        return UserTokenDto(token = uid.toString(), User(userName = input.userName,displayName =  input.displayName, id = uid.toString()))
     }
 
     fun requestLogin(userName: LoginInputModel): UserTokenDto {
@@ -69,16 +85,16 @@ class GuestService() {
         val otherUid = UUID.randomUUID().toString()
         val timeout = getTimeout()
         val token = UserTokenDto(otherUid, user = UserDto(user.userName, user.displayName), timeout)
-        userRepo.save(UserDoc(input.userName, user.displayName, otherUid, timeout,"enabled"))
+        userRepo.save(UserDoc(input.userName, user.displayName, otherUid, timeout, "enabled"))
         return token
     }
 
     private fun validateLoginToken(user: UserDoc, inputToken: String) {
-        if(user.loginToken != inputToken) throw InvalidTokenException()
+        if (user.loginToken != inputToken) throw InvalidTokenException()
     }
 
     private fun validateUserRegistrationInfo(user: UserDoc) {
-        if(!validTokenTimeOut(user.tokenExpireDate) && user.status == "pending validation"){
+        if (!validTokenTimeOut(user.tokenExpireDate) && user.status == "pending validation") {
             userRepo?.delete(user)
             throw RegistrationTimedOutException()
         }
@@ -88,15 +104,22 @@ class GuestService() {
         !(tokenExpireDate == null || getCurrentTimeInSeconds() > tokenExpireDate);
 
 
-
     private fun validateUserStatus(user: UserDoc) {
-        when(user.status){
-            "pending validation"-> throw PendingValidationException()
-            "disabled"-> throw UserDisabledException()
+        when (user.status) {
+            //"pending validation" -> throw PendingValidationException()
+            "disabled" -> throw UserDisabledException()
         }
+    }
+
+    fun joinSession(input: JoinSessionInputModel): SessionDoc {
+        sessionRepo?.updateNumberOfParticipants(input.sessionCode)
+        // if(trySession?.numberOfParticipants!! < trySession?.limitOfParticipants!!)   throw NumberOfParticipantsExceeded()
+
+        return sessionRepo?.findSessionDocByGuestCode(input.sessionCode)!!
     }
 
     private fun getTimeout(): Long = (System.currentTimeMillis() / 1000) + TOKEN_TIMEOUT
     private fun getRegistrationTimeout(): Long = (System.currentTimeMillis() / 1000) + REGISTRATION_TOKEN_TIMEOUT
     private fun getCurrentTimeInSeconds(): Long = (System.currentTimeMillis() / 1000)
+
 }

@@ -1,4 +1,4 @@
-package pt.isel.ps.qq.database
+package pt.isel.ps.qq.repositories
 
 interface IRepository<T> {
 

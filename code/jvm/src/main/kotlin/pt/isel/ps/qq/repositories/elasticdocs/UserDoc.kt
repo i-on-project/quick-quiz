@@ -1,4 +1,4 @@
-package pt.isel.ps.qq.database.elasticdocs
+package pt.isel.ps.qq.repositories.elasticdocs
 import org.springframework.data.annotation.Id
 import org.springframework.data.elasticsearch.annotations.Document
 
