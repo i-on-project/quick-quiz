@@ -1,7 +1,9 @@
 package pt.isel.ps.qq.service
 
 import org.springframework.stereotype.Service
-import pt.isel.ps.qq.data.dto.input.*
+import pt.isel.ps.qq.data.LoginInputModel
+import pt.isel.ps.qq.data.LoginMeInputModel
+import pt.isel.ps.qq.data.RegisterInputModel
 import pt.isel.ps.qq.repositories.SessionElasticRepository
 import pt.isel.ps.qq.repositories.UserElasticRepository
 import pt.isel.ps.qq.data.elasticdocs.UserDoc
@@ -24,7 +26,7 @@ class GuestService(private val userRepo: UserElasticRepository,
 
         try {
             val registeredUser = userRepo.findById(input.userName)
-            if(registeredUser!!.isEmpty) throw AlreadyExistsException()
+            if(!registeredUser.isEmpty) throw AlreadyExistsException()
             val uid = UUID.randomUUID()
 
             val user = UserDoc(

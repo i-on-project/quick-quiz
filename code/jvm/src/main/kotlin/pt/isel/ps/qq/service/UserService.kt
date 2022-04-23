@@ -1,7 +1,7 @@
 package pt.isel.ps.qq.service
 
 import org.springframework.stereotype.Service
-import pt.isel.ps.qq.data.dto.input.SessionInputModel
+import pt.isel.ps.qq.data.SessionInputModel
 import pt.isel.ps.qq.exceptions.AlreadyExistsException
 import pt.isel.ps.qq.exceptions.OpenedSessionException
 import pt.isel.ps.qq.repositories.SessionElasticRepository

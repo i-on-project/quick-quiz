@@ -1,8 +1,8 @@
 package pt.isel.ps.qq.filters
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
+import pt.isel.ps.qq.UserInfoScope
 import pt.isel.ps.qq.repositories.UserElasticRepository
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpFilter
@@ -11,10 +11,10 @@ import javax.servlet.http.HttpServletResponse
 
 
 @Order(1)
-class UserFilter(   private val mapper: ObjectMapper, private val userRepo: UserElasticRepository?
+class UserFilter(
+    private val userRepo: UserElasticRepository,
+    private val scope: UserInfoScope
 ): HttpFilter() {
-
-
 
     companion object {
         const val USER_TOKEN_EXPIRED = "User Token Expired/User does not exist"
@@ -37,11 +37,11 @@ class UserFilter(   private val mapper: ObjectMapper, private val userRepo: User
     private fun validateAuthorization(auth: String?): Boolean {
         if(auth == null) return false
         val userAndToken = auth.split(',')
-        val user = userRepo?.findById(userAndToken[0])!!.get()
+        val user = userRepo.findById(userAndToken[0]).get()
         if(userAndToken[1] != user.loginToken) return false
-        return true;
+        scope.setUser(user)
+        return true
     }
-
 }
 
 

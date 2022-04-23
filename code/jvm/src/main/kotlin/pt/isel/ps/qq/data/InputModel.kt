@@ -1,4 +1,4 @@
-package pt.isel.ps.qq.data.dto.input
+package pt.isel.ps.qq.data
 
 import java.util.UUID
 
