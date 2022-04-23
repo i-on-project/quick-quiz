@@ -1,31 +1,22 @@
 package pt.isel.ps.qq.service
 
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import pt.isel.ps.qq.data.dto.input.SessionInputModel
+import pt.isel.ps.qq.exceptions.AlreadyExistsException
+import pt.isel.ps.qq.exceptions.OpenedSessionException
 import pt.isel.ps.qq.repositories.SessionElasticRepository
 import pt.isel.ps.qq.repositories.elasticdocs.QqStatus
 import pt.isel.ps.qq.repositories.elasticdocs.SessionDoc
-import pt.isel.ps.qq.exceptions.AlreadyExistsException
-import pt.isel.ps.qq.exceptions.OpenedSessionException
 import java.util.*
 
 
-@Component
-class UserService() {
-
-/*
-    @Autowired
-    private val userRepo: UserElasticRepository? = null
-*/
-
-    @Autowired
-    private val sessionRepo: SessionElasticRepository? = null
+@Service
+class UserService(private val sessionRepo: SessionElasticRepository) {
 
     fun createSession(input: SessionInputModel): SessionDoc {
 
-        val openSessions = sessionRepo?.findSessionDocsByOwnerAndStatus(input.owner, QqStatus.STARTED)
-        if (openSessions!!.isNotEmpty()) throw OpenedSessionException()
+        val openSessions = sessionRepo.findSessionDocsByOwnerAndStatus(input.owner, QqStatus.STARTED)
+        if (openSessions.isNotEmpty()) throw OpenedSessionException()
 
         val sessionId = UUID.randomUUID().toString()
         var guestCode = sessionId.hashCode()
@@ -42,7 +33,7 @@ class UserService() {
             status = QqStatus.NOT_STARTED,
             numberOfParticipants = 0
         )
-        return sessionRepo?.save(session) as SessionDoc
+        return sessionRepo.save(session) as SessionDoc
 
     }
 

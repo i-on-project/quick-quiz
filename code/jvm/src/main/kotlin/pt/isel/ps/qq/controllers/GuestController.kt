@@ -64,16 +64,7 @@ class GuestController(
     }
 
 
-    @PostMapping("/joinsession")
-    fun joinSession(@RequestBody input: JoinSessionInputModel): ResponseEntity<Any> {
-        return try {
-            ResponseEntity.ok().body(service.joinSession(input))
-        } catch(e: InvalidTokenException) {
-            ResponseEntity.badRequest().body(ErrorDto(code = HttpStatus.BAD_REQUEST.value(), USER_INVALID_TOKEN))
-        } catch(e: UserNotFoundException) {
-            ResponseEntity.badRequest().body(ErrorDto(code = HttpStatus.BAD_REQUEST.value(), USER_NOT_REGISTERED))
-        }
-    }
+
     //TODO from this point every single registered operation needs the token an username on the header
 }
 

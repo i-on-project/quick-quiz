@@ -1,6 +1,5 @@
 package pt.isel.ps.qq.service
 
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import pt.isel.ps.qq.data.User
 import pt.isel.ps.qq.data.dto.UserDto
@@ -11,18 +10,16 @@ import pt.isel.ps.qq.repositories.UserElasticRepository
 import pt.isel.ps.qq.repositories.elasticdocs.SessionDoc
 import pt.isel.ps.qq.repositories.elasticdocs.UserDoc
 import pt.isel.ps.qq.exceptions.*
+import pt.isel.ps.qq.repositories.GuestSessionElasticRepository
+import pt.isel.ps.qq.repositories.elasticdocs.GuestSessionDoc
 import java.util.*
 
 //TODO: elastic time triggers ?! -> status management
 
 @Service
-class GuestService() {
-
-    @Autowired
-    private val userRepo: UserElasticRepository? = null
-
-    @Autowired
-    private val sessionRepo: SessionElasticRepository? = null
+class GuestService(private val userRepo: UserElasticRepository,
+                   private val sessionRepo: SessionElasticRepository
+) {
 
     companion object {
         const val TOKEN_TIMEOUT: Long = 604800
@@ -32,11 +29,10 @@ class GuestService() {
     fun register(input: RegisterInputModel): UserTokenDto {
 
         try {
-            val registeredUser = userRepo?.findById(input.userName)
+            val registeredUser = userRepo.findById(input.userName)
             if(registeredUser!!.isEmpty) throw AlreadyExistsException()
-
             val uid = UUID.randomUUID()
-            if (input.displayName == null) throw java.lang.IllegalStateException("This should NEVER happen") //done on the registerInputModel
+
             val user = UserDoc(
                 userName = input.userName,
                 displayName = input.displayName,
@@ -44,7 +40,7 @@ class GuestService() {
                 tokenExpireDate = getRegistrationTimeout(),
                 status = "pending validation"
             )
-            userRepo?.save(user)
+            userRepo.save(user)
             return UserTokenDto(
                 token = uid.toString(),
                 User(userName = input.userName, displayName = input.displayName, id = uid.toString())
@@ -57,7 +53,7 @@ class GuestService() {
     }
 
     fun requestLogin(userName: LoginInputModel): UserTokenDto {
-        val user = userRepo?.findById(userName.userName)!!.get()
+        val user = userRepo.findById(userName.userName)!!.get()
         validateUserStatus(user)
         val uid = UUID.randomUUID()
         val timeout = getTimeout()
@@ -67,7 +63,7 @@ class GuestService() {
             loginToken = uid.toString(),
             tokenExpireDate = timeout
         )
-        val t = userRepo?.save(updatedUser)
+        val t = userRepo.save(updatedUser)
         return UserTokenDto(
             token = uid.toString(),
             user = UserDto(userName = user.userName, displayName = user.displayName),
@@ -76,7 +72,7 @@ class GuestService() {
     }
 
     fun logmein(input: LoginMeInputModel): UserTokenDto {
-        val user = userRepo?.findById(input.userName)!!.get()
+        val user = userRepo.findById(input.userName)!!.get()
 
         validateUserRegistrationInfo(user)
         validateUserStatus(user)
@@ -95,7 +91,7 @@ class GuestService() {
 
     private fun validateUserRegistrationInfo(user: UserDoc) {
         if (!validTokenTimeOut(user.tokenExpireDate) && user.status == "pending validation") {
-            userRepo?.delete(user)
+            userRepo.delete(user)
             throw RegistrationTimedOutException()
         }
     }
@@ -111,12 +107,7 @@ class GuestService() {
         }
     }
 
-    fun joinSession(input: JoinSessionInputModel): SessionDoc {
-        sessionRepo?.updateNumberOfParticipants(input.sessionCode)
-        // if(trySession?.numberOfParticipants!! < trySession?.limitOfParticipants!!)   throw NumberOfParticipantsExceeded()
 
-        return sessionRepo?.findSessionDocByGuestCode(input.sessionCode)!!
-    }
 
     private fun getTimeout(): Long = (System.currentTimeMillis() / 1000) + TOKEN_TIMEOUT
     private fun getRegistrationTimeout(): Long = (System.currentTimeMillis() / 1000) + REGISTRATION_TOKEN_TIMEOUT

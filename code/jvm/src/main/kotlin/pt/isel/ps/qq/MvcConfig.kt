@@ -19,10 +19,7 @@ import pt.isel.ps.qq.resolver.RequestBodyParser
 
 
 @Component
-class MvcConfig : WebMvcConfigurer {
-
-    @Autowired
-    private val userRepo: UserElasticRepository? = null
+class MvcConfig(private val userRepo: UserElasticRepository) : WebMvcConfigurer {
 
     override fun addArgumentResolvers(resolvers: MutableList<HandlerMethodArgumentResolver>) {
         resolvers.add(RequestBodyParser(ObjectMapper().registerKotlinModule(), InputModelProcessor()))
