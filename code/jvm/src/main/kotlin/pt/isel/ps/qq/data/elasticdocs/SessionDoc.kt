@@ -1,4 +1,4 @@
-package pt.isel.ps.qq.repositories.elasticdocs
+package pt.isel.ps.qq.data.elasticdocs
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.elasticsearch.annotations.Document
@@ -21,21 +21,9 @@ data class SessionDoc(
 
 )
 
-/*data class SessionState(
-    val status: QqStatus,
-    val numberOfParticipants: Int
-)*/
-
 enum class QqStatus {
     NOT_STARTED, STARTED, CLOSED
 }
-
-/*
-data class QuizState(
-    val status: QqStatus,
-    val numberOfAnswers: Int
-)
-*/
 
 data class Quiz(
     val id: String,
@@ -54,16 +42,3 @@ data class AChoice(
     val choiceRight: Boolean
 )
 
-/*
-data class SessionSettings(
-    val limitOfParticipants: Int,
-    val geolocation: Geolocation? = null,
-    val endDate: Long? = null
-)
-
-data class Geolocation(
-    val latitude: Double,
-    val longitude: Double,
-    val radius: Double,
-    val radiusUnit: String
-)*/

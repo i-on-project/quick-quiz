@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service
 import pt.isel.ps.qq.data.dto.input.JoinSessionInputModel
 import pt.isel.ps.qq.repositories.GuestSessionElasticRepository
 import pt.isel.ps.qq.repositories.SessionElasticRepository
-import pt.isel.ps.qq.repositories.elasticdocs.GuestSessionDoc
+import pt.isel.ps.qq.data.elasticdocs.GuestSessionDoc
 import java.util.*
 
 @Service

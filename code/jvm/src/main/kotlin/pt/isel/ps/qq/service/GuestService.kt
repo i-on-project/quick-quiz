@@ -1,17 +1,11 @@
 package pt.isel.ps.qq.service
 
 import org.springframework.stereotype.Service
-import pt.isel.ps.qq.data.User
-import pt.isel.ps.qq.data.dto.UserDto
-import pt.isel.ps.qq.data.dto.UserTokenDto
 import pt.isel.ps.qq.data.dto.input.*
 import pt.isel.ps.qq.repositories.SessionElasticRepository
 import pt.isel.ps.qq.repositories.UserElasticRepository
-import pt.isel.ps.qq.repositories.elasticdocs.SessionDoc
-import pt.isel.ps.qq.repositories.elasticdocs.UserDoc
+import pt.isel.ps.qq.data.elasticdocs.UserDoc
 import pt.isel.ps.qq.exceptions.*
-import pt.isel.ps.qq.repositories.GuestSessionElasticRepository
-import pt.isel.ps.qq.repositories.elasticdocs.GuestSessionDoc
 import java.util.*
 
 //TODO: elastic time triggers ?! -> status management
@@ -26,7 +20,7 @@ class GuestService(private val userRepo: UserElasticRepository,
         const val REGISTRATION_TOKEN_TIMEOUT: Long = 3600
     }
 
-    fun register(input: RegisterInputModel): UserTokenDto {
+    fun register(input: RegisterInputModel): UserDoc {
 
         try {
             val registeredUser = userRepo.findById(input.userName)
@@ -41,10 +35,7 @@ class GuestService(private val userRepo: UserElasticRepository,
                 status = "pending validation"
             )
             userRepo.save(user)
-            return UserTokenDto(
-                token = uid.toString(),
-                User(userName = input.userName, displayName = input.displayName, id = uid.toString())
-            )
+            return user
         } catch (e: Exception) {
 
             println(e) //index does not exist
@@ -52,7 +43,7 @@ class GuestService(private val userRepo: UserElasticRepository,
         }
     }
 
-    fun requestLogin(userName: LoginInputModel): UserTokenDto {
+    fun requestLogin(userName: LoginInputModel): UserDoc {
         val user = userRepo.findById(userName.userName)!!.get()
         validateUserStatus(user)
         val uid = UUID.randomUUID()
@@ -64,14 +55,11 @@ class GuestService(private val userRepo: UserElasticRepository,
             tokenExpireDate = timeout
         )
         val t = userRepo.save(updatedUser)
-        return UserTokenDto(
-            token = uid.toString(),
-            user = UserDto(userName = user.userName, displayName = user.displayName),
-            expireDate = timeout
-        )
+        return updatedUser
+
     }
 
-    fun logmein(input: LoginMeInputModel): UserTokenDto {
+    fun logmein(input: LoginMeInputModel): UserDoc {
         val user = userRepo.findById(input.userName)!!.get()
 
         validateUserRegistrationInfo(user)
@@ -80,9 +68,9 @@ class GuestService(private val userRepo: UserElasticRepository,
 
         val otherUid = UUID.randomUUID().toString()
         val timeout = getTimeout()
-        val token = UserTokenDto(otherUid, user = UserDto(user.userName, user.displayName), timeout)
-        userRepo.save(UserDoc(input.userName, user.displayName, otherUid, timeout, "enabled"))
-        return token
+        val updatedUser = UserDoc(input.userName, user.displayName, otherUid, timeout, "enabled")
+        userRepo.save(updatedUser)
+        return updatedUser
     }
 
     private fun validateLoginToken(user: UserDoc, inputToken: String) {

@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import pt.isel.ps.qq.data.dto.ErrorDto
 import pt.isel.ps.qq.data.dto.input.JoinSessionInputModel
 import pt.isel.ps.qq.exceptions.InvalidTokenException
 import pt.isel.ps.qq.exceptions.UserNotFoundException
@@ -24,9 +23,9 @@ class SessionController (
         return try {
             ResponseEntity.ok().body(service.joinSession(input))
         } catch(e: InvalidTokenException) {
-            ResponseEntity.badRequest().body(ErrorDto(code = HttpStatus.BAD_REQUEST.value(), GuestController.USER_INVALID_TOKEN))
+            ResponseEntity.badRequest().body(GuestController.USER_INVALID_TOKEN)
         } catch(e: UserNotFoundException) {
-            ResponseEntity.badRequest().body(ErrorDto(code = HttpStatus.BAD_REQUEST.value(), GuestController.USER_NOT_REGISTERED))
+            ResponseEntity.badRequest().body(GuestController.USER_NOT_REGISTERED)
         }
     }
 }

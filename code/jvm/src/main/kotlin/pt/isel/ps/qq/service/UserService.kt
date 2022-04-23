@@ -5,8 +5,8 @@ import pt.isel.ps.qq.data.dto.input.SessionInputModel
 import pt.isel.ps.qq.exceptions.AlreadyExistsException
 import pt.isel.ps.qq.exceptions.OpenedSessionException
 import pt.isel.ps.qq.repositories.SessionElasticRepository
-import pt.isel.ps.qq.repositories.elasticdocs.QqStatus
-import pt.isel.ps.qq.repositories.elasticdocs.SessionDoc
+import pt.isel.ps.qq.data.elasticdocs.QqStatus
+import pt.isel.ps.qq.data.elasticdocs.SessionDoc
 import java.util.*
 
 

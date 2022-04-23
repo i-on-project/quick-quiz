@@ -10,7 +10,6 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.post
 import pt.isel.ps.qq.data.dto.ErrorDto
-import pt.isel.ps.qq.data.dto.UserDto
 
 
 @SpringBootTest

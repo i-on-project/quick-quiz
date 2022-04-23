@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import pt.isel.ps.qq.data.dto.input.SessionInputModel
-import pt.isel.ps.qq.repositories.elasticdocs.SessionDoc
+import pt.isel.ps.qq.data.elasticdocs.SessionDoc
 import pt.isel.ps.qq.service.UserService
 
 @RestController

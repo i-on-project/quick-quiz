@@ -3,7 +3,6 @@ package pt.isel.ps.qq.filters
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
-import pt.isel.ps.qq.data.dto.ErrorDto
 import pt.isel.ps.qq.repositories.UserElasticRepository
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpFilter
@@ -27,7 +26,7 @@ class UserFilter(   private val mapper: ObjectMapper, private val userRepo: User
             val code = HttpStatus.FORBIDDEN.value()
             response?.status = code
             response?.addHeader("Content-Type", "application/json")
-            val str = mapper.writeValueAsString(ErrorDto(code = code, reason = USER_TOKEN_EXPIRED))
+            val str = USER_TOKEN_EXPIRED
             response?.writer?.write(str)
             return
         }
