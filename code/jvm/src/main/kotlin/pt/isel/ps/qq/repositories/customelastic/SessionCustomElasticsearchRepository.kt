@@ -23,9 +23,9 @@ class SessionCustomElasticsearchRepositoryImpl(
             script
         )
 
-        if (response.noops > 0) throw NumberOfParticipantsExceeded()
-        if (response.updated == 0L) throw Exception() else {
-        }
+        if (response.noops > 0) throw NumberOfParticipantsExceeded() else {}
+/*        if (response.updated == 0L) throw Exception() else {
+        }*/
     } catch (e: Exception) {
         println("The exception was here")
         println(e)

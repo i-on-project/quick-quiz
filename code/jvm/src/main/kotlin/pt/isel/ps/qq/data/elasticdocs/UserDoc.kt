@@ -14,6 +14,6 @@ data class UserDoc(
     val templates: List<String> = emptyList(),
     val sessionHistory: List<String> = emptyList()
 ) {
-    //constructor(user: UserDoc) this:
+    //constructor(user: UserDoc): this(userName)
 }
 
