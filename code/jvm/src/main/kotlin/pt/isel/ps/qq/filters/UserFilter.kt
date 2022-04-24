@@ -14,8 +14,6 @@ import javax.servlet.http.HttpServletResponse
 class UserFilter(   private val mapper: ObjectMapper, private val userRepo: UserElasticRepository?
 ): HttpFilter() {
 
-
-
     companion object {
         const val USER_TOKEN_EXPIRED = "User Token Expired/User does not exist"
     }

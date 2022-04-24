@@ -24,7 +24,7 @@ class GuestService(private val userRepo: UserElasticRepository,
 
         try {
             val registeredUser = userRepo.findById(input.userName)
-            if(registeredUser!!.isEmpty) throw AlreadyExistsException()
+            if(!registeredUser.isEmpty) throw AlreadyExistsException()
             val uid = UUID.randomUUID()
 
             val user = UserDoc(

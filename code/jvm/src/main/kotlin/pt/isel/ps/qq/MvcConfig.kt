@@ -25,10 +25,5 @@ class MvcConfig(private val userRepo: UserElasticRepository) : WebMvcConfigurer 
         //registrationBean.order = 2
         return registrationBean
     }
-
-
-
-
-
 }
 
