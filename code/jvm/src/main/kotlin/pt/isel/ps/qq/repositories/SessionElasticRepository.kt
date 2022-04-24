@@ -11,5 +11,5 @@ import pt.isel.ps.qq.data.elasticdocs.SessionDoc
 interface SessionElasticRepository: ElasticsearchRepository<SessionDoc, String>, SessionCustomElasticsearchRepository {
   fun findSessionDocsByOwnerAndStatus(owner: String, status: QqStatus): List<SessionDoc>
   fun findSessionDocByGuestCode(guestCode: Int): SessionDoc
-
+  fun findSessionDocByGuestCodeAndStatusNot(guestCode: Int, status: QqStatus): SessionDoc?
 }

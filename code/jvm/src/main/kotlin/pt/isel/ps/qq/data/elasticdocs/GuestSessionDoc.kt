@@ -3,7 +3,7 @@ package pt.isel.ps.qq.data.elasticdocs
 import org.springframework.data.annotation.Id
 import org.springframework.data.elasticsearch.annotations.Document
 
-@Document(indexName ="guestsessions")
+@Document(indexName ="guest_sessions")
 data class GuestSessionDoc(
     @Id
     val id: String,

@@ -1,15 +1,18 @@
 package pt.isel.ps.qq.service
 
 import org.springframework.stereotype.Service
-import pt.isel.ps.qq.data.dto.input.JoinSessionInputModel
+import pt.isel.ps.qq.data.GiveAnswerInputModel
+import pt.isel.ps.qq.data.JoinSessionInputModel
+import pt.isel.ps.qq.data.elasticdocs.Answer
 import pt.isel.ps.qq.repositories.GuestSessionElasticRepository
 import pt.isel.ps.qq.repositories.SessionElasticRepository
 import pt.isel.ps.qq.data.elasticdocs.GuestSessionDoc
 import java.util.*
 
 @Service
-class SessionService(private val sessionRepo: SessionElasticRepository,
-                     private val guestSessionRepo: GuestSessionElasticRepository
+class SessionService(
+    private val sessionRepo: SessionElasticRepository,
+    private val guestSessionRepo: GuestSessionElasticRepository
 ) {
     fun joinSession(input: JoinSessionInputModel): GuestSessionDoc {
         sessionRepo.updateNumberOfParticipants(input.sessionCode)
@@ -18,6 +21,13 @@ class SessionService(private val sessionRepo: SessionElasticRepository,
         val guestSession = GuestSessionDoc(id=guestUuid, sessionId = session.id)
         guestSessionRepo.save(guestSession)
         return guestSession
+    }
+
+    fun giveAnswer(input: GiveAnswerInputModel): GuestSessionDoc {
+        guestSessionRepo.updateAnswerList(input)
+        val opt =  guestSessionRepo.findById(input.guestId)
+        if(opt.isEmpty) throw Exception("It was empty oh no" )
+        return opt.get()
     }
 
 }

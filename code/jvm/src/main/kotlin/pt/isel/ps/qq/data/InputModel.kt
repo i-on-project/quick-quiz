@@ -1,4 +1,4 @@
-package pt.isel.ps.qq.data.dto.input
+package pt.isel.ps.qq.data
 
 import java.util.UUID
 
@@ -7,7 +7,6 @@ private val emailRegex = Regex("^[a-zA-Z0-9_!#\$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.
 
 data class SessionInputModel(
     val name: String,
-    val owner: String,
     val limitOfParticipants: Int,
     val geolocation: String?,
     val endDate: Long?, //seconds
@@ -44,4 +43,10 @@ data class LoginMeInputModel(
 
 data class JoinSessionInputModel(
     val sessionCode: Int
+)
+
+data class GiveAnswerInputModel(
+    val guestId: String,
+    val quizId: String,
+    val answer: String
 )
