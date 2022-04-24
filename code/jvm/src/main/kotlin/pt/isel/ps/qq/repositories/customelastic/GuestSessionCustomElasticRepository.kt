@@ -1,7 +1,6 @@
 package pt.isel.ps.qq.repositories.customelastic
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.elasticsearch.index.query.MatchQueryBuilder
 import org.elasticsearch.index.query.TermQueryBuilder
 import pt.isel.ps.qq.data.GiveAnswerInputModel
 import pt.isel.ps.qq.data.elasticdocs.Answer
@@ -17,18 +16,16 @@ class GuestSessionCustomElasticRepositoryImpl(
 ) : GuestSessionCustomElasticRepository {
 
     override fun updateAnswerList(input: GiveAnswerInputModel) = try {
-        val script =
-            "ctx._source.answers.add(params.answer)"
-        val map = mapOf("answer" to mapOf("quizId" to input.quizId, "answer" to input.answer))
+        val script = "ctx._source.answers.add(params.answer)"
         val response = elasticCustom.buildAndSendRequest(
             "guest_sessions",
-            MatchQueryBuilder("id", input.guestId),
-            map,
+            TermQueryBuilder("id", input.guestId),
+            mapOf("answer" to Answer(quizId = input.quizId, answer = input.answer)),
             script
         )
 
         if (response.noops > 0) throw NumberOfParticipantsExceeded()
-        if (response.updated == 0L) throw Exception("There was no update in guest_session") else {
+        if (response.updated == 0L) throw Exception("There was no update in guest_sseion") else {
         }
     } catch (e: Exception) {
         println(e)

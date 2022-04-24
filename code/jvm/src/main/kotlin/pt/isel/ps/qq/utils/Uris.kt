@@ -1,5 +1,7 @@
 package pt.isel.ps.qq.utils
 
+import org.springframework.web.util.UriTemplate
+
 object Uris {
 
     object API {
@@ -62,6 +64,13 @@ object Uris {
                         const val ENDPOINT = "/create_session"
                         const val PATH = "${Auth.PATH}$ENDPOINT"
                         fun make() = PATH
+                    }
+
+                    object DeleteSession {
+                        const val ENDPOINT = "/delete_session/{id}"
+                        const val PATH = "${Auth.PATH}$ENDPOINT"
+                        private val TEMPLATE = UriTemplate(PATH)
+                        fun make(id: String) = TEMPLATE.expand(mapOf("id" to id))
                     }
                 }
             }
