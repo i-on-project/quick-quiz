@@ -16,12 +16,11 @@ class GuestSessionCustomElasticRepositoryImpl(
 ) : GuestSessionCustomElasticRepository {
 
     override fun updateAnswerList(input: GiveAnswerInputModel) = try {
-        val script =
-            "ctx._source.answers.add(params.answer)"
+        val script = "ctx._source.answers.add(params.answer)"
         val response = elasticCustom.buildAndSendRequest(
             "guest_sessions",
             TermQueryBuilder("id", input.guestId),
-            mapOf("answer" to jsonMapper.writeValueAsString(Answer(quizId = input.quizId, answer = input.answer))),
+            mapOf("answer" to Answer(quizId = input.quizId, answer = input.answer)),
             script
         )
 

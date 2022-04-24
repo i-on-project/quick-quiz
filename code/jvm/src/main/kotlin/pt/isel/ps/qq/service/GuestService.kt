@@ -24,37 +24,37 @@ class GuestService(private val userRepo: UserElasticRepository,
     }
 
     fun register(input: RegisterInputModel): UserDoc {
+        val registeredUser = userRepo.findById(input.userName)
+        if(!registeredUser.isEmpty) {
 
-        try {
-            val registeredUser = userRepo.findById(input.userName)
-            if(!registeredUser.isEmpty) {
-                val user = registeredUser.get()
-                if(user.status!! == "pending validation" && getCurrentTimeSeconds() > user.tokenExpireDate) {
+            /*
+            If user exists but the login token has already expired without a single login,
+            it is permitted to register again
+             */
 
-                } else {
-                    throw AlreadyExistsException()
-                }
+            val user = registeredUser.get()
+            if(user.status!! == "pending validation" && getCurrentTimeSeconds() > user.tokenExpireDate) {
+                val newUser = UserDoc(user, UUID.randomUUID().toString(), getCurrentTimeSeconds())
+                userRepo.save(newUser)
+            } else {
+                throw AlreadyExistsException()
             }
-            val uid = UUID.randomUUID()
-
-            val user = UserDoc(
-                userName = input.userName,
-                displayName = input.displayName,
-                loginToken = uid.toString(),
-                tokenExpireDate = getRegistrationTimeout(),
-                status = "pending validation"
-            )
-            userRepo.save(user)
-            return user
-        } catch (e: Exception) {
-
-            println(e) //index does not exist
-            throw e;
         }
+        val uid = UUID.randomUUID()
+
+        val user = UserDoc(
+            userName = input.userName,
+            displayName = input.displayName,
+            loginToken = uid.toString(),
+            tokenExpireDate = getRegistrationTimeout(),
+            status = "pending validation"
+        )
+        userRepo.save(user)
+        return user
     }
 
     fun requestLogin(userName: LoginInputModel): UserDoc {
-        val user = userRepo.findById(userName.userName)!!.get()
+        val user = userRepo.findById(userName.userName).get()
         validateUserStatus(user)
         val uid = UUID.randomUUID()
         val timeout = getTimeout()
@@ -70,7 +70,7 @@ class GuestService(private val userRepo: UserElasticRepository,
     }
 
     fun logmein(input: LoginMeInputModel): UserDoc {
-        val user = userRepo.findById(input.userName)!!.get()
+        val user = userRepo.findById(input.userName).get()
 
         validateUserRegistrationInfo(user)
         validateUserStatus(user)
@@ -88,7 +88,7 @@ class GuestService(private val userRepo: UserElasticRepository,
     }
 
     private fun validateUserRegistrationInfo(user: UserDoc) {
-        if (!validTokenTimeOut(user.tokenExpireDate) && user.status == "pending validation") {
+        if (user.status == "pending validation" && !validTokenTimeOut(user.tokenExpireDate)) {
             userRepo.delete(user)
             throw RegistrationTimedOutException()
         }
