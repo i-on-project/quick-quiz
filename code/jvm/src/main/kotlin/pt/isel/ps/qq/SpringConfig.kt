@@ -1,5 +1,7 @@
 package pt.isel.ps.qq
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.elasticsearch.client.RestHighLevelClient
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
@@ -18,6 +20,9 @@ class MvcConfig(
     private val elasticRepository: UserElasticRepository,
     private val scope: UserInfoScope
 ): WebMvcConfigurer {
+
+    @Bean
+    fun objectMapper(): ObjectMapper = ObjectMapper().registerKotlinModule()
 
     @Bean
     fun userFilterRegistrationBean(): FilterRegistrationBean<UserFilter> {

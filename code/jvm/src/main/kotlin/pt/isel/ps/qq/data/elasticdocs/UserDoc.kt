@@ -13,5 +13,7 @@ data class UserDoc(
     val status: String? = null,
     val templates: List<String> = emptyList(),
     val sessionHistory: List<String> = emptyList()
-)
+) {
+    //constructor(user: UserDoc) this:
+}
 

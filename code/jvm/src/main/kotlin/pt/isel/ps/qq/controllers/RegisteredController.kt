@@ -19,7 +19,6 @@ class RegisteredController(
 
     @PostMapping(Uris.API.Web.V1_0.Auth.CreateSession.ENDPOINT)
     fun createSession(@RequestBody session: SessionInputModel): SessionDoc {
-        println(scope.getUser()?.userName)
-        return service.createSession(session)
+        return service.createSession(scope.getUser().userName, session)
     }
 }

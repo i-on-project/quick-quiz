@@ -8,6 +8,7 @@ import pt.isel.ps.qq.repositories.SessionElasticRepository
 import pt.isel.ps.qq.repositories.UserElasticRepository
 import pt.isel.ps.qq.data.elasticdocs.UserDoc
 import pt.isel.ps.qq.exceptions.*
+import pt.isel.ps.qq.utils.getCurrentTimeSeconds
 import java.util.*
 
 //TODO: elastic time triggers ?! -> status management
@@ -26,7 +27,14 @@ class GuestService(private val userRepo: UserElasticRepository,
 
         try {
             val registeredUser = userRepo.findById(input.userName)
-            if(!registeredUser.isEmpty) throw AlreadyExistsException()
+            if(!registeredUser.isEmpty) {
+                val user = registeredUser.get()
+                if(user.status!! == "pending validation" && getCurrentTimeSeconds() > user.tokenExpireDate) {
+
+                } else {
+                    throw AlreadyExistsException()
+                }
+            }
             val uid = UUID.randomUUID()
 
             val user = UserDoc(

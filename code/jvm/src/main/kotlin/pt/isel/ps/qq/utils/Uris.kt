@@ -45,6 +45,12 @@ object Uris {
                         const val PATH = "${NonAuth.PATH}$ENDPOINT"
                         fun make() = PATH
                     }
+
+                    object GiveAnswer {
+                        const val ENDPOINT = "/give_answer"
+                        const val PATH = "${NonAuth.PATH}$ENDPOINT"
+                        fun make() = PATH
+                    }
                 }
 
                 object Auth {

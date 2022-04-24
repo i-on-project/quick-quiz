@@ -5,10 +5,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import pt.isel.ps.qq.data.JoinSessionInputModel
-import pt.isel.ps.qq.data.LoginInputModel
-import pt.isel.ps.qq.data.LoginMeInputModel
-import pt.isel.ps.qq.data.RegisterInputModel
+import pt.isel.ps.qq.data.*
 import pt.isel.ps.qq.service.GuestService
 import pt.isel.ps.qq.service.SessionService
 import pt.isel.ps.qq.utils.Uris
@@ -38,6 +35,11 @@ class UnregisteredController(
     @PostMapping(Uris.API.Web.V1_0.NonAuth.JoinSession.ENDPOINT)
     fun joinSession(@RequestBody input: JoinSessionInputModel): ResponseEntity<Any> {
         return ResponseEntity.ok().body(sessionService.joinSession(input))
+    }
+
+    @PostMapping(Uris.API.Web.V1_0.NonAuth.GiveAnswer.ENDPOINT)
+    fun giveAnswer(@RequestBody input: GiveAnswerInputModel): ResponseEntity<Any> {
+        return ResponseEntity.ok().body(sessionService.giveAnswer(input))
     }
 }
 
