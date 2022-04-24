@@ -3,6 +3,10 @@ package pt.isel.ps.qq.data.elasticdocs
 import org.springframework.data.annotation.Id
 import org.springframework.data.elasticsearch.annotations.Document
 
+enum class UserStatus {
+    PENDING_REGISTRATION, ENABLED, DISABLED;
+}
+
 @Document(indexName = "users")
 data class UserDoc(
     @Id
@@ -10,7 +14,7 @@ data class UserDoc(
     val displayName: String? = null,
     val loginToken: String,
     val tokenExpireDate: Long,
-    val status: String? = null,
+    val status: UserStatus? = null,
     val templates: List<String> = emptyList(),
     val sessionHistory: List<String> = emptyList()
 ) {
