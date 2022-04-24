@@ -1,5 +1,6 @@
 package pt.isel.ps.qq.service
 
+import org.springframework.dao.DataAccessResourceFailureException
 import org.springframework.stereotype.Service
 import pt.isel.ps.qq.data.LoginInputModel
 import pt.isel.ps.qq.data.LoginMeInputModel
@@ -26,6 +27,7 @@ class AuthenticationService(
 
     fun register(input: RegisterInputModel): UserDoc {
         val registeredUser = userRepo.findById(input.userName)
+
         if(!registeredUser.isEmpty) {
 
             /*
@@ -35,14 +37,16 @@ class AuthenticationService(
 
             val user = registeredUser.get()
             if(user.status!! == UserStatus.PENDING_REGISTRATION && getCurrentTimeSeconds() > user.tokenExpireDate) {
-                val newUser = UserDoc(user, UUID.randomUUID().toString(), getCurrentTimeSeconds())
+                val newUser = UserDoc(user, UUID.randomUUID().toString(), getRegistrationTimeout())
                 userRepo.save(newUser)
             } else {
                 throw AlreadyExistsException(
                     alreadyExistsWhat = "User",
                     reasonForUser = "This email is already registered.",
                     moreDetails = "Please try to login",
-                    whereDidTheErrorOccurred = ErrorInstance(Uris.API.Web.V1_0.NonAuth.Register.make(), input.userName)
+                    whereDidTheErrorOccurred = ErrorInstance(
+                        Uris.API.Web.V1_0.NonAuth.Register.make(), input.userName
+                    )
                 )
             }
         }
@@ -87,7 +91,7 @@ class AuthenticationService(
     }
 
     private fun validateLoginToken(user: UserDoc, inputToken: String) {
-        if (user.loginToken != inputToken) throw InvalidTokenException(
+        if(user.loginToken != inputToken) throw InvalidTokenException(
             reasonForUser = "Your login token is invalid.",
             moreDetails = "Please check if your login token is valid.",
             whereDidTheErrorOccurred = ErrorInstance(Uris.API.Web.V1_0.NonAuth.Logmein.make(), user.userName)
@@ -100,7 +104,7 @@ class AuthenticationService(
     }
 
     private fun validateUserRegistrationInfo(user: UserDoc) {
-        if (user.status == UserStatus.PENDING_REGISTRATION && !validTokenTimeOut(user.tokenExpireDate)) {
+        if(user.status == UserStatus.PENDING_REGISTRATION && !validTokenTimeOut(user.tokenExpireDate)) {
             userRepo.delete(user)
             throw InvalidTokenException(
                 reasonForUser = "Your registration token is expired.",
@@ -129,13 +133,12 @@ class AuthenticationService(
         )
     }
 
-    private fun getUserNotFoundException(username: String, method: String) =
-        NotFoundException(
-            notFoundWhat = "User",
-            reasonForUser = "Your user was not found.",
-            moreDetails = "Please check your email for a link to login on the application. If the email is not found try register your email",
-            whereDidTheErrorOccurred = ErrorInstance(method, username)
-        )
+    private fun getUserNotFoundException(username: String, method: String) = NotFoundException(
+        notFoundWhat = "User",
+        reasonForUser = "Your user was not found.",
+        moreDetails = "Please check your email for a link to login on the application. If the email is not found try register your email",
+        whereDidTheErrorOccurred = ErrorInstance(method, username)
+    )
 
 
     private fun getTokenTimeout(): Long = getCurrentTimeSeconds() + TOKEN_TIMEOUT

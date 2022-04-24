@@ -1,5 +1,7 @@
 package pt.isel.ps.qq
 
+import org.springframework.dao.DataAccessException
+import org.springframework.dao.DataAccessResourceFailureException
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -38,5 +40,19 @@ class ExceptionHandler: ResponseEntityExceptionHandler() {
         return ResponseEntity.status(ex.status)
             .contentType(MEDIA_TYPE)
             .body(ProblemJson(ex))
+    }
+
+    @ExceptionHandler(DataAccessException::class)
+    fun handleDataAccessException(ex: DataAccessException, request: WebRequest): ResponseEntity<Any> {
+        logger.info("Database Down")
+        return ResponseEntity.status(502)
+            .contentType(MEDIA_TYPE)
+            .body(ProblemJson(
+                type = "DataAccessException",
+                title = "One of the services is currently unavailable.",
+                status = 502,
+                detail = "Please try again, if the issue remains contact our support team",
+                instance = "null@null"
+            ))
     }
 }
