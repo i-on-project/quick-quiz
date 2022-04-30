@@ -8,7 +8,7 @@ open class AlreadyExistsException(
 ): ProblemJsonException(
     type = "${alreadyExistsWhat}AlreadyExistsException",
     title = reasonForUser,
-    status = 404,
+    status = 400,
     detail = moreDetails,
     instance = whereDidTheErrorOccurred
 )

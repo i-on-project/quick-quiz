@@ -1,0 +1,29 @@
+package pt.isel.ps.qq.data
+
+import org.springframework.dao.DataAccessResourceFailureException
+import org.springframework.http.MediaType
+import pt.isel.ps.qq.exceptions.ProblemJsonException
+
+data class ProblemJson(
+    val type: String, val title: String, val status: Int, val detail: String, val instance: String
+) {
+    constructor(ex: ProblemJsonException): this(
+        type = ex.type, title = ex.title, status = ex.status, detail = ex.detail, instance = ex.instance.toString()
+    )
+
+    constructor(ex: DataAccessResourceFailureException, instance: String): this(
+        type = ex.javaClass.name,
+        title = "One of the services is currently unavailable.",
+        status = 502,
+        detail = "Please try again later, if the issue remains contact our support team",
+        instance = instance
+    )
+
+    override fun toString(): String {
+        return "\"type\":${this.type}\"title\":${this.title}\"status\":${this.status}\"detail\":${this.detail}\"instance\":${this.instance}"
+    }
+
+    companion object {
+        val MEDIA_TYPE = MediaType.parseMediaType("application/problem+json")
+    }
+}

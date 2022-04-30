@@ -19,7 +19,22 @@ data class SessionDoc(
     val status: QqStatus,
     var numberOfParticipants: Int = 0
 
-)
+) {
+    constructor(session: SessionDoc, status: QqStatus): this(
+        id = session.id,
+        name = session.name,
+        owner = session.owner,
+        guestCode = session.guestCode,
+        limitOfParticipants = session.limitOfParticipants,
+        geolocation = session.geolocation,
+        radius = session.radius,
+        radiusUnit = session.radiusUnit,
+        endDate = session.endDate,
+        quizzes = session.quizzes,
+        status = status,
+        numberOfParticipants = session.numberOfParticipants
+    )
+}
 
 enum class QqStatus {
     NOT_STARTED, STARTED, CLOSED

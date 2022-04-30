@@ -1,6 +1,6 @@
 package pt.isel.ps.qq.exceptions
 
-class IllegalStatusException(
+class IllegalAuthenticationException(
     private val reasonForUser: String,
     private val moreDetails: String,
     private val whereDidTheErrorOccurred: ErrorInstance

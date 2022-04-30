@@ -18,6 +18,7 @@ repositories {
 dependencies {
 	//implementation("org.springframework.security:spring-security-config")
 	//implementation("org.springframework.security:spring-security-web")
+	implementation("com.sun.mail:javax.mail:1.6.2")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.data:spring-data-elasticsearch:4.3.3") //Bonsai Max Elastic version 7.10.2 -> Spting plugin elastic plugin 7.9.3
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
