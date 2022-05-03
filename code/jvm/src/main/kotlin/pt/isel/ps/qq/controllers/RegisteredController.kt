@@ -53,9 +53,6 @@ class RegisteredController(
                     title = "Delete",
                     method = "DELETE",
                     href = Uris.API.Web.V1_0.Auth.Session.Id.make(doc.id).toString(),
-                ),
-                SirenAction(
-
                 )
             )
         )
