@@ -2,8 +2,6 @@ package pt.isel.ps.qq.repositories.customelastic
 
 import org.elasticsearch.client.RequestOptions
 import org.elasticsearch.client.RestHighLevelClient
-import org.elasticsearch.index.query.AbstractQueryBuilder
-import org.elasticsearch.index.query.MatchQueryBuilder
 import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.index.query.TermQueryBuilder
 import org.elasticsearch.index.reindex.BulkByScrollResponse

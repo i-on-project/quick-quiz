@@ -60,6 +60,59 @@ object Uris {
                     const val PATH = "${V1_0.PATH}$ENDPOINT"
                     fun make() = PATH
 
+                    object Session {
+                        const val ENDPOINT = "/session"
+                        const val PATH = "${Auth.PATH}$ENDPOINT"
+                        fun make() = PATH
+
+                        object Id {
+                            const val CONTROLLER_ENDPOINT = "/session/{id}"
+                            const val ENDPOINT = "/{id}"
+                            const val PATH = "${Session.PATH}$ENDPOINT"
+                            private val TEMPLATE = UriTemplate(PATH)
+                            fun make(id: String) = TEMPLATE.expand(mapOf("id" to id))
+                        }
+                    }
+
+                    object User {
+                        const val ENDPOINT = "/user"
+                        const val PATH = "${Auth.PATH}$ENDPOINT"
+                        fun make() = PATH
+
+                        object Id {
+                            const val ENDPOINT = "/{id}"
+                            const val PATH = "${User.PATH}$ENDPOINT"
+                            private val TEMPLATE = UriTemplate(PATH)
+                            fun make(id: String) = TEMPLATE.expand(mapOf("id" to id))
+                        }
+                    }
+
+                    object Quiz {
+                        const val ENDPOINT = "/quiz"
+                        const val PATH = "${Auth.PATH}$ENDPOINT"
+                        fun make() = PATH
+
+                        object Id {
+                            const val CONTROLLER_ENDPOINT = "/quiz/{id}"
+                            const val ENDPOINT = "/{id}"
+                            const val PATH = "${Quiz.PATH}$ENDPOINT"
+                            private val TEMPLATE = UriTemplate(PATH)
+                            fun make(id: String) = TEMPLATE.expand(mapOf("id" to id))
+                        }
+                    }
+
+
+
+
+
+
+
+
+
+
+
+
+
                     object CreateSession {
                         const val ENDPOINT = "/create_session"
                         const val PATH = "${Auth.PATH}$ENDPOINT"

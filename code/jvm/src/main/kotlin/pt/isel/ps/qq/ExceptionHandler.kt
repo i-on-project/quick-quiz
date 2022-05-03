@@ -1,58 +1,28 @@
 package pt.isel.ps.qq
 
-import org.springframework.dao.DataAccessException
 import org.springframework.dao.DataAccessResourceFailureException
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
+import pt.isel.ps.qq.data.ProblemJson
 import pt.isel.ps.qq.exceptions.ProblemJsonException
-
-data class ProblemJson(
-    val type: String,
-    val title: String,
-    val status: Int,
-    val detail: String,
-    val instance: String
-) {
-    constructor(ex: ProblemJsonException): this(
-        type = ex.type,
-        title = ex.title,
-        status = ex.status,
-        detail = ex.detail,
-        instance = ex.instance.toString()
-    )
-}
 
 @ControllerAdvice
 class ExceptionHandler: ResponseEntityExceptionHandler() {
 
-    companion object {
-        val MEDIA_TYPE = MediaType.parseMediaType("application/problem+json")
-    }
-
     @ExceptionHandler(ProblemJsonException::class)
     fun handleProblemJsonException(ex: ProblemJsonException, request: WebRequest): ResponseEntity<Any> {
         logger.info("Type:${ex.type};Instance:${ex.instance}")
-
-        return ResponseEntity.status(ex.status)
-            .contentType(MEDIA_TYPE)
-            .body(ProblemJson(ex))
+        return ResponseEntity.status(ex.status).contentType(ProblemJson.MEDIA_TYPE).body(ProblemJson(ex))
     }
 
-    @ExceptionHandler(DataAccessException::class)
-    fun handleDataAccessException(ex: DataAccessException, request: WebRequest): ResponseEntity<Any> {
+    @ExceptionHandler(DataAccessResourceFailureException::class)
+    fun handleDataAccessResourceFailureException(ex: DataAccessResourceFailureException, request: WebRequest): ResponseEntity<Any> {
         logger.info("Database Down")
-        return ResponseEntity.status(502)
-            .contentType(MEDIA_TYPE)
-            .body(ProblemJson(
-                type = "DataAccessException",
-                title = "One of the services is currently unavailable.",
-                status = 502,
-                detail = "Please try again, if the issue remains contact our support team",
-                instance = "null@null"
-            ))
+        return ResponseEntity.status(502).contentType(ProblemJson.MEDIA_TYPE).body(
+            ProblemJson(ex = ex, instance = "${request.contextPath}@null")
+        )
     }
 }

@@ -1,9 +1,9 @@
 package pt.isel.ps.qq.data
 
+import pt.isel.ps.qq.data.elasticdocs.QuestionType
 import java.util.UUID
 
 private val emailRegex = Regex("^[a-zA-Z0-9_!#\$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+\$")
-
 
 data class SessionInputModel(
     val name: String,
@@ -49,4 +49,26 @@ data class GiveAnswerInputModel(
     val guestId: String,
     val quizId: String,
     val answer: String
+)
+
+data class EditSessionInputModel(
+    val name: String?,
+    val limitOfParticipants: Int?,
+    val geolocation: String?,
+    val endDate: Long?, //seconds
+    val templateId: String? = null,
+    //val quizzes: List<EditSessionQuizzesInputModel>
+)
+
+data class MultipleChoiceInputModel(
+    val choiceNumber: Int? = 0,
+    val choice: String,
+    val choiceRight: Boolean
+)
+
+data class EditSessionQuizzesInputModel(
+    val order: Int?,
+    val question: String,
+    val questionType: QuestionType,
+    val choices: List<MultipleChoiceInputModel>?
 )

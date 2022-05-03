@@ -1,6 +1,5 @@
 package pt.isel.ps.qq.service
 
-import org.springframework.dao.DataAccessResourceFailureException
 import org.springframework.stereotype.Service
 import pt.isel.ps.qq.data.LoginInputModel
 import pt.isel.ps.qq.data.LoginMeInputModel
@@ -12,16 +11,22 @@ import pt.isel.ps.qq.repositories.UserElasticRepository
 import pt.isel.ps.qq.utils.Uris
 import pt.isel.ps.qq.utils.getCurrentTimeSeconds
 import java.util.*
+import javax.mail.*
+import javax.mail.internet.InternetAddress
+import javax.mail.internet.MimeMessage
 
 //TODO: elastic time triggers ?! -> status management
 
 @Service
 class AuthenticationService(
-    private val userRepo: UserElasticRepository
+    private val userRepo: UserElasticRepository, private val mailSession: Session
 ) {
 
     companion object {
+        // Login token default timeout time in seconds (1 week)
         const val TOKEN_TIMEOUT: Long = 604800
+
+        // Register token default timeout time in seconds (1 hour)
         const val REGISTRATION_TOKEN_TIMEOUT: Long = 3600
     }
 
@@ -60,6 +65,25 @@ class AuthenticationService(
             status = UserStatus.PENDING_REGISTRATION
         )
         return userRepo.save(user)
+    }
+
+    private fun sendEmail(to: String) {
+        val inetAdr = InternetAddress(to)
+        try {
+            val msg = MimeMessage(mailSession)
+            msg.setFrom(InternetAddress("quick.quiz@localhost.com"))
+            msg.addRecipient(Message.RecipientType.TO, inetAdr)
+            msg.subject = "Quick Quiz App verify registration"
+            msg.setText("Experimental")
+            Transport.send(msg)
+        } catch(ex: SendFailedException) {
+            val instance = ErrorInstance(Uris.API.Web.V1_0.NonAuth.Register.make(), to)
+            val email = ex.invalidAddresses.find { it == inetAdr }
+            if(email != null) throw InvalidMailException(to, instance)
+            else throw ServerMailException(to, instance)
+        } catch(ex: MessagingException) {
+            throw ServerMailException(to, ErrorInstance(Uris.API.Web.V1_0.NonAuth.Register.make(), to))
+        }
     }
 
     fun requestLogin(userName: LoginInputModel): UserDoc {
@@ -118,7 +142,7 @@ class AuthenticationService(
         !(tokenExpireDate == null || getCurrentTimeSeconds() > tokenExpireDate);
 
     private fun validateUserStatusIsNotDisabled(user: UserDoc, method: String) {
-        if(user.status == UserStatus.DISABLED) throw IllegalStatusException(
+        if(user.status == UserStatus.DISABLED) throw IllegalAuthenticationException(
             reasonForUser = "Your email was disabled.",
             moreDetails = "Contact support for more details.",
             whereDidTheErrorOccurred = ErrorInstance(method, user.userName)
@@ -126,7 +150,7 @@ class AuthenticationService(
     }
 
     private fun validateUserStatusIsNotPending(user: UserDoc, method: String) {
-        if(user.status == UserStatus.PENDING_REGISTRATION) throw IllegalStatusException(
+        if(user.status == UserStatus.PENDING_REGISTRATION) throw IllegalAuthenticationException(
             reasonForUser = "Your email is pending",
             moreDetails = "Please check your email for logging in to the app.",
             whereDidTheErrorOccurred = ErrorInstance(method, user.userName)
