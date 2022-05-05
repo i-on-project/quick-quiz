@@ -10,6 +10,7 @@ import pt.isel.ps.qq.exceptions.*
 import pt.isel.ps.qq.repositories.UserElasticRepository
 import pt.isel.ps.qq.utils.Uris
 import pt.isel.ps.qq.utils.getCurrentTimeSeconds
+import java.net.URI
 import java.util.*
 import javax.mail.*
 import javax.mail.internet.InternetAddress
@@ -141,7 +142,7 @@ class AuthenticationService(
     private fun validTokenTimeOut(tokenExpireDate: Long?): Boolean =
         !(tokenExpireDate == null || getCurrentTimeSeconds() > tokenExpireDate);
 
-    private fun validateUserStatusIsNotDisabled(user: UserDoc, method: String) {
+    private fun validateUserStatusIsNotDisabled(user: UserDoc, method: URI) {
         if(user.status == UserStatus.DISABLED) throw IllegalAuthenticationException(
             reasonForUser = "Your email was disabled.",
             moreDetails = "Contact support for more details.",
@@ -149,7 +150,7 @@ class AuthenticationService(
         )
     }
 
-    private fun validateUserStatusIsNotPending(user: UserDoc, method: String) {
+    private fun validateUserStatusIsNotPending(user: UserDoc, method: URI) {
         if(user.status == UserStatus.PENDING_REGISTRATION) throw IllegalAuthenticationException(
             reasonForUser = "Your email is pending",
             moreDetails = "Please check your email for logging in to the app.",
@@ -157,7 +158,7 @@ class AuthenticationService(
         )
     }
 
-    private fun getUserNotFoundException(username: String, method: String) = NotFoundException(
+    private fun getUserNotFoundException(username: String, method: URI) = NotFoundException(
         notFoundWhat = "User",
         reasonForUser = "Your user was not found.",
         moreDetails = "Please check your email for a link to login on the application. If the email is not found try register your email",

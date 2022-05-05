@@ -1,7 +1,9 @@
 package pt.isel.ps.qq.exceptions
 
+import java.net.URI
+
 data class ErrorInstance(
-    val method: String,
+    val method: URI,
     val instance: Any
 ) {
     override fun toString(): String {

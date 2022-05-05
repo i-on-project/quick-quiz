@@ -1,5 +1,6 @@
 package pt.isel.ps.qq.repositories
 
+import org.springframework.data.domain.Pageable
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 import org.springframework.stereotype.Repository
 import pt.isel.ps.qq.repositories.customelastic.SessionCustomElasticsearchRepository
@@ -11,5 +12,5 @@ interface SessionElasticRepository: ElasticsearchRepository<SessionDoc, String>,
   fun findSessionDocsByOwnerAndStatus(owner: String, status: QqStatus): List<SessionDoc>
   fun findSessionDocByGuestCode(guestCode: Int): SessionDoc?
   fun findSessionDocByGuestCodeAndStatusNot(guestCode: Int, status: QqStatus): SessionDoc?
-  fun findSessionDocsByOwner(owner: String): List<SessionDoc>
+  fun findSessionDocsByOwnerOrderById(owner: String, page: Pageable): List<SessionDoc>
 }

@@ -16,7 +16,7 @@ data class QuizDoc(
     val question: String,
     val answerType: QuestionType,
     val answerChoices: List<MultipleChoice>? = null,
-    val quizState: QqStatus,
+    val quizState: QqStatus, //launched or not
     val numberOfAnswers: Int
 )
 

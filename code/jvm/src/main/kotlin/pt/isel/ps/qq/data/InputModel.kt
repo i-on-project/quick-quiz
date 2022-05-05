@@ -9,7 +9,6 @@ data class SessionInputModel(
     val name: String,
     val limitOfParticipants: Int,
     val geolocation: String?,
-    val endDate: Long?, //seconds
     val templateId: String? = null
 )
 
@@ -55,9 +54,7 @@ data class EditSessionInputModel(
     val name: String?,
     val limitOfParticipants: Int?,
     val geolocation: String?,
-    val endDate: Long?, //seconds
-    val templateId: String? = null,
-    //val quizzes: List<EditSessionQuizzesInputModel>
+    val description: String?
 )
 
 data class MultipleChoiceInputModel(
@@ -66,7 +63,7 @@ data class MultipleChoiceInputModel(
     val choiceRight: Boolean
 )
 
-data class EditSessionQuizzesInputModel(
+data class AddQuizToSessionInputModel(
     val order: Int?,
     val question: String,
     val questionType: QuestionType,
