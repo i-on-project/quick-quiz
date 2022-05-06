@@ -20,7 +20,7 @@ data class SessionOutputModel(
     val status: QqStatus,
     val description: String?,
     val creationDate: Long,
-    val guestCode: Int,
+    val guestCode: Int?,
     val limitOfParticipants: Int
 ) {
     constructor(session: SessionDoc): this(
@@ -50,4 +50,8 @@ data class Acknowledge(
 data class ListInfo(
     val size: Int,
     val total: Int
+)
+
+data class LiveSession(
+    val guestCode: String
 )

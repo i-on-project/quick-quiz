@@ -2,6 +2,11 @@ package pt.isel.ps.qq.data.elasticdocs
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.elasticsearch.annotations.Document
+import pt.isel.ps.qq.data.EditQuizInputModel
+import pt.isel.ps.qq.data.MultipleChoiceInputModel
+import pt.isel.ps.qq.exceptions.AtLeast1CorrectChoice
+import pt.isel.ps.qq.exceptions.AtLeast2Choices
+import pt.isel.ps.qq.exceptions.QuizBadInputModelException
 
 enum class QuestionType {
     MULTIPLE_CHOICE, SHORT, LONG
@@ -18,7 +23,48 @@ data class QuizDoc(
     val answerChoices: List<MultipleChoice>? = null,
     val quizState: QqStatus, //launched or not
     val numberOfAnswers: Int
-)
+) {
+
+    init {
+        if(answerType == QuestionType.MULTIPLE_CHOICE) {
+            if(answerChoices == null || answerChoices.count() < 2) throw AtLeast2Choices()
+            answerChoices.find { it.choiceRight } ?: throw AtLeast1CorrectChoice()
+        }
+    }
+
+    companion object {
+        private fun changeChoices(doc: QuizDoc, add: List<MultipleChoiceInputModel>?, rem: List<String>?): List<MultipleChoice>? {
+            if(doc.answerType != QuestionType.MULTIPLE_CHOICE) return null
+            val toReturn = doc.answerChoices!!.toMutableList()
+            if(rem != null && rem.isNotEmpty()) {
+                rem.forEach { str ->
+                    val toDelete = toReturn.find { it.choiceAnswer == str }
+                    if(toDelete != null) toReturn.remove(toDelete)
+                }
+            }
+            if(add != null && add.isNotEmpty()) {
+                add.forEach {
+                    toReturn.add(MultipleChoice(it.choiceNumber ?: 0, it.choice, it.choiceRight))
+                }
+            }
+            return toReturn
+        }
+    }
+
+    constructor(doc: QuizDoc, input: EditQuizInputModel): this(
+        id = doc.id,
+        sessionId = doc.sessionId,
+        userOwner = doc.userOwner, // parametro de pesquisa para templates por user
+        order = input.order ?: doc.order, // posição da questão numa sessão
+        question = input.question ?: doc.question,
+        answerType = doc.answerType,
+        answerChoices = changeChoices(doc, input.addChoices, input.removeChoices),
+        quizState = doc.quizState, //launched or not
+        numberOfAnswers = doc.numberOfAnswers
+    )
+
+
+}
 
 data class MultipleChoice(
     val choiceNumber: Int,

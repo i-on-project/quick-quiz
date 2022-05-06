@@ -15,7 +15,7 @@ data class SessionDoc(
     val description: String? = null,
     val creationDate: Long = getCurrentTimeSeconds(),
     val owner: String,
-    val guestCode: Int,
+    val guestCode: Int? = null,
     val limitOfParticipants: Int = 0,
     val geolocation: String? = null,
     val radius: Double? = null,

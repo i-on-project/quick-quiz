@@ -57,9 +57,9 @@ data class SirenAction(
 )
 
 data class SirenEntity(
-    @JsonProperty("class") @JsonAlias("class") val clazz: List<String>,
+    @JsonProperty("class") @JsonAlias("class") val clazz: List<String> = emptyList(),
     @NotEmpty val rel: List<String>, //required
-    val href: String, //required
+    val href: String? = null,
     val properties: Any? = null,
     val links: List<SirenLink> = emptyList(),
     val title: String? = null

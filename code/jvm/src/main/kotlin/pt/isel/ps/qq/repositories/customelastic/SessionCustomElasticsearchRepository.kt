@@ -13,7 +13,7 @@ import pt.isel.ps.qq.utils.getCurrentTimeSeconds
 interface SessionCustomElasticsearchRepository {
     fun updateNumberOfParticipants(sessionCode: Int)
     fun updateStatus(id: String, newStatus: QqStatus)
-    fun updateStatusAndDate(id: String, newStatus: QqStatus)
+    fun makeSessionGoLive(id: String, guestCode: Int)
     fun updateQuizzes(id: String, quizId: String)
 }
 
@@ -36,8 +36,8 @@ class SessionCustomElasticsearchRepositoryImpl(
         if(response.updated == 0L) throw Exception("It was not updated")
     }
 
-    override fun updateStatusAndDate(id: String, newStatus: QqStatus) {
-        val script = "ctx._source.status = \'$newStatus\'; ctx._source.liveDate = ${getCurrentTimeSeconds()}"
+    override fun makeSessionGoLive(id: String, guestCode: Int) {
+        val script = "ctx._source.status = \'${QqStatus.STARTED}\'; ctx._source.liveDate = ${getCurrentTimeSeconds()}; ctx._source.guestCode = $guestCode"
         val query = MatchPhraseQueryBuilder("id", id)
         val response = request(query, emptyMap(), script)
         if(response.updated == 0L) throw Exception("It was not updated")

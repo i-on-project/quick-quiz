@@ -69,3 +69,10 @@ data class AddQuizToSessionInputModel(
     val questionType: QuestionType,
     val choices: List<MultipleChoiceInputModel>?
 )
+
+data class EditQuizInputModel(
+    val order: Int?,
+    val question: String?,
+    val addChoices: List<MultipleChoiceInputModel>?,
+    val removeChoices: List<String>?
+)

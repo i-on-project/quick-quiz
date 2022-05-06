@@ -66,35 +66,35 @@ object Uris {
                         fun url(host: String, page: Int) = "${host}${PATH}?page=${page}"
 
                         object Id {
-                            const val CONTROLLER_ENDPOINT = "/session/{id}"
                             const val ENDPOINT = "/{id}"
                             const val PATH = "${Session.PATH}$ENDPOINT"
+                            const val CONTROLLER_ENDPOINT = "${Session.ENDPOINT}${ENDPOINT}"
                             private val TEMPLATE = UriTemplate(PATH)
                             fun make(id: String): URI = TEMPLATE.expand(mapOf("id" to id))
                             fun url(host: String, id: String) = "${host}${make(id)}"
 
                             object Live {
-                                const val CONTROLLER_ENDPOINT = "/session/{id}/live"
                                 const val ENDPOINT = "/live"
                                 const val PATH = "${Session.Id.PATH}$ENDPOINT"
+                                const val CONTROLLER_ENDPOINT = "${Session.ENDPOINT}${Id.ENDPOINT}${ENDPOINT}"
                                 private val TEMPLATE = UriTemplate(PATH)
                                 fun make(id: String): URI = TEMPLATE.expand(mapOf("id" to id))
                                 fun url(host: String, id: String) = "${host}${make(id)}"
                             }
 
                             object Close {
-                                const val CONTROLLER_ENDPOINT = "/session/{id}/close"
                                 const val ENDPOINT = "/close"
                                 const val PATH = "${Session.Id.PATH}$ENDPOINT"
+                                const val CONTROLLER_ENDPOINT = "${Session.ENDPOINT}${Id.ENDPOINT}${ENDPOINT}"
                                 private val TEMPLATE = UriTemplate(PATH)
                                 fun make(id: String): URI = TEMPLATE.expand(mapOf("id" to id))
                                 fun url(host: String, id: String) = "${host}${make(id)}"
                             }
 
-                            object Quizzes {
-                                const val CONTROLLER_ENDPOINT = "/session/{id}/quizzes"
-                                const val ENDPOINT = "/quizzes"
+                            object Quiz {
+                                const val ENDPOINT = "/quiz"
                                 const val PATH = "${Session.Id.PATH}$ENDPOINT"
+                                const val CONTROLLER_ENDPOINT = "${Session.ENDPOINT}${Id.ENDPOINT}${ENDPOINT}"
                                 private val TEMPLATE = UriTemplate(PATH)
                                 fun make(id: String): URI = TEMPLATE.expand(mapOf("id" to id))
                                 fun url(host: String, id: String) = "${host}${make(id)}"
@@ -121,9 +121,9 @@ object Uris {
                         fun url(host: String) = "${host}${PATH}"
 
                         object Id {
-                            const val CONTROLLER_ENDPOINT = "/quiz/{id}"
                             const val ENDPOINT = "/{id}"
                             const val PATH = "${Quiz.PATH}$ENDPOINT"
+                            const val CONTROLLER_ENDPOINT = "${Quiz.ENDPOINT}${ENDPOINT}"
                             private val TEMPLATE = UriTemplate(PATH)
                             fun make(id: String): URI = TEMPLATE.expand(mapOf("id" to id))
                             fun url(host: String, id: String) = "${host}${make(id)}"

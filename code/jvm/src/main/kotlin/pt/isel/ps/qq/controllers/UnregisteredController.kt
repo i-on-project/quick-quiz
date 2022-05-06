@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import pt.isel.ps.qq.data.*
 import pt.isel.ps.qq.service.AuthenticationService
-import pt.isel.ps.qq.service.SessionService
+import pt.isel.ps.qq.service.DataService
 import pt.isel.ps.qq.utils.Uris
 import pt.isel.ps.qq.utils.getBaseUrlHostFromRequest
 import java.time.Duration
@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletResponse
 @RequestMapping(Uris.API.Web.V1_0.NonAuth.PATH)
 class UnregisteredController(
     private val authenticationService: AuthenticationService,
-    private val sessionService: SessionService
+    private val dataService: DataService
 ) {
 
     /**
@@ -113,12 +113,12 @@ class UnregisteredController(
 
     @PostMapping(Uris.API.Web.V1_0.NonAuth.JoinSession.ENDPOINT)
     fun joinSession(@RequestBody input: JoinSessionInputModel): ResponseEntity<Any> {
-        return ResponseEntity.ok().body(sessionService.joinSession(input))
+        return ResponseEntity.ok().body(dataService.joinSession(input))
     }
 
     @PostMapping(Uris.API.Web.V1_0.NonAuth.GiveAnswer.ENDPOINT)
     fun giveAnswer(request: HttpServletRequest, @RequestBody input: GiveAnswerInputModel): ResponseEntity<Any> {
-        return ResponseEntity.ok().body(sessionService.giveAnswer(input))
+        return ResponseEntity.ok().body(dataService.giveAnswer(input))
     }
 }
 

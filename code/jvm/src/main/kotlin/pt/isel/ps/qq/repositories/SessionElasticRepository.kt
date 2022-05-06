@@ -13,4 +13,5 @@ interface SessionElasticRepository: ElasticsearchRepository<SessionDoc, String>,
   fun findSessionDocByGuestCode(guestCode: Int): SessionDoc?
   fun findSessionDocByGuestCodeAndStatusNot(guestCode: Int, status: QqStatus): SessionDoc?
   fun findSessionDocsByOwnerOrderById(owner: String, page: Pageable): List<SessionDoc>
+  fun findSessionDocsByGuestCodeAndStatus(guestCode: Int, status: QqStatus): List<SessionDoc>
 }
