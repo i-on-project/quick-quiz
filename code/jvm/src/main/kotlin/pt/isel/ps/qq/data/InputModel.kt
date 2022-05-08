@@ -7,7 +7,8 @@ private val emailRegex = Regex("^[a-zA-Z0-9_!#\$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.
 
 data class SessionInputModel(
     val name: String,
-    val limitOfParticipants: Int,
+    val description: String? = null,
+    val limitOfParticipants: Int?,
     val geolocation: String?,
     val templateId: String? = null
 )
@@ -44,10 +45,18 @@ data class JoinSessionInputModel(
     val sessionCode: Int
 )
 
+data class GetQuizInputModel(
+    val guestId: String,
+    val sessionId: String,
+    val quizId: String
+)
+
 data class GiveAnswerInputModel(
     val guestId: String,
+    val sessionId: String,
     val quizId: String,
-    val answer: String
+    val answer: String? = null,
+    val answerChoice: Int? = null
 )
 
 data class EditSessionInputModel(

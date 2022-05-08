@@ -1,5 +1,6 @@
 package pt.isel.ps.qq.filters
 
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
@@ -13,7 +14,7 @@ import javax.servlet.http.HttpServletResponse
 class TestFilter: HttpFilter() {
 
     companion object {
-        val logger = LoggerFactory.getLogger(TestFilter::class.java)
+        val logger: Logger = LoggerFactory.getLogger(TestFilter::class.java)
     }
 
     override fun doFilter(request: HttpServletRequest, response: HttpServletResponse, chain: FilterChain) {

@@ -4,7 +4,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.elasticsearch.annotations.Document
 
 @Document(indexName ="guest_sessions")
-data class GuestSessionDoc(
+data class AnswersDoc(
     @Id
     val id: String,
     val sessionId: String,
@@ -13,5 +13,6 @@ data class GuestSessionDoc(
 
 data class Answer(
     val quizId: String,
-    val answer: String?
+    val answer: String? = null,
+    val answerNumber: Int? = null
 )

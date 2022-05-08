@@ -6,7 +6,7 @@ import pt.isel.ps.qq.data.EditQuizInputModel
 import pt.isel.ps.qq.data.MultipleChoiceInputModel
 import pt.isel.ps.qq.exceptions.AtLeast1CorrectChoice
 import pt.isel.ps.qq.exceptions.AtLeast2Choices
-import pt.isel.ps.qq.exceptions.QuizBadInputModelException
+import java.util.*
 
 enum class QuestionType {
     MULTIPLE_CHOICE, SHORT, LONG
@@ -63,7 +63,17 @@ data class QuizDoc(
         numberOfAnswers = doc.numberOfAnswers
     )
 
-
+    constructor(quiz: QuizTemplate, owner: String, session: String): this(
+        id = UUID.randomUUID().toString(),
+        sessionId = session,
+        userOwner = owner, // parametro de pesquisa para templates por user
+        order = quiz.order, // posição da questão numa sessão
+        question = quiz.question,
+        answerType = quiz.answerType,
+        answerChoices = quiz.answerChoices,
+        quizState = QqStatus.NOT_STARTED, //launched or not
+        numberOfAnswers = 0
+    )
 }
 
 data class MultipleChoice(
