@@ -9,7 +9,7 @@ import pt.isel.ps.qq.data.ProblemJson
 import pt.isel.ps.qq.exceptions.ErrorInstance
 import pt.isel.ps.qq.exceptions.IllegalAuthenticationException
 import pt.isel.ps.qq.repositories.UserElasticRepository
-import java.util.*
+import java.net.URI
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpFilter
 import javax.servlet.http.HttpServletRequest
@@ -31,7 +31,7 @@ class UserFilter(
             val exception = IllegalAuthenticationException(
                 reasonForUser = "Your credentials are invalid or expired.",
                 moreDetails = "Your credentials are invalid or expired, please try to login again",
-                whereDidTheErrorOccurred = ErrorInstance(method = request.requestURI, instance = header ?: "null")
+                whereDidTheErrorOccurred = ErrorInstance(method = URI.create(request.requestURI), instance = header ?: "null")
             )
             if(request.cookies == null) throw exception
             val cookie = request.cookies.find { it.name == "Authorization" } ?: throw exception

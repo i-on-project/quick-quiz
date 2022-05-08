@@ -13,11 +13,15 @@ java.sourceCompatibility = JavaVersion.VERSION_11
 
 repositories {
 	mavenCentral()
+	maven {
+		url = uri("https://jcenter.bintray.com/")
+	}
 }
 
 dependencies {
 	//implementation("org.springframework.security:spring-security-config")
 	//implementation("org.springframework.security:spring-security-web")
+	implementation("org.unbroken-dome.siren:siren-core:0.2.0")
 	implementation("com.sun.mail:javax.mail:1.6.2")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.data:spring-data-elasticsearch:4.3.3") //Bonsai Max Elastic version 7.10.2 -> Spting plugin elastic plugin 7.9.3

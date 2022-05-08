@@ -14,6 +14,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import pt.isel.ps.qq.filters.UserFilter
 import pt.isel.ps.qq.repositories.UserElasticRepository
 import pt.isel.ps.qq.utils.Uris
+import java.util.Random
 import javax.mail.Session
 
 @Configuration
@@ -31,6 +32,9 @@ class MvcConfig(
 
     @Bean
     fun objectMapper(): ObjectMapper = ObjectMapper().registerKotlinModule()
+
+    @Bean
+    fun random(): Random = Random()
 
     @Bean
     fun userFilterRegistrationBean(): FilterRegistrationBean<UserFilter> {
