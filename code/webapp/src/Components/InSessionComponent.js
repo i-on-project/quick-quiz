@@ -1,26 +1,28 @@
 import React from "react";
 import {Card, Container, Row} from "react-bootstrap";
 import * as stompClient from "../Utils/websocket-listener";
-//import * as stompClient from "../serviceWorker";
 
 export class InSession extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             thisMessage: '',
-            date: new Date()};
+            date: new Date()
+        };
     }
+
     componentDidMount() {
-        stompClient.register([
-            {route: '/insession', callback: this.refreshCurrentPage}
+        stompClient.register( [
+            {route: '/topic/newEmployee', callback: this.refreshCurrentPage},
+            {route: '/topic/updateEmployee', callback: this.refreshCurrentPage},
+            {route: '/topic/deleteEmployee', callback: this.refreshCurrentPage}
         ])
-
-
     }
 
     refreshCurrentPage(message) {
         this.setState({thisMessage: message})
     }
+
     render() {
         return (
             <div>
@@ -34,7 +36,6 @@ export class InSession extends React.Component {
                         </Card>
                     </Row>
                 </Container>
-
             </div>
 
         );

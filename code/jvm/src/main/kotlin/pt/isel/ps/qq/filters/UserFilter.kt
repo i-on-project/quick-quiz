@@ -9,6 +9,7 @@ import pt.isel.ps.qq.data.ProblemJson
 import pt.isel.ps.qq.exceptions.ErrorInstance
 import pt.isel.ps.qq.exceptions.IllegalAuthenticationException
 import pt.isel.ps.qq.repositories.UserElasticRepository
+import java.util.*
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpFilter
 import javax.servlet.http.HttpServletRequest
@@ -36,7 +37,7 @@ class UserFilter(
             val cookie = request.cookies.find { it.name == "Authorization" } ?: throw exception
             logger.info(cookie.value)
 
-            if(!validateAuthorization(header)) {
+            if(!validateAuthorization(String(Base64.getDecoder().decode(cookie.value)))) {
                 throw throw exception
             }
         } catch(ex: IllegalAuthenticationException) {

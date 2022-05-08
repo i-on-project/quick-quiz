@@ -76,4 +76,9 @@ class RegisteredController(
     fun addQuizToSession(@PathVariable id: String, @RequestBody input: EditSessionQuizzesInputModel) {
         service.addQuizToSession(scope.getUser().userName, id, input)
     }
+
+    @GetMapping("user")
+    fun getUser() : ResponseEntity<Any> {
+        return ResponseEntity.ok().body(scope.getUser())
+    }
 }

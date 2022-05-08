@@ -72,8 +72,9 @@ class SessionService(
         sessionRepo.deleteById(id)
     }
 
-    fun getAllSessions(user: String, id: String): List<SessionDoc> {
-        return sessionRepo.findSessionDocsByOwner(user)
+    fun getAllSessions(): List<SessionDoc> {
+        val t = sessionRepo.findAll().toList()
+        return t
     }
 
 

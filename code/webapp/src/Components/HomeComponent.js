@@ -1,11 +1,16 @@
 import {Card, Container, FormControl, InputGroup, Row} from "react-bootstrap";
-import React, { useState} from 'react'
+import React, {useEffect, useState, useContext} from 'react'
 import Button from "react-bootstrap/Button";
 import {goFetch} from "../Services/FetchService";
 import {InSession} from "./InSessionComponent";
 
+import {UserContext} from "./UserContextProvider";
+
 
 export const HomeComponent = () => {
+
+    const userContext = useContext(UserContext)
+
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
 
@@ -15,10 +20,16 @@ export const HomeComponent = () => {
         setSession(event.target.value);
     };
 
+    useEffect(() => {
+        console.log('How is context?')
+        console.log(userContext.userName)
+        console.log(userContext.displayName)
+    }, [])
+
     function joinSessionAction () {
         const postData = {sessionCode: session}
         goFetch(`/api/web/v1.0/non_auth/join_session`, postData, setData, setError)
-    };
+    }
 
     return (
         <div>

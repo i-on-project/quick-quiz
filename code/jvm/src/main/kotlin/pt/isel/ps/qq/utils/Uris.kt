@@ -47,6 +47,12 @@ object Uris {
                         const val PATH = "${NonAuth.PATH}$ENDPOINT"
                         fun make() = PATH
                     }
+                    /*TODO: TESTING ONLY*/
+                    object GetAllSession {
+                        const val ENDPOINT = "/testgetallsessions"
+                        const val PATH = "${NonAuth.PATH}$ENDPOINT"
+                        fun make() = PATH
+                    }
 
                     object GiveAnswer {
                         const val ENDPOINT = "/give_answer"

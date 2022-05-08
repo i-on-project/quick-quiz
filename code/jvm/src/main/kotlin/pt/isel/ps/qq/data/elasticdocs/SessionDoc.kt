@@ -3,6 +3,7 @@ package pt.isel.ps.qq.data.elasticdocs
 import org.springframework.data.annotation.Id
 import org.springframework.data.elasticsearch.annotations.Document
 
+
 @Document(indexName = "sessions")
 data class SessionDoc(
     @Id
@@ -20,6 +21,7 @@ data class SessionDoc(
     var numberOfParticipants: Int = 0
 
 ) {
+
     constructor(session: SessionDoc, status: QqStatus): this(
         id = session.id,
         name = session.name,
