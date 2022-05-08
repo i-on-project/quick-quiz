@@ -16,14 +16,14 @@ data class ProblemJson(
         type = ex.type, title = ex.title, status = ex.status, detail = ex.detail, instance = ex.instance.toString()
     )
 
-    constructor(ex: DataAccessResourceFailureException, instance: String): this(
+    /*constructor(ex: DataAccessResourceFailureException, instance: String): this(
         type = "DataAccessResourceFailureException",
         title = "One of the services is currently unavailable.",
         status = 502,
         detail = "Please try again later, if the issue remains contact our support team",
         instance = instance,
         values = mapOf("message" to ex.message)
-    )
+    )*/
 
     override fun toString(): String {
         val str = StringBuilder("{\"type\":\"${this.type}\",\"title\":\"${this.title}\",\"status\":${this.status},\"instance\":\"${this.instance}\"")

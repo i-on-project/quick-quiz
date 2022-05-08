@@ -29,19 +29,19 @@ object Uris {
                     object Register {
                         const val ENDPOINT = "/register"
                         const val PATH = "${NonAuth.PATH}$ENDPOINT"
-                        fun make(): URI = URI.create(API.PATH)
+                        fun make(): URI = URI.create(PATH)
                     }
 
                     object Login {
                         const val ENDPOINT = "/login"
                         const val PATH = "${NonAuth.PATH}$ENDPOINT"
-                        fun make(): URI = URI.create(API.PATH)
+                        fun make(): URI = URI.create(PATH)
                     }
 
                     object Logmein {
                         const val ENDPOINT = "/logmein"
                         const val PATH = "${NonAuth.PATH}$ENDPOINT"
-                        fun make(): URI = URI.create(API.PATH)
+                        fun make(): URI = URI.create(PATH)
                         fun url(host: String) = "${host}${PATH}"
                     }
 
@@ -59,6 +59,13 @@ object Uris {
                 object Auth {
                     const val ENDPOINT = "/auth"
                     const val PATH = "${V1_0.PATH}$ENDPOINT"
+
+                    object Logout {
+                        const val ENDPOINT = "/logout"
+                        const val PATH = "${Auth.PATH}$ENDPOINT"
+                        fun make(): URI = URI.create(PATH)
+                        fun url(host: String) = "${host}${PATH}"
+                    }
 
                     object Session {
                         const val ENDPOINT = "/session"
@@ -128,6 +135,12 @@ object Uris {
                             fun make(id: String): URI = TEMPLATE.expand(mapOf("id" to id))
                             fun url(host: String, id: String) = "${host}${make(id)}"
                         }
+                    }
+
+                    object History {
+                        const val ENDPOINT = "/history"
+                        const val PATH = "${Auth.PATH}$ENDPOINT"
+                        fun url(host: String) = "${host}${PATH}"
                     }
                 }
             }
