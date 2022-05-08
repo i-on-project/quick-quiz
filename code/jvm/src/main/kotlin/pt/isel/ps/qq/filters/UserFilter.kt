@@ -6,10 +6,10 @@ import org.springframework.core.annotation.Order
 import org.springframework.dao.DataAccessResourceFailureException
 import pt.isel.ps.qq.UserInfoScope
 import pt.isel.ps.qq.data.ProblemJson
-import pt.isel.ps.qq.exceptions.ErrorInstance
-import pt.isel.ps.qq.exceptions.IllegalAuthenticationException
+import pt.isel.ps.qq.exceptions.InvalidCredentialsException
+import pt.isel.ps.qq.exceptions.MissingCookieException
 import pt.isel.ps.qq.repositories.UserElasticRepository
-import java.net.URI
+import java.util.*
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpFilter
 import javax.servlet.http.HttpServletRequest
@@ -20,40 +20,64 @@ class UserFilter(
     private val userRepo: UserElasticRepository, private val scope: UserInfoScope
 ): HttpFilter() {
 
-    companion object {
-        val logger: Logger = LoggerFactory.getLogger(UserFilter::class.java)
-    }
-
     override fun doFilter(request: HttpServletRequest, response: HttpServletResponse, chain: FilterChain) {
-        logger.info("Filtering User...")
-        val header: String? = request.getHeader("Authorization")
         try {
-            val exception = IllegalAuthenticationException(
-                reasonForUser = "Your credentials are invalid or expired.",
-                moreDetails = "Your credentials are invalid or expired, please try to login again",
-                whereDidTheErrorOccurred = ErrorInstance(method = URI.create(request.requestURI), instance = header ?: "null")
-            )
-            if(request.cookies == null) throw exception
-            val cookie = request.cookies.find { it.name == "Authorization" } ?: throw exception
-            logger.info(cookie.value)
 
-            if(!validateAuthorization(String(Base64.getDecoder().decode(cookie.value)))) {
-                throw throw exception
+            if(request.cookies == null) throw MissingCookieException()
+            val cookie = request.cookies.find { it.name == "Authorization" } ?: throw MissingCookieException()
+            val bytes = Base64.getDecoder().decode(cookie.value)
+            val auth = String(bytes)
+            if(!validateAuthorization(auth)) {
+                throw InvalidCredentialsException(auth, )
             }
-        } catch(ex: IllegalAuthenticationException) {
-            val problem = ProblemJson(ex = ex)
+        } catch(ex: MissingCookieException) {
+            val problem = ProblemJson(
+                type = "MissingCookieException",
+                title = "You are not logged in",
+                status = 403,
+                instance = request.requestURI,
+                values = mapOf("message" to ex.message)
+            )
+            response.status = problem.status
+            response.contentType = ProblemJson.MEDIA_TYPE.toString()
+            response.writer?.write(problem.toString())
+            return
+        } catch(ex: InvalidCredentialsException) {
+            val problem = ProblemJson(
+                type = "InvalidCredentialsException",
+                title = "Your credentials are invalid",
+                status = 403,
+                instance = request.requestURI,
+                values = mapOf("credentials" to ex.credentials, "message" to ex.message)
+            )
             response.status = problem.status
             response.contentType = ProblemJson.MEDIA_TYPE.toString()
             response.writer?.write(problem.toString())
             return
         } catch(ex: DataAccessResourceFailureException) {
-            val problem = ProblemJson(ex = ex, instance = "${request.requestURI}@${header}")
+            val problem = ProblemJson(
+                type = "DataAccessResourceFailureException",
+                title = "One of the services is currently unavailable",
+                status = 502,
+                instance = request.requestURI,
+                values = mapOf("message" to ex.message)
+            )
             response.status = problem.status
             response.contentType = ProblemJson.MEDIA_TYPE.toString()
             response.writer?.write(problem.toString())
             return
+        } catch(ex: Exception) {
+            val problem = ProblemJson(
+                type = "Exception",
+                title = "Unknown error",
+                status = 500,
+                instance = request.requestURI,
+                values = mapOf("message" to ex.message)
+            )
+            response.status = problem.status
+            response.contentType = ProblemJson.MEDIA_TYPE.toString()
+            response.writer?.write(problem.toString())
         }
-        logger.info("Filtering User Succeeded")
         chain.doFilter(request, response)
     }
 

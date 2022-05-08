@@ -37,14 +37,16 @@ class AuthenticationService(
         if(!registeredUser.isEmpty) {
 
             /*
-            If user exists but the login token has already expired without a single login,
+            If user exists but the registration token has already expired without a single login,
             it is permitted to register again
              */
 
             val user = registeredUser.get()
-            if(user.status!! == UserStatus.PENDING_REGISTRATION && getCurrentTimeSeconds() > user.tokenExpireDate) {
-                val newUser = UserDoc(user, UUID.randomUUID().toString(), getRegistrationTimeout())
-                userRepo.save(newUser)
+            if(user.status == UserStatus.PENDING_REGISTRATION && user.registrationExpireDate != null) {
+                if(getCurrentTimeSeconds() < user.registrationExpireDate){
+                    // send email
+                    return user
+                }
             } else {
                 throw UserAlreadyExistsException("This email is already registered")
             }
@@ -54,10 +56,12 @@ class AuthenticationService(
         val user = UserDoc(
             userName = input.userName,
             displayName = input.displayName,
-            loginToken = uid.toString(),
-            tokenExpireDate = getRegistrationTimeout(),
-            status = UserStatus.PENDING_REGISTRATION
+            status = UserStatus.PENDING_REGISTRATION,
+            registrationToken = uid.toString(),
+            registrationExpireDate = getRegistrationTimeout()
         )
+
+        //send email
         return userRepo.save(user)
     }
 
@@ -81,54 +85,71 @@ class AuthenticationService(
     }
 
     fun requestLogin(userName: LoginInputModel): UserDoc {
-        val opt = userRepo.findById(userName.userName)
-        if(opt.isEmpty) throw UserNotFoundException()
-        val user = opt.get()
+        val user = getUser(userName.userName)
 
-        validateUserStatusIsNotPending(user, Uris.API.Web.V1_0.NonAuth.Login.make())
-        validateUserStatusIsNotDisabled(user, Uris.API.Web.V1_0.NonAuth.Login.make())
+        validateUserStatusIsNotPending(user)
+        validateUserStatusIsNotDisabled(user)
 
         val uid = UUID.randomUUID()
-        val updatedUser = UserDoc(user, uid.toString(), getTokenTimeout())
+        val updatedUser = UserDoc.userRequest(user, uid.toString(), getTokenTimeout())
         return userRepo.save(updatedUser)
     }
 
     fun logmein(input: LoginMeInputModel): UserDoc {
-        val opt = userRepo.findById(input.userName)
-        if(opt.isEmpty) throw UserNotFoundException()
-        val user = opt.get()
+        val user = getUser(input.userName)
+        validateUserStatusIsNotDisabled(user)
 
-        validateUserRegistrationInfo(user)
-        validateUserStatusIsNotDisabled(user, Uris.API.Web.V1_0.NonAuth.Logmein.make())
-        validateLoginToken(user, input.loginToken)
+        if(user.status == UserStatus.PENDING_REGISTRATION) {
+            // First Time login
+            if(user.registrationExpireDate == null || getCurrentTimeSeconds() > user.registrationExpireDate) {
+                userRepo.deleteById(user.userName)
+                throw TokenExpiredException()
+            }
+            validExpireDate(user.registrationExpireDate)
+            validateToken(user.registrationToken, input.loginToken)
 
-        val otherUid = UUID.randomUUID().toString()
-        val timeout = getTokenTimeout()
-        val updatedUser = UserDoc(input.userName, user.displayName, otherUid, timeout, UserStatus.ENABLED)
+            val enabledUser = UserDoc(
+                userName = user.userName,
+                displayName = user.displayName,
+                status = UserStatus.ENABLED,
+                loginToken = UUID.randomUUID().toString(),
+                loginExpireDate = getTokenTimeout()
+            )
+            return userRepo.save(enabledUser)
+        }
+
+        validateToken(user.requestToken, input.loginToken)
+        validExpireDate(user.requestExpireDate)
+        val updatedUser = UserDoc.userLogin(user, UUID.randomUUID().toString(), getTokenTimeout())
         return userRepo.save(updatedUser)
     }
 
-    private fun validateLoginToken(user: UserDoc, inputToken: String) {
-        if(user.loginToken != inputToken) throw InvalidTokenException()
-        if(getCurrentTimeSeconds() > user.tokenExpireDate) throw TokenExpiredException()
+    fun logout(user: String) {
+        val doc = getUser(user)
+        validateUserStatusIsNotDisabled(doc)
+        validateUserStatusIsNotPending(doc)
+        userRepo.save(UserDoc(doc.userName, doc.displayName, doc.status))
     }
 
-    private fun validateUserRegistrationInfo(user: UserDoc) {
-        if(user.status == UserStatus.PENDING_REGISTRATION && !validTokenTimeOut(user.tokenExpireDate)) {
-            userRepo.delete(user)
-            throw TokenExpiredException()
-        }
+    private fun getUser(user: String): UserDoc {
+        val opt = userRepo.findById(user)
+        if(opt.isEmpty) throw UserNotFoundException()
+        return opt.get()
     }
 
-    private fun validTokenTimeOut(tokenExpireDate: Long?): Boolean {
-        return !(tokenExpireDate == null || getCurrentTimeSeconds() > tokenExpireDate)
+    private fun validateToken(userToken: String?, inputToken: String) {
+        if(userToken == null || userToken != inputToken) throw InvalidTokenException()
     }
 
-    private fun validateUserStatusIsNotDisabled(user: UserDoc, method: URI) {
+    private fun validExpireDate(date: Long?): Boolean {
+        return !(date == null || getCurrentTimeSeconds() > date)
+    }
+
+    private fun validateUserStatusIsNotDisabled(user: UserDoc) {
         if(user.status == UserStatus.DISABLED) throw UserDisabledException("Your email was disabled")
     }
 
-    private fun validateUserStatusIsNotPending(user: UserDoc, method: URI) {
+    private fun validateUserStatusIsNotPending(user: UserDoc) {
         if(user.status == UserStatus.PENDING_REGISTRATION) throw PendingValidationException("Your email is pending")
     }
 

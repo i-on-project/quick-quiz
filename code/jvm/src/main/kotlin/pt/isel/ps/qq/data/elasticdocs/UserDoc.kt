@@ -11,21 +11,37 @@ enum class UserStatus {
 data class UserDoc(
     @Id
     val userName: String,
-    val displayName: String? = null,
-    val loginToken: String,
-    val tokenExpireDate: Long,
-    val status: UserStatus? = null,
-    val templates: List<String> = emptyList(),
-    val sessionHistory: List<String> = emptyList()
+    val displayName: String,
+    val status: UserStatus,
+    val registrationToken: String? = null,
+    val registrationExpireDate: Long? = null,
+    val requestToken: String? = null,
+    val requestExpireDate: Long? = null,
+    val loginToken: String? = null,
+    val loginExpireDate: Long? = null,
 ) {
-    constructor(user: UserDoc, newToken: String, newExpiredDate: Long): this(
-        userName = user.userName,
-        displayName = user.displayName,
-        loginToken = newToken,
-        tokenExpireDate = newExpiredDate,
-        status = user.status,
-        templates = user.templates,
-        sessionHistory = user.sessionHistory
-    )
+    companion object {
+        fun userRegister(user: UserDoc, token: String, date: Long) = UserDoc(
+            userName = user.userName,
+            displayName = user.displayName,
+            status = user.status,
+            registrationToken = token,
+            registrationExpireDate = date
+        )
+        fun userRequest(user: UserDoc, token: String, date: Long) = UserDoc(
+            userName = user.userName,
+            displayName = user.displayName,
+            status = user.status,
+            requestToken = token,
+            requestExpireDate = date
+        )
+        fun userLogin(user: UserDoc, token: String, date: Long) = UserDoc(
+            userName = user.userName,
+            displayName = user.displayName,
+            status = user.status,
+            loginToken = token,
+            loginExpireDate = date
+        )
+    }
 }
 

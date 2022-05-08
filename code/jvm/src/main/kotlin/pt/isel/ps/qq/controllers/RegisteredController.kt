@@ -1,14 +1,17 @@
 package pt.isel.ps.qq.controllers
 
+import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import pt.isel.ps.qq.UserInfoScope
 import pt.isel.ps.qq.data.*
 import pt.isel.ps.qq.data.elasticdocs.QqStatus
 import pt.isel.ps.qq.exceptions.*
+import pt.isel.ps.qq.service.AuthenticationService
 import pt.isel.ps.qq.service.DataService
 import pt.isel.ps.qq.utils.Uris
 import pt.isel.ps.qq.utils.getBaseUrlHostFromRequest
+import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 
 /**
@@ -20,8 +23,30 @@ import javax.servlet.http.HttpServletRequest
 @RestController
 @RequestMapping(Uris.API.Web.V1_0.Auth.PATH)
 class RegisteredController(
-    private val service: DataService, private val scope: UserInfoScope
+    private val service: DataService,
+    private val authService: AuthenticationService,
+    private val scope: UserInfoScope
 ) {
+
+    private fun expireCookie(cookie: Cookie): String {
+        val builder = StringBuilder("${cookie.name}=${cookie.value};")
+        builder.append("Expires=Thu, 01 Jan 1970 00:00:01 GMT;")
+        builder.append("Max-Age=-99999999")
+        builder.append("Path=${cookie.path};")
+        builder.append("Domain=${cookie.domain};")
+        if(cookie.secure) builder.append("Secure;")
+        if(cookie.isHttpOnly) builder.append("HttpOnly;")
+        return builder.toString()
+    }
+
+    @PostMapping(Uris.API.Web.V1_0.Auth.Logout.ENDPOINT)
+    fun logout(request: HttpServletRequest): ResponseEntity<Any> {
+        val cookie = request.cookies.find { it.name == "Authorization" }!!
+        val headers = HttpHeaders()
+        authService.logout(scope.getUser().userName)
+        headers.add("Set-Cookie", expireCookie(cookie))
+        return ResponseEntity.ok().build()
+    }
 
     private fun exceptionHandling(type: String, title: String, status: Int, instance: String, values: Map<String, Any?> = emptyMap(), detail: String? = null): ResponseEntity<Any> {
         val problem = ProblemJson(type = type, title = title, status = status, instance = instance, values = values, detail = detail)
@@ -343,10 +368,10 @@ class RegisteredController(
     @PostMapping(Uris.API.Web.V1_0.Auth.Session.Id.Live.CONTROLLER_ENDPOINT)
     fun startSession(request: HttpServletRequest, @PathVariable id: String): ResponseEntity<Any> {
         return try {
-            val doc = service.makeSessionLive(scope.getUser().userName, id)
+            val code = service.makeSessionLive(scope.getUser().userName, id)
             val body = SirenModel(
                 clazz = listOf("LiveSession"),
-                properties = LiveSession(doc.guestCode!!.toString().padStart(9, '0')),
+                properties = LiveSession(code.toString().padStart(9, '0')),
                 title = "Session went live successfully."
             )
             ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
@@ -449,7 +474,7 @@ class RegisteredController(
      * Handler to remove a quiz from the session. The quiz is only removed if the session have status NOT_STARTED
      * @param request injected HTTP request
      * @param id id that references the quiz
-     * @return a ResponseEntity with status code 201, header location and body with a siren response
+     * @return a ResponseEntity with status code 200 and body with a siren response
      *
      * Siren class = RemoveQuizFromSession
      * Siren properties = acknowledge
@@ -473,13 +498,56 @@ class RegisteredController(
         }
     }
 
+    /**
+     * PUT /api/web/v1.0/auth/quiz/{id}
+     *
+     * Handler to edit a quiz from the session. The quiz is only edited if the session have status NOT_STARTED
+     * @param request injected HTTP request
+     * @param id id that references the quiz
+     * @return a ResponseEntity with status code 200 and body with a siren response
+     *
+     * Siren class = TODO
+     */
     @PutMapping(Uris.API.Web.V1_0.Auth.Quiz.Id.CONTROLLER_ENDPOINT)
-    fun editQuiz(@PathVariable id: String, @RequestBody input: EditQuizInputModel) {
-        service.editQuiz(scope.getUser().userName, id, input)
+    fun editQuiz(request: HttpServletRequest, @PathVariable id: String, @RequestBody input: EditQuizInputModel): ResponseEntity<Any> {
+        return try {
+            service.editQuiz(scope.getUser().userName, id, input)
+            val body = SirenModel(clazz = listOf("TODO"))
+            ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
+        } catch(ex: SessionNotFoundException) {
+            exceptionHandle(request, id, ex)
+        } catch(ex: SessionAuthorizationException) {
+            exceptionHandle(request, id, ex)
+        } catch(ex: SessionIllegalStatusOperationException) {
+            exceptionHandle(request, id, ex)
+        } catch(ex: QuizNotFoundException) {
+            exceptionHandle(request, id, ex)
+        } catch(ex: QuizAuthorizationException) {
+            exceptionHandle(request, id, ex)
+        } catch(ex: AtLeast2Choices) {
+            exceptionHandle(request, id, ex)
+        } catch(ex: AtLeast1CorrectChoice) {
+            exceptionHandle(request, id, ex)
+        }
     }
 
-    @GetMapping("user")
-    fun getUser() : ResponseEntity<Any> {
-        return ResponseEntity.ok().body(scope.getUser())
+    @GetMapping(Uris.API.Web.V1_0.Auth.Quiz.Id.CONTROLLER_ENDPOINT)
+    fun getQuizFullInformation(request: HttpServletRequest, @PathVariable id: String): ResponseEntity<Any> {
+        val quiz = service.getQuizValidatingOwner(scope.getUser().userName, id)
+        val body = SirenModel(
+            clazz = listOf("Quiz"),
+            properties = quiz
+        )
+        return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
+    }
+
+    @GetMapping(Uris.API.Web.V1_0.Auth.History.ENDPOINT)
+    fun getHistory(request: HttpServletRequest, @RequestParam page: Int?): ResponseEntity<Any> {
+        val idx = page ?: 0
+        val history = service.getHistory(scope.getUser().userName, idx)
+        val body = SirenModel(
+            clazz = listOf("History")
+        )
+        return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }
 }

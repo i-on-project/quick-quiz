@@ -5,8 +5,9 @@ import org.springframework.data.elasticsearch.annotations.Document
 import org.springframework.data.elasticsearch.annotations.Field
 import org.springframework.data.elasticsearch.annotations.FieldType
 import pt.isel.ps.qq.data.EditSessionInputModel
+import pt.isel.ps.qq.data.SessionInputModel
 import pt.isel.ps.qq.utils.getCurrentTimeSeconds
-
+import java.util.UUID
 
 @Document(indexName = "sessions")
 data class SessionDoc(
@@ -17,7 +18,7 @@ data class SessionDoc(
     val creationDate: Long = getCurrentTimeSeconds(),
     val owner: String,
     val guestCode: Int? = null,
-    val limitOfParticipants: Int = 0,
+    val limitOfParticipants: Int = 10,
     val geolocation: String? = null,
     val radius: Double? = null,
     val radiusUnit: String? = null,
@@ -42,6 +43,18 @@ data class SessionDoc(
         quizzes = session.quizzes,
         status = session.status,
         numberOfParticipants = session.numberOfParticipants
+    )
+
+    constructor(template: TemplateDoc, id: String, input: SessionInputModel, quizzes: List<String>): this(
+        id = id,
+        name = input.name,
+        description = input.description,
+        creationDate = getCurrentTimeSeconds(),
+        owner = template.owner,
+        limitOfParticipants = input.limitOfParticipants ?: template.limitOfParticipants ?: 10,
+        geolocation = input.geolocation ?: template.geolocation,
+        quizzes = quizzes,
+        status = QqStatus.NOT_STARTED,
     )
 }
 
