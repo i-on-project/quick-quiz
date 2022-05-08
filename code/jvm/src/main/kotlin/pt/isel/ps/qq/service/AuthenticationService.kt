@@ -10,6 +10,7 @@ import pt.isel.ps.qq.exceptions.*
 import pt.isel.ps.qq.repositories.UserElasticRepository
 import pt.isel.ps.qq.utils.Uris
 import pt.isel.ps.qq.utils.getCurrentTimeSeconds
+import java.net.URI
 import java.util.*
 import javax.mail.*
 import javax.mail.internet.InternetAddress
@@ -45,14 +46,7 @@ class AuthenticationService(
                 val newUser = UserDoc(user, UUID.randomUUID().toString(), getRegistrationTimeout())
                 userRepo.save(newUser)
             } else {
-                throw AlreadyExistsException(
-                    alreadyExistsWhat = "User",
-                    reasonForUser = "This email is already registered.",
-                    moreDetails = "Please try to login",
-                    whereDidTheErrorOccurred = ErrorInstance(
-                        Uris.API.Web.V1_0.NonAuth.Register.make(), input.userName
-                    )
-                )
+                throw UserAlreadyExistsException("This email is already registered")
             }
         }
         val uid = UUID.randomUUID()
@@ -88,7 +82,7 @@ class AuthenticationService(
 
     fun requestLogin(userName: LoginInputModel): UserDoc {
         val opt = userRepo.findById(userName.userName)
-        if(opt.isEmpty) throw getUserNotFoundException(userName.userName, Uris.API.Web.V1_0.NonAuth.Login.make())
+        if(opt.isEmpty) throw UserNotFoundException()
         val user = opt.get()
 
         validateUserStatusIsNotPending(user, Uris.API.Web.V1_0.NonAuth.Login.make())
@@ -101,7 +95,7 @@ class AuthenticationService(
 
     fun logmein(input: LoginMeInputModel): UserDoc {
         val opt = userRepo.findById(input.userName)
-        if(opt.isEmpty) throw getUserNotFoundException(input.userName, Uris.API.Web.V1_0.NonAuth.Logmein.make())
+        if(opt.isEmpty) throw UserNotFoundException()
         val user = opt.get()
 
         validateUserRegistrationInfo(user)
@@ -115,55 +109,28 @@ class AuthenticationService(
     }
 
     private fun validateLoginToken(user: UserDoc, inputToken: String) {
-        if(user.loginToken != inputToken) throw InvalidTokenException(
-            reasonForUser = "Your login token is invalid.",
-            moreDetails = "Please check if your login token is valid.",
-            whereDidTheErrorOccurred = ErrorInstance(Uris.API.Web.V1_0.NonAuth.Logmein.make(), user.userName)
-        )
-        if(getCurrentTimeSeconds() > user.tokenExpireDate) throw InvalidTokenException(
-            reasonForUser = "Your login token expired.",
-            moreDetails = "Please request a new token.",
-            whereDidTheErrorOccurred = ErrorInstance(Uris.API.Web.V1_0.NonAuth.Logmein.make(), user.userName)
-        )
+        if(user.loginToken != inputToken) throw InvalidTokenException()
+        if(getCurrentTimeSeconds() > user.tokenExpireDate) throw TokenExpiredException()
     }
 
     private fun validateUserRegistrationInfo(user: UserDoc) {
         if(user.status == UserStatus.PENDING_REGISTRATION && !validTokenTimeOut(user.tokenExpireDate)) {
             userRepo.delete(user)
-            throw InvalidTokenException(
-                reasonForUser = "Your registration token is expired.",
-                moreDetails = "Please register again to get a new registration token.",
-                whereDidTheErrorOccurred = ErrorInstance(Uris.API.Web.V1_0.NonAuth.Logmein.make(), user.userName)
-            )
+            throw TokenExpiredException()
         }
     }
 
-    private fun validTokenTimeOut(tokenExpireDate: Long?): Boolean =
-        !(tokenExpireDate == null || getCurrentTimeSeconds() > tokenExpireDate);
-
-    private fun validateUserStatusIsNotDisabled(user: UserDoc, method: String) {
-        if(user.status == UserStatus.DISABLED) throw IllegalAuthenticationException(
-            reasonForUser = "Your email was disabled.",
-            moreDetails = "Contact support for more details.",
-            whereDidTheErrorOccurred = ErrorInstance(method, user.userName)
-        )
+    private fun validTokenTimeOut(tokenExpireDate: Long?): Boolean {
+        return !(tokenExpireDate == null || getCurrentTimeSeconds() > tokenExpireDate)
     }
 
-    private fun validateUserStatusIsNotPending(user: UserDoc, method: String) {
-        if(user.status == UserStatus.PENDING_REGISTRATION) throw IllegalAuthenticationException(
-            reasonForUser = "Your email is pending",
-            moreDetails = "Please check your email for logging in to the app.",
-            whereDidTheErrorOccurred = ErrorInstance(method, user.userName)
-        )
+    private fun validateUserStatusIsNotDisabled(user: UserDoc, method: URI) {
+        if(user.status == UserStatus.DISABLED) throw UserDisabledException("Your email was disabled")
     }
 
-    private fun getUserNotFoundException(username: String, method: String) = NotFoundException(
-        notFoundWhat = "User",
-        reasonForUser = "Your user was not found.",
-        moreDetails = "Please check your email for a link to login on the application. If the email is not found try register your email",
-        whereDidTheErrorOccurred = ErrorInstance(method, username)
-    )
-
+    private fun validateUserStatusIsNotPending(user: UserDoc, method: URI) {
+        if(user.status == UserStatus.PENDING_REGISTRATION) throw PendingValidationException("Your email is pending")
+    }
 
     private fun getTokenTimeout(): Long = getCurrentTimeSeconds() + TOKEN_TIMEOUT
     private fun getRegistrationTimeout(): Long = getCurrentTimeSeconds() + REGISTRATION_TOKEN_TIMEOUT

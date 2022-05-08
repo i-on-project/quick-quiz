@@ -5,4 +5,6 @@ import pt.isel.ps.qq.data.elasticdocs.QuizDoc
 import org.springframework.stereotype.Repository
 
 @Repository
-interface QuizElasticRepository: ElasticsearchRepository<QuizDoc, String>
+interface QuizElasticRepository: ElasticsearchRepository<QuizDoc, String> {
+    fun findQuizDocsBySessionId(sessionId: String): List<QuizDoc>
+}
