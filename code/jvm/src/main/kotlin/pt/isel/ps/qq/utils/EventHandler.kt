@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 import pt.isel.ps.qq.WebSocketConfiguration.Companion.MESSAGE_PREFIX
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler
 import org.springframework.hateoas.server.EntityLinks
-import pt.isel.ps.qq.data.elasticdocs.Quiz
+import pt.isel.ps.qq.data.elasticdocs.QuizDoc
 import pt.isel.ps.qq.data.elasticdocs.SessionDoc
 
 @Component
@@ -17,20 +17,20 @@ import pt.isel.ps.qq.data.elasticdocs.SessionDoc
 class EventHandler (private val websocket: SimpMessagingTemplate, private val entityLinks: EntityLinks) {
 
     @HandleAfterCreate
-    fun newQuiz(quiz: Quiz) {
-        websocket.convertAndSend( MESSAGE_PREFIX + "/newEmployee", getPath(quiz)
+    fun newQuiz(quiz: QuizDoc) {
+        websocket.convertAndSend( MESSAGE_PREFIX + "/newQuiz", getPath(quiz)
         )
     }
 
     @HandleAfterDelete
-    fun deleteEmployee(quiz: Quiz) {
-        websocket.convertAndSend( MESSAGE_PREFIX + "/deleteEmployee", getPath(quiz)
+    fun deleteEmployee(quiz: QuizDoc) {
+        websocket.convertAndSend( MESSAGE_PREFIX + "/deleteQuiz", getPath(quiz)
         )
     }
 
     @HandleAfterSave
-    fun updatQuiz(quiz: Quiz) {
-        websocket.convertAndSend( MESSAGE_PREFIX + "/updateEmployee", getPath(quiz)
+    fun updatQuiz(quiz: QuizDoc) {
+        websocket.convertAndSend( MESSAGE_PREFIX + "/updateQuiz", getPath(quiz)
         )
     }
 
@@ -39,7 +39,7 @@ class EventHandler (private val websocket: SimpMessagingTemplate, private val en
      *
      * @param employee
      */
-    private fun getPath(quiz: Quiz): String {
+    private fun getPath(quiz: QuizDoc): String {
         return entityLinks.linkForItemResource(
             quiz.javaClass,
             quiz.id

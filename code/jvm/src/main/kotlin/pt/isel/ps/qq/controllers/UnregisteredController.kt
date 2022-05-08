@@ -41,7 +41,11 @@ class UnregisteredController(
         val user = authenticationService.register(input)
         val body = SirenModel(
             clazz = listOf("Register"),
-            properties = RequestLoginOutputModel(username = user.userName, token = user.registrationToken!!, timeout = user.registrationExpireDate!!),
+            properties = RequestLoginOutputModel(
+                username = user.userName,
+                token = user.registrationToken!!,
+                timeout = user.registrationExpireDate!!
+            ),
             actions = listOf(
                 SirenAction(
                     name = "Logmein",
@@ -57,7 +61,8 @@ class UnregisteredController(
                             value = user.loginToken
                         )
                     )
-            )),
+                )
+            ),
             title = "Check your email"
         )
         return ResponseEntity.ok().body(body)
@@ -68,7 +73,11 @@ class UnregisteredController(
         val user = authenticationService.requestLogin(userName)
         val body = SirenModel(
             clazz = listOf("RequestLogin"),
-            properties = RequestLoginOutputModel(username = user.userName, token = user.requestToken!!, timeout = user.requestExpireDate!!),
+            properties = RequestLoginOutputModel(
+                username = user.userName,
+                token = user.requestToken,
+                timeout = user.requestExpireDate
+            ),
             actions = listOf(
                 SirenAction(
                     name = "Logmein",
@@ -84,7 +93,8 @@ class UnregisteredController(
                             value = user.loginToken
                         )
                     )
-            )),
+                )
+            ),
             title = "Check your email"
         )
         return ResponseEntity.ok().body(user)
@@ -97,11 +107,20 @@ class UnregisteredController(
         val base64 = Base64.getEncoder().encodeToString(str.toByteArray())
 
         val headers = HttpHeaders()
-        headers.add("Set-Cookie", "Authorization=$base64; Max-Age=${Duration.ofDays(7).toSeconds()}; Path=/; Secure; HttpOnly; SameSite=Strict")
+        headers.add(
+            "Set-Cookie",
+            "Authorization=$base64; Max-Age=${
+                Duration.ofDays(7).toSeconds()
+            }; Path=/; Secure; HttpOnly; SameSite=Strict"
+        )
 
         val body = SirenModel(
             clazz = listOf("Login"),
-            properties = Acknowledge.TRUE,
+            //properties = Acknowledge.TRUE,
+            properties = RequestLoginOutputModel(
+                username = doc.userName,
+                displayName = doc.displayName,
+            ),
             title = "Welcome ${doc.userName}"
         )
 

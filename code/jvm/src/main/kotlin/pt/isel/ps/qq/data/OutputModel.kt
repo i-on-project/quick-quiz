@@ -2,6 +2,7 @@ package pt.isel.ps.qq.data
 
 import pt.isel.ps.qq.data.elasticdocs.QqStatus
 import pt.isel.ps.qq.data.elasticdocs.SessionDoc
+import java.awt.DisplayMode
 
 data class SessionSummaryOutputModel(
     val name: String,
@@ -35,8 +36,9 @@ data class SessionOutputModel(
 
 data class RequestLoginOutputModel(
     val username: String,
-    val token: String,
-    val timeout: Long
+    val displayName: String? = null,
+    val token: String? = null,
+    val timeout: Long? = null
 )
 
 data class Acknowledge(

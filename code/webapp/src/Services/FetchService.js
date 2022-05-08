@@ -16,12 +16,12 @@ export const goFetch = (address, submitData, setData, setError) => {
             return response.json();
         })
         .then((actualData) => {
-            setData(actualData)
-            setError(null)
+            setData?.(actualData)
+            setError?.(null)
         })
         .catch((err) => {
-            setError(err.message)
-            setData(null)
+           setError?.(err.message)
+            setData?.(null)
         })
         .finally(() => {
             // setLoading(false);
