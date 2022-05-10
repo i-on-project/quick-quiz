@@ -1,7 +1,7 @@
 import {Card, Container, FormControl, InputGroup, Row} from "react-bootstrap";
 import React, {useEffect, useState, useContext} from 'react'
 import Button from "react-bootstrap/Button";
-import {goFetch} from "../Services/FetchService";
+import {goPOST} from "../Services/FetchService";
 import {InSession} from "./InSessionComponent";
 
 import {UserContext} from "./UserContextProvider";
@@ -28,7 +28,7 @@ export const HomeComponent = () => {
 
     function joinSessionAction () {
         const postData = {sessionCode: session}
-        goFetch(`/api/web/v1.0/non_auth/join_session`, postData, setData, setError)
+        goPOST(`/api/web/v1.0/non_auth/join_session`, postData, setData, setError)
     }
 
     return (

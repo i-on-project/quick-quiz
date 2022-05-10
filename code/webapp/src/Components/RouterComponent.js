@@ -1,4 +1,4 @@
-import {NavbarComponentAuth} from "./NavBarComponentAuth";
+import {NavBarComponent} from "./NavBarComponent";
 import {NavbarComponentNotAuth} from "./NavbarComponentNotAuth";
 import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 import {HomeComponent} from "./HomeComponent";
@@ -13,7 +13,7 @@ export const MasterComponent = () => {
         <div>
             <Router>
                 <div>
-                    {user !== null? <NavbarComponentAuth/> : <NavbarComponentNotAuth/>}
+                    <NavBarComponent/>
                     <Routes>
                         <Route path="/" element={<HomeComponent/>}/>
                         <Route path="/register" element={<RegisterUser/>}/>

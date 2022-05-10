@@ -24,7 +24,7 @@ class UserFilter(
         try {
 
             if(request.cookies == null) throw MissingCookieException()
-            val cookie = request.cookies.find { it.name == "Authorization" } ?: throw MissingCookieException()
+            val cookie = request.cookies.find { it.name == "Authorization" } ?: throw MissingCookieException() //TODO: 401 required
             val bytes = Base64.getDecoder().decode(cookie.value)
             val auth = String(bytes)
             if(!validateAuthorization(auth)) {
@@ -77,6 +77,7 @@ class UserFilter(
             response.status = problem.status
             response.contentType = ProblemJson.MEDIA_TYPE.toString()
             response.writer?.write(problem.toString())
+            return
         }
         chain.doFilter(request, response)
     }

@@ -27,7 +27,7 @@ export const authService = () => {
 const isLoggedInHandler = () => {
     let data = null
     let error = null
-    goFetchNoHook("/api/web/v1.0/auth/user",null, data, error)
+    goFetchNoHook("/api/web/v1.0/auth/user/checkuser",null, data, error)
     return data
 }
 

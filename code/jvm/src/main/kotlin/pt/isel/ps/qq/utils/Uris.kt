@@ -68,7 +68,7 @@ object Uris {
                     }
 
                     object Session {
-                        const val ENDPOINT = "/session"
+                        const val ENDPOINT = "/sessions"
                         const val PATH = "${Auth.PATH}$ENDPOINT"
                         fun url(host: String, page: Int) = "${host}${PATH}?page=${page}"
 
@@ -115,6 +115,14 @@ object Uris {
 
                         object Id {
                             const val ENDPOINT = "/{id}"
+                            const val PATH = "${User.PATH}$ENDPOINT"
+                            private val TEMPLATE = UriTemplate(PATH)
+                            fun make(id: String): URI = TEMPLATE.expand(mapOf("id" to id))
+                            fun url(host: String, id: String) = "${host}${make(id)}"
+                        }
+
+                        object CheckUser {
+                            const val ENDPOINT = "/checkuser"
                             const val PATH = "${User.PATH}$ENDPOINT"
                             private val TEMPLATE = UriTemplate(PATH)
                             fun make(id: String): URI = TEMPLATE.expand(mapOf("id" to id))

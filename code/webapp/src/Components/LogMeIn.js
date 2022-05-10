@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useContext} from 'react'
-import {goFetch} from "../Services/FetchService";
+import {goPOST} from "../Services/FetchService";
 import {Card, Container, Row} from "react-bootstrap";
 import {Navigate, useSearchParams} from "react-router-dom";
 import {UserContext} from "./UserContextProvider";
@@ -30,7 +30,7 @@ export const LogMeIn = () => {
         if(!data) {
             console.log(`useEffect 2: ${tempUser.userName}`)
             const postData = {userName: tempUser.userName, loginToken: tempUser.token}
-            goFetch(`/api/web/v1.0/non_auth/logmein`, postData, setData, setError)
+            goPOST(`/api/web/v1.0/non_auth/logmein`, postData, setData, setError)
         }
 
     }, [tempUser.userName,tempUser.token, data])

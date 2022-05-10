@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import {goFetch} from "../Services/FetchService";
+import {goPOST} from "../Services/FetchService";
 import Button from 'react-bootstrap/Button';
 import {Card, Container, FormControl, InputGroup, Row} from "react-bootstrap";
 
@@ -18,7 +18,7 @@ export const LoginUser = () => {
     const toggleButtonState = () => {
         const postData = {userName: userName}
         console.log(postData)
-        goFetch(`/api/web/v1.0/non_auth/login`, postData, setData, setError)
+        goPOST(`/api/web/v1.0/non_auth/login`, postData, setData, setError)
     };
 
     return (

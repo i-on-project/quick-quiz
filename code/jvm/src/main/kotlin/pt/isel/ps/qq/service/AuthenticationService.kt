@@ -156,4 +156,11 @@ class AuthenticationService(
     private fun getTokenTimeout(): Long = getCurrentTimeSeconds() + TOKEN_TIMEOUT
     private fun getRegistrationTimeout(): Long = getCurrentTimeSeconds() + REGISTRATION_TOKEN_TIMEOUT
 
+//TODO: Create LOGIN Cache to requests to elastic
+    fun checkUserLoginStatus(userName: String, token: String): UserDoc {
+        val user = getUser(userName)
+        if(user.loginToken != token) throw UserDisabledException() //TODO: create User Login Expired
+        return user
+    }
+
 }

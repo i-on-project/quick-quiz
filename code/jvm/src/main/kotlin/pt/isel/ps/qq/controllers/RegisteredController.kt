@@ -31,9 +31,7 @@ class RegisteredController(
     private fun expireCookie(cookie: Cookie): String {
         val builder = StringBuilder("${cookie.name}=${cookie.value};")
         builder.append("Expires=Thu, 01 Jan 1970 00:00:01 GMT;")
-        builder.append("Max-Age=-99999999")
-        builder.append("Path=${cookie.path};")
-        builder.append("Domain=${cookie.domain};")
+        builder.append("Path=/;")
         if(cookie.secure) builder.append("Secure;")
         if(cookie.isHttpOnly) builder.append("HttpOnly;")
         return builder.toString()
@@ -45,7 +43,7 @@ class RegisteredController(
         val headers = HttpHeaders()
         authService.logout(scope.getUser().userName)
         headers.add("Set-Cookie", expireCookie(cookie))
-        return ResponseEntity.ok().build()
+        return ResponseEntity.ok().headers(headers).build()
     }
 
     private fun exceptionHandling(type: String, title: String, status: Int, instance: String, values: Map<String, Any?> = emptyMap(), detail: String? = null): ResponseEntity<Any> {
@@ -549,5 +547,21 @@ class RegisteredController(
             clazz = listOf("History")
         )
         return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
+    }
+
+    @GetMapping(Uris.API.Web.V1_0.Auth.User.CheckUser.ENDPOINT)
+    fun checkUserLoginStatus(request: HttpServletRequest): ResponseEntity<Any>{
+        val cookie = request.cookies.find { it.name == "Authorization" }!!
+        val doc = authService.checkUserLoginStatus(scope.getUser().userName, scope.getUser().loginToken!!)
+        val body = SirenModel(
+            clazz = listOf("Login"),
+            //properties = Acknowledge.TRUE,
+            properties = RequestLoginOutputModel(
+                userName = doc.userName,
+                displayName = doc.displayName,
+            ),
+            title = "Welcome ${doc.userName}"
+        )
+        return ResponseEntity.ok().body(body)
     }
 }
