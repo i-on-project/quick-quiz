@@ -1,7 +1,6 @@
 package pt.isel.ps.qq.data
 
-import pt.isel.ps.qq.data.elasticdocs.QqStatus
-import pt.isel.ps.qq.data.elasticdocs.SessionDoc
+import pt.isel.ps.qq.data.elasticdocs.*
 
 data class SessionSummaryOutputModel(
     val name: String,
@@ -54,4 +53,40 @@ data class ListInfo(
 
 data class LiveSession(
     val guestCode: String
+)
+
+data class TemplateOutputModel(
+    val limitOfParticipants: Int,
+    val geolocation: String? = null,
+    val radius: Double? = null,
+    val radiusUnit: String? = null,
+    val quizzes: List<QuizTemplateOutputModel>
+) {
+    constructor(template: TemplateDoc): this(
+        limitOfParticipants = template.limitOfParticipants,
+        geolocation = template.geolocation,
+        radius = template.radius,
+        radiusUnit = template.radiusUnit,
+        quizzes = template.quizzes.sortedBy { it.order }.map { QuizTemplateOutputModel(it) }
+    )
+}
+
+data class QuizTemplateOutputModel(
+    val question: String,
+    val answerType: QuestionType,
+    val answerChoices: List<MultipleChoiceOutputModel>? = null,
+) {
+    constructor(input: QuizTemplate): this(
+        question = input.question,
+        answerType = input.answerType,
+        answerChoices = input.answerChoices?.map {
+            MultipleChoiceOutputModel(it.choiceNumber, it.choiceAnswer, it.choiceRight)
+        }
+    )
+}
+
+data class MultipleChoiceOutputModel(
+    val choiceNumber: Int,
+    val choiceAnswer: String,
+    val choiceRight: Boolean
 )
