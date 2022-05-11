@@ -13,7 +13,6 @@ import java.util.*
 @Service
 class DataService(
     private val uniqueCodeGenerator: UniqueCodeGenerator,
-    private val random: Random,
     private val sessionRepo: SessionElasticRepository,
     private val answerRepo: AnswersElasticRepository,
     private val quizRepo: QuizElasticRepository,
@@ -77,11 +76,15 @@ class DataService(
      * Returns the number of documents present on the data repository 'sessions'.
      * @return Returns the number of documents present on the data repository 'sessions'
      */
-    fun documentsCount(): Long {
+    fun sessionDocumentsCount(): Long {
         return sessionRepo.count()
     }
 
-    private fun getTemplateValidatingOwner(owner: String, id: String): TemplateDoc {
+    fun templatesDocumentsCount(): Long {
+        return templateRepo.count()
+    }
+
+    fun getTemplateValidatingOwner(owner: String, id: String): TemplateDoc {
         val opt = templateRepo.findById(id)
         if(opt.isEmpty) throw TemplateNotFoundException()
         val doc = opt.get()
@@ -240,6 +243,20 @@ class DataService(
 
     fun getHistory(user: String, page: Int): List<HistoryDoc> {
         return historyRepo.findHistoryDocsByOwner(user, PageRequest.of(page, PAGE_SIZE))
+    }
+
+    fun createTemplate(owner: String, input: CreateTemplateInputModel): TemplateDoc {
+        val template = TemplateDoc(owner, input)
+        return templateRepo.save(template)
+    }
+
+    fun deleteTemplate(owner: String, id: String) {
+        val template = getTemplateValidatingOwner(owner, id)
+        templateRepo.deleteById(id)
+    }
+
+    fun getAllTemplates(owner: String, page: Int): List<TemplateDoc> {
+        return templateRepo.findTemplateDocsByOwner(owner, PageRequest.of(page, PAGE_SIZE))
     }
 
 }

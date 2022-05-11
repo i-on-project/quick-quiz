@@ -85,3 +85,18 @@ data class EditQuizInputModel(
     val addChoices: List<MultipleChoiceInputModel>?,
     val removeChoices: List<String>?
 )
+
+data class CreateTemplateInputModel(
+    val limitOfParticipants: Int?,
+    val geolocation: String? = null,
+    val radius: Double? = null,
+    val radiusUnit: String? = null,
+    val quizzes: List<QuizTemplateInputModel> = emptyList()
+)
+
+data class QuizTemplateInputModel(
+    val order: Int, // posição da questão numa sessão
+    val question: String,
+    val answerType: QuestionType,
+    val answerChoices: List<MultipleChoiceInputModel>? = null,
+)
