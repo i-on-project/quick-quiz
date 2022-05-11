@@ -100,7 +100,7 @@ class UnregisteredController(
         val base64 = Base64.getEncoder().encodeToString(str.toByteArray())
 
         val headers = HttpHeaders()
-        headers.add("Set-Cookie", "Authorization=$base64; Max-Age=${Duration.ofDays(7).toSeconds()}; Path=/; Secure; HttpOnly; SameSite=Strict")
+        headers.add("Set-Cookie", "Authorization=$base64; Max-Age=${Duration.ofDays(7).toSeconds()}; Path=/; Secure; HttpOnly;") // SameSite=Strict
 
         val body = SirenModel(
             clazz = listOf("Login"),

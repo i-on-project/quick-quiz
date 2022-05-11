@@ -142,6 +142,21 @@ object Uris {
                         const val PATH = "${Auth.PATH}$ENDPOINT"
                         fun url(host: String) = "${host}${PATH}"
                     }
+
+                    object Template {
+                        const val ENDPOINT = "/template"
+                        const val PATH = "${Auth.PATH}$ENDPOINT"
+                        fun url(host: String, page: Int) = "${host}${PATH}?page=${page}"
+
+                        object Id {
+                            const val ENDPOINT = "/{id}"
+                            const val PATH = "${Template.PATH}$ENDPOINT"
+                            const val CONTROLLER_ENDPOINT = "${Template.ENDPOINT}${ENDPOINT}"
+                            private val TEMPLATE = UriTemplate(PATH)
+                            fun make(id: String): URI = TEMPLATE.expand(mapOf("id" to id))
+                            fun url(host: String, id: String) = "${host}${make(id)}"
+                        }
+                    }
                 }
             }
         }
