@@ -35,7 +35,7 @@ export const UserContextProvider = ({children}) => {
             }
             updateContext({isLoading: true})
             const setError = (error) => {
-                console.log(`I'm Error Fetched in COntext: ${error}`)
+                //console.log(`I'm Error Fetched in COntext: ${error}`)
                 updateContext({ isLoading: false })
             }
             goGET("/api/web/v1.0/auth/checkuser", setData, setError)

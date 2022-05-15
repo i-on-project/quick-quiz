@@ -9,15 +9,16 @@ import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 import {NavBarComponent} from "./Components/NavBarComponent";
 import {Templates} from "./Components/Templates/Templates";
 import {Sessions} from "./Components/Sessions/Sessions";
+import {Session} from "./Components/Sessions/Session";
 
 
 function App() {
 
     //var stompClient = require('./Utils/websocket-listener')
     const userContext = useContext(UserContext)
-    useEffect(() => {
-        console.log(`Is LoggedIn: ${userContext.isLoggedIn}`)
-    }, [])
+
+   // const isLoggedIn = () => userContext.userName !== null && userContext.isLoading === false
+
     return (
             <UserContextProvider>
                 <Router>
@@ -27,7 +28,10 @@ function App() {
                             <Route path="/" element={<HomeComponent/>}/>
                             <Route path="/register" element={<RegisterUser/>}/>
                             <Route path="/sessions" element={<Sessions/>}/>
+                            <Route path="/sessions/:id" element={<Session/>}/>
+                           {/* <Route path="/insession/:id" element={<Session/>}/>*/}
                             <Route path="/templates" element={<Templates/>}/>
+                            {/*<Route path="/history" element={<History />} />*/}
                             <Route path="/login" element={<LoginUser/>}/>
                             <Route path="/logmein" element={<LogMeIn/>}/>
                         </Routes>

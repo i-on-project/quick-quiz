@@ -1,6 +1,6 @@
 module.exports = {
 
-    Session: function Session(name, description, limitOfParticipants, geolocation, templateId) {
+    SessionDTO: function Session(name, description, limitOfParticipants, geolocation, templateId) {
             this.name =	name
             this.description = description
             this.limitOfParticipants = limitOfParticipants

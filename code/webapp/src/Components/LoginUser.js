@@ -55,14 +55,14 @@ export const LoginUser = () => {
                                 )}
 
                                 {data && (
-                                    <div>{data.userName}</div>
+                                    <div>{data.properties.userName}</div>
                                 )}
                                 {data && (
-                                    <div>{data.requestToken}</div>
+                                    <div>{data.properties.token}</div>
                                 )}
 
                                 {data && (
-                                    <a href={`http://localhost:3000/logmein?user=${data.userName}&token=${data.requestToken}`}> LogMeIn </a>)}
+                                    <a href={`http://localhost:3000/logmein?user=${data.properties.userName}&token=${data.properties.token}`}> LogMeIn </a>)}
                             </Card.Body>
                         </Card>
                     ) : <div/>}
