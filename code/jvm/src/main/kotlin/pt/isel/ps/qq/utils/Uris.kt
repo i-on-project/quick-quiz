@@ -120,6 +120,14 @@ object Uris {
                             fun make(id: String): URI = TEMPLATE.expand(mapOf("id" to id))
                             fun url(host: String, id: String) = "${host}${make(id)}"
                         }
+
+                        object CheckUser {
+                            const val ENDPOINT = "/checkuser"
+                            const val PATH = "${User.PATH}$ENDPOINT"
+                            private val TEMPLATE = UriTemplate(PATH)
+                            fun make(id: String): URI = TEMPLATE.expand(mapOf("id" to id))
+                            fun url(host: String, id: String) = "${host}${make(id)}"
+                        }
                     }
 
                     object Quiz {
@@ -140,7 +148,7 @@ object Uris {
                     object History {
                         const val ENDPOINT = "/history"
                         const val PATH = "${Auth.PATH}$ENDPOINT"
-                        fun url(host: String) = "${host}${PATH}"
+                        fun url(host: String, page: Int) = "${host}${PATH}?page=${page}"
                     }
 
                     object Template {

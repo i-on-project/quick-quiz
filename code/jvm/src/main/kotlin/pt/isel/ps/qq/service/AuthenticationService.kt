@@ -130,6 +130,12 @@ class AuthenticationService(
         userRepo.save(UserDoc(doc.userName, doc.displayName, doc.status))
     }
 
+    fun checkUserLoginStatus(userName: String, token: String): UserDoc {
+        val user = getUser(userName)
+        if(user.loginToken != token) throw UserDisabledException() //TODO: create User Login Expired
+        return user
+    }
+
     private fun getUser(user: String): UserDoc {
         val opt = userRepo.findById(user)
         if(opt.isEmpty) throw UserNotFoundException()

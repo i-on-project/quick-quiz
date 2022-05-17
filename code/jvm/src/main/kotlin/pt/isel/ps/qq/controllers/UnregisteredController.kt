@@ -44,7 +44,7 @@ class UnregisteredController(
         val user = authenticationService.register(input)
         val body = SirenModel(
             clazz = listOf("Register"),
-            properties = RequestLoginOutputModel(username = user.userName, token = user.registrationToken!!, timeout = user.registrationExpireDate!!),
+            properties = RequestLoginOutputModel(userName = user.userName, token = user.registrationToken!!, timeout = user.registrationExpireDate!!),
             actions = listOf(
                 SirenAction(
                     name = "Logmein",
@@ -71,7 +71,7 @@ class UnregisteredController(
         val user = authenticationService.requestLogin(userName)
         val body = SirenModel(
             clazz = listOf("RequestLogin"),
-            properties = RequestLoginOutputModel(username = user.userName, token = user.requestToken!!, timeout = user.requestExpireDate!!),
+            properties = RequestLoginOutputModel(userName = user.userName, token = user.requestToken!!, timeout = user.requestExpireDate!!),
             actions = listOf(
                 SirenAction(
                     name = "Logmein",
@@ -104,7 +104,11 @@ class UnregisteredController(
 
         val body = SirenModel(
             clazz = listOf("Login"),
-            properties = Acknowledge.TRUE,
+            //properties = Acknowledge.TRUE,
+            properties = RequestLoginOutputModel(
+                userName = doc.userName,
+                displayName = doc.displayName,
+            ),
             title = "Welcome ${doc.userName}"
         )
 

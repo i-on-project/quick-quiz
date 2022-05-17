@@ -1,6 +1,7 @@
 package pt.isel.ps.qq.data
 
 import pt.isel.ps.qq.data.elasticdocs.*
+import pt.isel.ps.qq.utils.getCurrentTimeSeconds
 
 data class SessionSummaryOutputModel(
     val name: String,
@@ -33,9 +34,10 @@ data class SessionOutputModel(
 }
 
 data class RequestLoginOutputModel(
-    val username: String,
-    val token: String,
-    val timeout: Long
+    val userName: String,
+    val displayName: String? = null,
+    val token: String? = null,
+    val timeout: Long? = null
 )
 
 data class Acknowledge(
@@ -82,6 +84,26 @@ data class QuizTemplateOutputModel(
         answerChoices = input.answerChoices?.map {
             MultipleChoiceOutputModel(it.choiceNumber, it.choiceAnswer, it.choiceRight)
         }
+    )
+}
+
+data class HistoryOutputModel(
+    val name: String,
+    val description: String? = null,
+    val historyDate: Long,
+    val limitOfParticipants: Int,
+    val liveDate: Long,
+    val quizzes: List<HistoryQuiz>,
+    val numberOfParticipants: Int
+) {
+    constructor(doc: HistoryDoc) : this(
+        name = doc.name,
+        description = doc.description,
+        historyDate = doc.historyDate,
+        limitOfParticipants = doc.limitOfParticipants,
+        liveDate = doc.liveDate,
+        quizzes = doc.quizzes,
+        numberOfParticipants = doc.numberOfParticipants
     )
 }
 
