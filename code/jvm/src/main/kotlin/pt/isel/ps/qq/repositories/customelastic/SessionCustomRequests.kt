@@ -19,7 +19,7 @@ interface SessionCustomRequests {
     fun updateStatus(id: String, newStatus: QqStatus)
     fun makeSessionGoLive(id: String, owner: String, guestCode: Int)
     fun shutDownSession(id: String, owner: String)
-    fun updateQuizzes(id: String, owner: String, quizId: String, action: CustomRequestUpdateQuizAction)
+    fun updateSessionQuizzes(id: String, owner: String, quizId: String, action: CustomRequestUpdateQuizAction)
 }
 
 enum class CustomRequestUpdateQuizAction(val script: String) {
@@ -82,15 +82,19 @@ class SessionCustomRequestsImpl(
         if(cause[0] == "owner") throw SessionAuthorizationException()
     }
 
-    override fun updateQuizzes(id: String, owner: String, quizId: String, action: CustomRequestUpdateQuizAction) {
-        val script = "if(ctx._source.owner == '$owner') { if(ctx._source.status == '${QqStatus.NOT_STARTED}') ctx._source.quizzes.${action.script}(params.quizId); else throw Exception('status:'+ctx._source.status); } else throw new Exception('owner');"
+    override fun updateSessionQuizzes(id: String, owner: String, quizId: String, action: CustomRequestUpdateQuizAction) {
+        //TODO: check if quiz already exists // cannot happen in app I think?
+        val script = "if(ctx._source.owner == '$owner') { if(ctx._source.status == '${QqStatus.NOT_STARTED}') ctx._source.quizzes.${action.script}(params.quizId); else throw new Exception('status:'+ctx._source.status); } else throw new Exception('owner');"
         val params = mapOf("quizId" to quizId)
         try {
             val response = request(id, params, script)
             if(response != null) throw Exception(response.getResult.toString())
         } catch(ex: ElasticsearchException) {
             parseElasticsearchException(ex, QqStatus.NOT_STARTED)
+        } catch(ex: Exception) {
+            throw ex
         }
+
     }
 
     private fun request(query: QueryBuilder, params: Map<String, Any>, script: String): BulkByScrollResponse {
@@ -98,8 +102,7 @@ class SessionCustomRequestsImpl(
     }
     private fun request(id: String, params: Map<String, Any>, script: String): UpdateResponse? {
         val response = elasticCustom.updateDocument("sessions", id, params, script)
-        return if(validateResponse(response)) null
-        else response
+        return if(validateResponse(response)) null else response
     }
     private fun request(id: String, field: String, value: Map<String, Any>): UpdateResponse? {
         val response = elasticCustom.updateField("sessions", id, field, value)

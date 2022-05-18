@@ -10,6 +10,7 @@ import {NavBarComponent} from "./Components/NavBarComponent";
 import {Templates} from "./Components/Templates/Templates";
 import {Sessions} from "./Components/Sessions/Sessions";
 import {Session} from "./Components/Sessions/Session";
+import History from "./Components/History/HistoryPage";
 
 
 function App() {
@@ -31,7 +32,7 @@ function App() {
                             <Route path="/sessions/:id" element={<Session/>}/>
                            {/* <Route path="/insession/:id" element={<Session/>}/>*/}
                             <Route path="/templates" element={<Templates/>}/>
-                            {/*<Route path="/history" element={<History />} />*/}
+                            <Route path="/history" element={<History />} />
                             <Route path="/login" element={<LoginUser/>}/>
                             <Route path="/logmein" element={<LogMeIn/>}/>
                         </Routes>

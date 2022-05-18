@@ -99,7 +99,7 @@ class DataService(
             val sessionID = UUID.randomUUID().toString()
             val aux = mutableListOf<String>()
             template.quizzes.forEach {
-                val quiz = QuizDoc(it, owner, sessionID)
+                val quiz = SessionQuizDoc(it, owner, sessionID)
                 quizRepo.save(quiz)
                 aux.add(quiz.id)
             }
@@ -175,7 +175,7 @@ class DataService(
     //SessionAuthorizationException
     fun editSession(owner: String, id: String, input: EditSessionInputModel): SessionDoc {
         val doc = getSessionValidatingTheOwner(owner, id)
-        if(doc.status != QqStatus.NOT_STARTED) throw SessionIllegalStatusOperationException(doc.status, "To perform this operation the session status can only be NOT_STARTED")
+        //if(doc.status != QqStatus.NOT_STARTED) throw SessionIllegalStatusOperationException(doc.status, "To perform this operation the session status can only be NOT_STARTED")
         val newDoc = SessionDoc(doc, input)
         return sessionRepo.save(newDoc)
     }
@@ -185,21 +185,21 @@ class DataService(
     //SessionIllegalStatusOperationException
     //AtLeast1CorrectChoice
     //AtLeast2Choices
-    fun addQuizToSession(owner: String, id: String, input: AddQuizToSessionInputModel): QuizDoc {
-        val quiz = QuizDoc(
+    fun addQuizToSession(owner: String, sessionId: String, input: AddQuizToSessionInputModel): SessionQuizDoc {
+        val quiz = SessionQuizDoc(
             id = UUID.randomUUID().toString(),
-            sessionId = id,
+            sessionId = sessionId,
             userOwner = owner,
             order = input.order ?: 0,
             question = input.question,
             answerType = input.questionType,
-            answerChoices = input.choices?.map { MultipleChoice(it.choiceNumber ?: 0, it.choice, it.choiceRight) },
+            answerChoices = input.choices?.map { MultipleChoice(it.choiceNumber ?: 0, it.choiceAnswer, it.choiceRight) },
             quizState = QqStatus.NOT_STARTED,
             numberOfAnswers = 0
         )
         val toReturn = quizRepo.save(quiz)
         try {
-            sessionRepo.updateQuizzes(id, owner, quiz.id ,CustomRequestUpdateQuizAction.ADD)
+            sessionRepo.updateSessionQuizzes(sessionId, owner, quiz.id ,CustomRequestUpdateQuizAction.ADD)
         } catch(ex: Exception) {
             quizRepo.deleteById(quiz.id)
             throw ex
@@ -209,7 +209,7 @@ class DataService(
 
     //QuizNotFoundException
     //QuizAuthorizationException
-    fun getQuizValidatingOwner(owner: String, id: String): QuizDoc {
+    fun getQuizValidatingOwner(owner: String, id: String): SessionQuizDoc {
         val opt = quizRepo.findById(id)
         if(opt.isEmpty) throw QuizNotFoundException()
         val doc = opt.get()
@@ -223,7 +223,7 @@ class DataService(
     fun removeQuizFromSession(owner: String, id: String) {
         val quizDoc = getQuizValidatingOwner(owner, id)
         quizRepo.deleteById(quizDoc.id)
-        sessionRepo.updateQuizzes(quizDoc.sessionId, owner, quizDoc.id, CustomRequestUpdateQuizAction.REMOVE)
+        sessionRepo.updateSessionQuizzes(quizDoc.sessionId, owner, quizDoc.id, CustomRequestUpdateQuizAction.REMOVE)
     }
 
     //QuizNotFoundException
@@ -233,11 +233,18 @@ class DataService(
     //SessionNotFoundException
     //SessionAuthorizationException
     //SessionIllegalStatusOperationException
-    fun editQuiz(owner: String, id: String, input: EditQuizInputModel): QuizDoc {
+    fun editQuiz(owner: String, id: String, input: EditQuizInputModel): SessionQuizDoc {
         val quizDoc = getQuizValidatingOwner(owner, id)
         val session = getSessionValidatingTheOwner(owner, quizDoc.sessionId)
-        if(session.status != QqStatus.NOT_STARTED) throw SessionIllegalStatusOperationException(session.status) // conflict 409
-        val newQuizDoc = QuizDoc(quizDoc, input)
+        //if(session.status != QqStatus.NOT_STARTED) throw SessionIllegalStatusOperationException(session.status) // conflict 409
+        val newQuizDoc = SessionQuizDoc(quizDoc, input)
+        return quizRepo.save(newQuizDoc)
+    }
+
+    fun updateQuizStatus(owner: String, id: String, input: UpdateQuizStausInputModel): SessionQuizDoc {
+        val quizDoc = getQuizValidatingOwner(owner, id)
+        val session = getSessionValidatingTheOwner(owner, quizDoc.sessionId)
+        val newQuizDoc = SessionQuizDoc(quizDoc, input.quizState)
         return quizRepo.save(newQuizDoc)
     }
 
@@ -258,5 +265,11 @@ class DataService(
     fun getAllTemplates(owner: String, page: Int): List<TemplateDoc> {
         return templateRepo.findTemplateDocsByOwner(owner, PageRequest.of(page, PAGE_SIZE))
     }
+
+    fun getAllSessionQuizzes(sessionid: String): List<SessionQuizDoc> {
+        return quizRepo.findQuizDocsBySessionId(sessionid)
+    }
+
+
 
 }

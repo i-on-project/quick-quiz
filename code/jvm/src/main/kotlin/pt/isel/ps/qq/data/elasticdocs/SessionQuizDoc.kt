@@ -12,8 +12,8 @@ enum class QuestionType {
     MULTIPLE_CHOICE, SHORT, LONG
 }
 
-@Document(indexName = "quizzes")
-data class QuizDoc(
+@Document(indexName = "session_quizzes")
+data class SessionQuizDoc(
     @Id val id: String,
     val sessionId: String,
     val userOwner: String, // parametro de pesquisa para templates por user
@@ -26,44 +26,69 @@ data class QuizDoc(
 ) {
 
     init {
-        if(answerType == QuestionType.MULTIPLE_CHOICE) {
-            if(answerChoices == null || answerChoices.count() < 2) throw AtLeast2Choices()
+        if (answerType == QuestionType.MULTIPLE_CHOICE) {
+            if (answerChoices == null || answerChoices.count() < 2) throw AtLeast2Choices()
             answerChoices.find { it.choiceRight } ?: throw AtLeast1CorrectChoice()
         }
     }
 
     companion object {
-        private fun changeChoices(doc: QuizDoc, add: List<MultipleChoiceInputModel>?, rem: List<String>?): List<MultipleChoice>? {
-            if(doc.answerType != QuestionType.MULTIPLE_CHOICE) return null
+        private fun changeChoices(
+            doc: SessionQuizDoc,
+            add: List<MultipleChoiceInputModel>?,
+            rem: List<String>?
+        ): List<MultipleChoice>? {
+            if (doc.answerType != QuestionType.MULTIPLE_CHOICE) return null
             val toReturn = doc.answerChoices!!.toMutableList()
-            if(rem != null && rem.isNotEmpty()) {
+            if (rem != null && rem.isNotEmpty()) {
                 rem.forEach { str ->
                     val toDelete = toReturn.find { it.choiceAnswer == str }
-                    if(toDelete != null) toReturn.remove(toDelete)
+                    if (toDelete != null) toReturn.remove(toDelete)
                 }
             }
-            if(add != null && add.isNotEmpty()) {
+            if (add != null && add.isNotEmpty()) {
                 add.forEach {
-                    toReturn.add(MultipleChoice(it.choiceNumber ?: 0, it.choice, it.choiceRight))
+                    toReturn.add(MultipleChoice(it.choiceNumber ?: 0, it.choiceAnswer, it.choiceRight))
                 }
             }
             return toReturn
         }
+
+        private fun getMultipleChoices(input: List<MultipleChoiceInputModel>?): List<MultipleChoice>? {
+            when (input) {
+                null -> return null
+                else -> return input.map { c -> MultipleChoice(c.choiceNumber ?: 999, c.choiceAnswer, c.choiceRight) }
+            }
+        }
+
+
     }
 
-    constructor(doc: QuizDoc, input: EditQuizInputModel): this(
+    constructor(doc: SessionQuizDoc, input: EditQuizInputModel) : this(
         id = doc.id,
         sessionId = doc.sessionId,
         userOwner = doc.userOwner, // parametro de pesquisa para templates por user
         order = input.order ?: doc.order, // posição da questão numa sessão
         question = input.question ?: doc.question,
         answerType = doc.answerType,
-        answerChoices = changeChoices(doc, input.addChoices, input.removeChoices),
+        answerChoices = getMultipleChoices(input.choices), //changeChoices(doc, input.addChoices, input.removeChoices),
         quizState = doc.quizState, //launched or not
         numberOfAnswers = doc.numberOfAnswers
     )
 
-    constructor(quiz: QuizTemplate, owner: String, session: String): this(
+    constructor(doc: SessionQuizDoc, input: QqStatus) : this(
+        id = doc.id,
+        sessionId = doc.sessionId,
+        userOwner = doc.userOwner, // parametro de pesquisa para templates por user
+        order = doc.order, // posição da questão numa sessão
+        question = doc.question,
+        answerType = doc.answerType,
+        answerChoices = doc.answerChoices,
+        quizState = input, //launched or not
+        numberOfAnswers = doc.numberOfAnswers
+    )
+
+    constructor(quiz: QuizTemplate, owner: String, session: String) : this(
         id = UUID.randomUUID().toString(),
         sessionId = session,
         userOwner = owner, // parametro de pesquisa para templates por user
@@ -74,6 +99,63 @@ data class QuizDoc(
         quizState = QqStatus.NOT_STARTED, //launched or not
         numberOfAnswers = 0
     )
+}
+
+
+@Document(indexName = "template_quizzes")
+data class TemplateQuizDoc(
+    @Id val id: String,
+    val templateId: String,
+    val userOwner: String, // parametro de pesquisa para templates por user
+    val order: Int, // posição da questão numa sessão
+    val question: String,
+    val answerType: QuestionType,
+    val answerChoices: List<MultipleChoice>? = null,
+    val numberOfAnswers: Int
+) {
+
+    init {
+        if (answerType == QuestionType.MULTIPLE_CHOICE) {
+            if (answerChoices == null || answerChoices.count() < 2) throw AtLeast2Choices()
+            answerChoices.find { it.choiceRight } ?: throw AtLeast1CorrectChoice()
+        }
+    }
+
+    companion object {
+        private fun changeChoices(
+            doc: TemplateQuizDoc,
+            add: List<MultipleChoiceInputModel>?,
+            rem: List<String>?
+        ): List<MultipleChoice>? {
+            if (doc.answerType != QuestionType.MULTIPLE_CHOICE) return null
+            val toReturn = doc.answerChoices!!.toMutableList()
+            if (rem != null && rem.isNotEmpty()) {
+                rem.forEach { str ->
+                    val toDelete = toReturn.find { it.choiceAnswer == str }
+                    if (toDelete != null) toReturn.remove(toDelete)
+                }
+            }
+            if (add != null && add.isNotEmpty()) {
+                add.forEach {
+                    toReturn.add(MultipleChoice(it.choiceNumber ?: 0, it.choiceAnswer, it.choiceRight))
+                }
+            }
+            return toReturn
+        }
+    }
+
+    constructor(doc: TemplateQuizDoc, input: EditQuizInputModel) : this(
+        id = doc.id,
+        templateId = doc.templateId,
+        userOwner = doc.userOwner, // parametro de pesquisa para templates por user
+        order = input.order ?: doc.order, // posição da questão numa sessão
+        question = input.question ?: doc.question,
+        answerType = doc.answerType,
+        // answerChoices = changeChoices(doc, input.addChoices, input.removeChoices),
+        numberOfAnswers = doc.numberOfAnswers
+    )
+
+
 }
 
 data class MultipleChoice(

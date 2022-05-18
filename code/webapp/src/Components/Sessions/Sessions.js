@@ -1,48 +1,53 @@
 import React, {Fragment, useEffect, useState} from "react";
-import {Card, Container, Modal, Row, Spinner} from "react-bootstrap";
+import {Container, Modal, Row, Spinner} from "react-bootstrap";
 import Button from "react-bootstrap/Button";
-import {createSession, getAllSessions, getSession} from "../../Services/SessionService";
 import {SessionCard} from "./SessionCard";
-import {Navigate} from "react-router-dom";
+import {Navigate, Redirect} from "react-router-dom";
 import {goGET, goPOST} from "../../Services/FetchService";
 import {CreateSessionModal} from "./CreateSessionModal";
-import {useLocation, useParams} from "react-router";
+
 
 
 export const Sessions = () => {
 
     const [sessions, setSessions] = useState(null)
     const [sessionId, setSessionId] = useState(null)
-    const [error, setError] = useState(null)
     const [loading, setLoading] = useState(false)
     const [inSession, setInSession] = useState(false)
     const [newSession, setNewSession] = useState(false)
     const [page, setPage] = useState(0)
     const [totalPages, setTotalPages] = useState(-1)
+    const [sessionCreated, setSessionCreated] = useState(null)
+
+
 
 
     useEffect(() => {
 
         setLoading(true)
 
-        goGET(`/api/web/v1.0/auth/sessions?page=${page === -1 ? 0 : page}`, setSessions, setError)
-        //getAllSessions(setSessions, setError)
-    }, [page])
-
-    useEffect(() => {
-
-        if (sessions || error) {
-            setLoading(false)
-            const npages = Math.floor(sessions.properties.total / 10)
-            setTotalPages( npages === 0 ? 1 : npages)
+        const setError = (error) => {
+            alert(`Failed to update Session from ${`/api/web/v1.0/auth/sessions?page=${page === -1 ? 0 : page}`} with error ${error}`)
         }
 
-    }, [sessions, error])
+        const setData = (data) => {
+            setSessions(data)
+            const nPages = Math.floor(data.properties.total / 10)
+            setTotalPages(nPages === 0 ? 1 : nPages)
+        }
+
+        goGET(`/api/web/v1.0/auth/sessions?page=${page === -1 ? 0 : page}`, setData, setError, setLoading)
+
+    }, [page])
+
 
     const createSession = (newSession) => {
-
+        setLoading(true)
         const setData = (data) => {
-            alert('Session was created and Data received: ' + data)
+            handleCLose()
+            console.log(data)
+            setSessionCreated(data.properties)
+            setSessionId(data.properties.id)
         }
 
         const setError = (error) => {
@@ -51,10 +56,11 @@ export const Sessions = () => {
         }
 
         const apiLink = sessions.actions.find(a => a.name === 'Create-Session').href
-        goPOST(apiLink, newSession, setData, setError)
+        goPOST(apiLink, newSession, setData, setError, 'POST', setLoading)
 
     }
 
+    //const goToSession = (id) => <Redirect to={`\/${id}`} />
     /*const openSession = (name, link) => {
         setLoading(true)
         //console.log(`name: ${name} -> link: ${link}`)
@@ -73,17 +79,12 @@ export const Sessions = () => {
         setSessionId(id)
     }
 
-    const goBack = () => {
-        setInSession(false)
-    }
+    // const goBack = () => {
+    //     setInSession(false)
+    // }
 
     const handleCLose = () => setNewSession(false)
 
-    /*    const backButton = () => (
-            <Button className="btn btn-success" type="submit"
-                    onClick={goBack}> Back
-            </Button>
-        )*/
 
     const newButton = () => (
         <Button className="btn btn-success" type="submit"
@@ -104,6 +105,7 @@ export const Sessions = () => {
 
     return (
         <Fragment>
+           {sessionId !== null && <Navigate to={`./${sessionId}`} session={sessionCreated} />}
             <Container>
                 <Row>
                     <h1>Sessions</h1>

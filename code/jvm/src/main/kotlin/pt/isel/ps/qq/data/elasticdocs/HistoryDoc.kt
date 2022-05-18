@@ -2,8 +2,6 @@ package pt.isel.ps.qq.data.elasticdocs
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.elasticsearch.annotations.Document
-import org.springframework.data.elasticsearch.annotations.Field
-import org.springframework.data.elasticsearch.annotations.FieldType
 import pt.isel.ps.qq.utils.getCurrentTimeSeconds
 
 @Document(indexName = "history")
@@ -18,7 +16,7 @@ data class HistoryDoc(
     val quizzes: List<HistoryQuiz>,
     var numberOfParticipants: Int
 ) {
-    constructor(session: SessionDoc, quizzes: List<QuizDoc>, answers: List<AnswersDoc>): this(
+    constructor(session: SessionDoc, quizzes: List<SessionQuizDoc>, answers: List<AnswersDoc>): this(
         id = session.id,
         name = session.name,
         description = session.description,

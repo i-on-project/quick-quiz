@@ -47,7 +47,7 @@ data class QuizTemplate(
         question = input.question,
         answerType = input.answerType,
         answerChoices = input.answerChoices?.map {
-            MultipleChoice(it.choiceNumber ?: 0, it.choice, it.choiceRight)
+            MultipleChoice(it.choiceNumber ?: 0, it.choiceAnswer, it.choiceRight)
         },
     )
 }

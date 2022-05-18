@@ -16,28 +16,25 @@ export const CreateSessionModal = ((props) => {
 
     const handleSubmit = (event) => {
         const form = event.currentTarget;
-        //event.preventDefault();
+
+        event.preventDefault();
+
         if (form.checkValidity() === false) {
-            event.preventDefault();
-            event.stopPropagation();
+           event.stopPropagation();
         }
-
-        const newSession = {
-            name: name,
-            description: description,
-            limitOfParticipants: limitOfParticipants,
-
+        else {
+            const newSession = {
+                name: name,
+                description: description,
+                limitOfParticipants: limitOfParticipants,
+            }
+            if (props.createSession != null) {
+                props.createSession(newSession)
+            }
         }
-
         setValidated(true);
-        if(props.createSession != null) {
-            props.createSession(newSession)
-        }
     };
 
-    const newSession = {
-
-    }
 
     const handleClose = () => {
         if(props.handleClose != null) {

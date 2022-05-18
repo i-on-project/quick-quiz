@@ -1,5 +1,6 @@
 package pt.isel.ps.qq.data
 
+import pt.isel.ps.qq.data.elasticdocs.QqStatus
 import pt.isel.ps.qq.data.elasticdocs.QuestionType
 import java.util.UUID
 
@@ -63,13 +64,15 @@ data class EditSessionInputModel(
     val name: String?,
     val limitOfParticipants: Int?,
     val geolocation: String?,
-    val description: String?
+    val description: String?,
+    val status: QqStatus?
+    //TODO: Missing radius
 )
 
 data class MultipleChoiceInputModel(
     val choiceNumber: Int? = 0,
-    val choice: String,
-    val choiceRight: Boolean
+    val choiceAnswer: String,
+    val choiceRight: Boolean = false
 )
 
 data class AddQuizToSessionInputModel(
@@ -82,8 +85,12 @@ data class AddQuizToSessionInputModel(
 data class EditQuizInputModel(
     val order: Int?,
     val question: String?,
-    val addChoices: List<MultipleChoiceInputModel>?,
-    val removeChoices: List<String>?
+    val choices: List<MultipleChoiceInputModel>?,
+    //val removeChoices: List<String>?
+)
+
+data class UpdateQuizStausInputModel(
+    val quizState: QqStatus
 )
 
 data class CreateTemplateInputModel(

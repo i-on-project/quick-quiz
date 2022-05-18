@@ -3,11 +3,13 @@ package pt.isel.ps.qq.data
 import pt.isel.ps.qq.data.elasticdocs.*
 
 data class SessionSummaryOutputModel(
+    val id: String,
     val name: String,
     val status: QqStatus,
     val description: String?
 ) {
     constructor(session: SessionDoc): this(
+        id = session.id,
         name = session.name,
         status = session.status,
         description = session.description
@@ -20,7 +22,10 @@ data class SessionOutputModel(
     val description: String?,
     val creationDate: Long,
     val guestCode: Int?,
-    val limitOfParticipants: Int
+    val limitOfParticipants: Int,
+    val geolocation: String?,
+    val radius: Double?,
+    val quizzes: List<String>,
 ) {
     constructor(session: SessionDoc): this(
         name = session.name,
@@ -28,7 +33,10 @@ data class SessionOutputModel(
         description = session.description,
         creationDate = session.creationDate,
         guestCode = session.guestCode,
-        limitOfParticipants = session.limitOfParticipants
+        limitOfParticipants = session.limitOfParticipants,
+        geolocation = session.geolocation,
+        radius = session.radius,
+        quizzes = session.quizzes
     )
 }
 

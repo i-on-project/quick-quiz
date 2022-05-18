@@ -1,5 +1,6 @@
 package pt.isel.ps.qq.utils
 
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.util.UriTemplate
 import java.net.URI
 import javax.servlet.http.HttpServletRequest
@@ -71,6 +72,8 @@ object Uris {
                         const val ENDPOINT = "/sessions"
                         const val PATH = "${Auth.PATH}$ENDPOINT"
                         fun url(host: String, page: Int) = "${host}${PATH}?page=${page}"
+                        fun make(page: Int): URI = URI.create("${PATH}?page=${page}")
+
 
                         object Id {
                             const val ENDPOINT = "/{id}"
@@ -141,6 +144,24 @@ object Uris {
                             const val CONTROLLER_ENDPOINT = "${Quiz.ENDPOINT}${ENDPOINT}"
                             private val TEMPLATE = UriTemplate(PATH)
                             fun make(id: String): URI = TEMPLATE.expand(mapOf("id" to id))
+                            fun url(host: String, id: String) = "${host}${make(id)}"
+
+                            object UpdateStatus {
+                                const val ENDPOINT = "/updatestatus"
+                                const val PATH = "${Quiz.Id.PATH}$ENDPOINT"
+                                const val CONTROLLER_ENDPOINT = "${Quiz.ENDPOINT}${Id.ENDPOINT}${ENDPOINT}"
+                                private val TEMPLATE = UriTemplate(PATH)
+                                fun make(id: String): URI = TEMPLATE.expand(mapOf("id" to id))
+
+                            }
+                        }
+                        /*TODO:Review this endpoint -> may make more sense in Sessions*/
+                        object SessionId {
+                            const val ENDPOINT = "/session/{sessionid}"
+                            const val PATH = "${Quiz.PATH}$ENDPOINT"
+                            const val CONTROLLER_ENDPOINT = "${Quiz.ENDPOINT}${ENDPOINT}"
+                            private val TEMPLATE = UriTemplate(PATH)
+                            fun make(id: String): URI = TEMPLATE.expand(mapOf("sessionid" to id))
                             fun url(host: String, id: String) = "${host}${make(id)}"
                         }
                     }

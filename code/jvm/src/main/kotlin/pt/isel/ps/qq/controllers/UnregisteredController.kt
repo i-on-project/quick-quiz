@@ -97,7 +97,7 @@ class UnregisteredController(
             ),
             title = "Check your email"
         )
-        return ResponseEntity.ok().body(user)
+        return ResponseEntity.ok().body(body)
     }
 
     @PostMapping(Uris.API.Web.V1_0.NonAuth.Logmein.ENDPOINT)

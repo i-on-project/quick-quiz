@@ -10,7 +10,7 @@ import {getSession} from "../../Services/SessionService";
 import {useParams} from "react-router";
 import {SessionForm} from "./SessionForm";
 
-export const Session = () => {
+export const Session = (props) => {
     const [loading, setLoading] = useState(false)
     const [session, setSession] = useState(null)
     const [quizzes, setQuizzes] = useState(null)
@@ -20,7 +20,7 @@ export const Session = () => {
     const {id} = useParams()
 
     useEffect(() => {
-
+        /*Prevent reset state*/
         const setSessionError = (error) => {
             if (error !== null) {
                 console.log(`Failed to get session with ID: ${id} with error ${error}`)
@@ -30,17 +30,21 @@ export const Session = () => {
         const getMeSession = (data) => {
             setSession(data)
         }
+        console.log(props)
+        if (props.session !== undefined && props.session !== null) { //TODO: Use or Remove as props
+            setSession(props.session)
 
-        goGET(`/api/web/v1.0/auth/sessions/${id}`, getMeSession, setSessionError)
-
-    }, [])
+        } else {
+            goGET(`/api/web/v1.0/auth/sessions/${id}`, getMeSession, setSessionError)
+        }
+    }, [id])
 
     useEffect(() => {
         if (session !== null) {
-            console.log(session.properties)
+            //console.log(session.properties)
             setTitle(session.properties.name)
             if (session.properties.quizzes.length > 0) {
-                console.log(session.links[0].href)
+                //console.log(session.links[0].href)
                 const setError = (error) => {
                     if (error !== null)
                         alert(`Failed to retrieve Session from ${session.links[0].href} with error ${error}`)
@@ -58,12 +62,9 @@ export const Session = () => {
                         setQuizzes(t)
                     }
                 }
-
                 goGET(session.links[0].href, setData, setError)
             }
-
         }
-
     }, [session])
 
     const openSession = (name, link) => {
@@ -74,7 +75,6 @@ export const Session = () => {
                 alert(`Failed to retrieve Session from ${link} with error ${error}`)
         }
         getSession(link, setSession, setError)
-
 
         setLoading(false)
     }
@@ -102,7 +102,7 @@ export const Session = () => {
     }
 
     const updateSessionHandler = (updatedSession) => {
-        console.log(updatedSession)
+        //console.log(updatedSession)
 
         setLoading(true)
         //console.log(`name: ${name} -> link: ${link}`)
@@ -111,13 +111,14 @@ export const Session = () => {
                 alert(`Failed to update Session from ${updatedSession} with error ${error}`)
         }
 
+
         const apiLink = session.actions.find(a => a.name === 'Update-Session').href
         const method = session.actions.find(a => a.name === 'Update-Session').method
-        console.log(`APILink: ${apiLink}`)
-        console.log(`Method: ${method}`)
+        /*        console.log(`APILink: ${apiLink}`)
+                console.log(`Method: ${method}`)*/
 
-        goPOST(apiLink, updatedSession, null, setError, 'PUT')
-        setLoading(false)
+        goPOST(apiLink, updatedSession, null, setError, 'PUT', setLoading)
+
     }
 
     return (

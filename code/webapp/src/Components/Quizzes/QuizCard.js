@@ -1,14 +1,12 @@
 import {Card, Container, Form, ListGroup, Modal, Row} from "react-bootstrap";
 import Button from "react-bootstrap/Button";
 import React, {Fragment, useEffect, useState} from "react";
-import {QuizModal} from "./QuizModal";
 import {CreateEditQuizModal} from "./CreateEditQuizModal";
 import {goDEL, goPOST} from "../../Services/FetchService";
 
 
 export const QuizCard = (props) => {
     const [show, setShow] = useState(false)
-    const [showEdit, setShowEdit] = useState(false)
     const [dataForEdit, setDataForEdit] = useState(null)
     const [status, setStatus] = useState(props.data.quizState)
 
@@ -25,16 +23,16 @@ export const QuizCard = (props) => {
 
     const updateQuizHandler = (id, quiz) => {
 
-        const setError = (error) => console.log(`Error Updating Quiz: ${id} with error ${error} `)
-        const setData = (data) => console.log(`Updated Quiz ${id} Successfully!! Response: ${data}`)
+        const setError = (error) => error !== null ? console.log(`Error Updating Quiz: ${id} with error ${error} `) : null
+        const setData = (data) => data !== null ? console.log(`Updated Quiz ${id} Successfully!! Response: ${data}`) : null
 
         goPOST(`/api/web/v1.0/auth/quiz/${id}`, quiz, setData, setError, 'PUT')
     }
 
     const removeQuiz = (id) => {
-        const setError = (error) => console.log(`Error Deleting Quiz: ${id} with error ${error} `)
-        const setData = (data) => console.log(`Deleted Quiz ${id} Successfully!! Response: ${data}`)
-        goDEL(`/api/web/v1.0/auth/quiz/${id}`)
+        const setError = (error) => error != null ? console.log(`Error Deleting Quiz: ${id} with error ${error} `) : null
+        const setData = (data) => data != null ? console.log(`Deleted Quiz ${id} Successfully!! Response: ${data}`) : null
+        goDEL(`/api/web/v1.0/auth/quiz/${id}`, setData, setError)
     }
 
     const updateStatus = (newStatus) => {
@@ -74,18 +72,24 @@ export const QuizCard = (props) => {
                         <option value='CLOSED'>Closed</option>
                     </Form.Select>
                 </ListGroup.Item>
-                <ListGroup.Item className="col-1"><Button variant="primary"
-                                                          onClick={handleClick}>Edit</Button></ListGroup.Item>
-                <ListGroup.Item className="col-1"><Form>
-                    <Button variant="primary" type="submit"
-                            onClick={() => removeQuiz(props.data.id)}>Remove</Button>
-                </Form></ListGroup.Item>
+                <ListGroup.Item >
+                    <Button variant="primary" onClick={handleClick}>
+                        Edit
+                    </Button>
+                </ListGroup.Item>
+                <ListGroup.Item ><Form>
+                    <Button variant="primary" type="submit" onClick={() => removeQuiz(props.data.id)}>
+                        Remove
+                    </Button>
+                </Form>
+                </ListGroup.Item>
 
             </ListGroup>
 
-                       {/* ))}*/}
             <Modal show={show}>
-                <CreateEditQuizModal data={dataForEdit} handleClose={handleClose} handleModalChanges={handleClick}
+                <CreateEditQuizModal data={dataForEdit}
+                                     handleClose={handleClose}
+                                     handleModalChanges={handleClick}
                                      updateQuiz={updateQuizHandler}/>
             </Modal>
         </Fragment>

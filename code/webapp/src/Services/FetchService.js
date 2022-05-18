@@ -1,5 +1,5 @@
 
-export const goPOST = (address, submitData, setData, setError, method = 'POST') => {
+export const goPOST = (address, submitData, setData, setError, method = 'POST', setLoading) => {
 
     fetch(address, {
         method: method,
@@ -19,21 +19,19 @@ export const goPOST = (address, submitData, setData, setError, method = 'POST') 
         .then((actualData) => {
             if(setData)
                 setData(actualData)
-            if(setError)
-                setError(null)
+
         })
         .catch((err) => {
             if(setError)
                 setError(err.message)
-            if(setData)
-                setData(null)
+
         })
         .finally(() => {
-            // setLoading(false);
+            setLoading(false);
         });
 };
 
-export const goDEL = (address, setData, setError) => {
+export const goDEL = (address, setData, setError, setLoading) => {
 
     fetch(address, {
         method: 'DELETE',
@@ -52,21 +50,19 @@ export const goDEL = (address, setData, setError) => {
         .then((actualData) => {
             if(setData)
                 setData(actualData)
-            if(setError)
-                setError(null)
+
         })
         .catch((err) => {
             if(setError)
                 setError(err.message)
-            if(setData)
-                setData(null)
+
         })
         .finally(() => {
-            // setLoading(false);
+            setLoading(false);
         });
 };
 
-export const goGET = (address, setData, setError) => {
+export const goGET = (address, setData, setError, setLoading) => {
 
     fetch(address, {
         method: 'GET',
@@ -85,17 +81,16 @@ export const goGET = (address, setData, setError) => {
         .then((actualData) => {
             if(setData)
                 setData(actualData)
-            if(setError)
-                setError(null)
+
         })
         .catch((err) => {
             if(setError)
                 setError(err.message)
-            if(setData)
-                setData(null)
+
         })
         .finally(() => {
-            // setLoading(false);
+            if(setLoading !== undefined && setLoading !== null)
+                setLoading(false);
         });
 };
 
