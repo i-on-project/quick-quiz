@@ -630,21 +630,7 @@ class RegisteredController(
         return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }
 
-    @GetMapping(Uris.API.Web.V1_0.Auth.User.CheckUser.ENDPOINT)
-    fun checkUserLoginStatus(request: HttpServletRequest): ResponseEntity<Any> {
-        val cookie = request.cookies.find { it.name == "Authorization" }!!
-        val doc = authService.checkUserLoginStatus(scope.getUser().userName, scope.getUser().loginToken!!)
-        val body = SirenModel(
-            clazz = listOf("Login"),
-            //properties = Acknowledge.TRUE,
-            properties = RequestLoginOutputModel(
-                userName = doc.userName,
-                displayName = doc.displayName,
-            ),
-            title = "Welcome ${doc.userName}"
-        )
-        return ResponseEntity.ok().body(body)
-    }
+
     @GetMapping(Uris.API.Web.V1_0.Auth.Template.ENDPOINT)
     fun getAllTemplatesFromUser(request: HttpServletRequest, @RequestParam pageNumber: Int?): ResponseEntity<Any> {
         val page = pageNumber?: 0
@@ -737,4 +723,6 @@ class RegisteredController(
         )
         return ResponseEntity.ok().body(body)
     }
+
+
 }
