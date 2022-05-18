@@ -84,6 +84,10 @@ class DataService(
         return templateRepo.count()
     }
 
+    fun historyDocumentCount(): Long {
+        return historyRepo.count()
+    }
+
     fun getTemplateValidatingOwner(owner: String, id: String): TemplateDoc {
         val opt = templateRepo.findById(id)
         if(opt.isEmpty) throw TemplateNotFoundException()
@@ -136,6 +140,7 @@ class DataService(
     //SessionNotFoundException
     //SessionAuthorizationException
     fun makeSessionLive(username: String, id: String): Int {
+        //TODO: put time trigger in elastic to close after 3h
         val generated = uniqueCodeGenerator.createID()
         sessionRepo.makeSessionGoLive(id, username, generated)
         return generated

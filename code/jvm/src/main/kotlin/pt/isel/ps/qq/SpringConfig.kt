@@ -47,7 +47,7 @@ class MvcConfig(
         return registrationBean
     }
 
-/*    override fun configureMessageConverters(converters: MutableList<HttpMessageConverter<*>>) {
+    /*override fun configureMessageConverters(converters: MutableList<HttpMessageConverter<*>>) {
         converters.removeIf{ it is MappingJackson2HttpMessageConverter }
 
         val customJson = MappingJackson2HttpMessageConverter()

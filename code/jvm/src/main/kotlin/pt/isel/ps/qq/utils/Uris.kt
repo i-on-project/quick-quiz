@@ -169,7 +169,7 @@ object Uris {
                     object History {
                         const val ENDPOINT = "/history"
                         const val PATH = "${Auth.PATH}$ENDPOINT"
-                        fun url(host: String) = "${host}${PATH}"
+                        fun url(host: String, page: Int) = "${host}${PATH}?page=${page}"
                     }
 
                     object Template {

@@ -12,7 +12,7 @@ data class HistoryDoc(
     val historyDate: Long = getCurrentTimeSeconds(),
     val owner: String,
     val limitOfParticipants: Int,
-    val liveDate: Long?,
+    val liveDate: Long,
     val quizzes: List<HistoryQuiz>,
     var numberOfParticipants: Int
 ) {
@@ -22,7 +22,7 @@ data class HistoryDoc(
         description = session.description,
         owner = session.owner,
         limitOfParticipants = session.limitOfParticipants,
-        liveDate = session.liveDate,
+        liveDate = session.liveDate!!,
         quizzes = quizzes.map { quiz ->
             val aux = mutableListOf<HistoryAnswer>()
             answers.forEach { answers ->

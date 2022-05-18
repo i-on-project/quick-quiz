@@ -62,7 +62,8 @@ data class SirenEntity(
     val href: String? = null,
     val properties: Any? = null,
     val links: List<SirenLink> = emptyList(),
-    val title: String? = null
+    val title: String? = null,
+    val fields: List<SirenField> = emptyList()
 )
 
 data class SirenModel(
