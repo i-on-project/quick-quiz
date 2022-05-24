@@ -1,12 +1,26 @@
-import React, {Fragment, useEffect, useState} from "react";
+import React, {Fragment, useEffect, useReducer, useState} from "react";
 import {Button, Form, Dropdown, FormControl, InputGroup, Modal, Col, Row} from "react-bootstrap";
+
+function reducer(state, action) {
+    switch (action.type) {
+        case 'set':
+            state.data.rightAnswer = action.payload.rightAnswer
+            return action.payload.rightAnswer
+        case 'increment':
+            return state.data.rightAnswer += 1
+        case 'decrement':
+            return state.data.rightAnswer -= 1;
+        default:
+            throw new Error();
+    }
+}
 
 
 export const CreateEditQuizModal = ((props) => {
 
         const validData = () => props.data !== undefined && props.data !== null
         const validChoices = () => validData() && props.data.answerChoices !== undefined && props.data.answerChoices !== null && props.data.answerType === 'MULTIPLE_CHOICE'
-        const emptyChoices = [{"choiceAnswer": ""}, {"choiceAnswer": ""}, {"choiceAnswer": ""}, {"choiceAnswer": ""}]
+        const emptyChoices = [{"choiceAnswer": ""}, {"choiceAnswer": ""}]
 
         const [type, setType] = useState(validData() ? props.data.answerType : 'SHORT')
         const [question, setQuestion] = useState(validData() ? props.data.question : '')
@@ -14,9 +28,13 @@ export const CreateEditQuizModal = ((props) => {
         const [validated, setValidated] = useState(false);
         const [order, setOrder] = useState(validData() ? props.data.order : 0)
         const [rightAnswer, setRightAnswer] = useState(-1)
+        const [state, dispatch] = useReducer(reducer,  {
+            loading: false,
+            data: {rightAnswer: 0},
+            error: undefined
+        });
 
         const handleClose = () => props.handleClose()
-
 
         useEffect(() => {
             if (validChoices())
@@ -31,17 +49,23 @@ export const CreateEditQuizModal = ((props) => {
             setQuestion(e.target.value)
         }
 
-        const fixOptions = () => {
+        const fixOptions = (right) => {
             if(type !== 'MULTIPLE_CHOICE') return null
 
-            return newAnsOptions.map((e, i) => (
-                {...e, choiceNumber: i, choiceRight: i === rightAnswer}
+            const tmp = newAnsOptions.map((e, i) => (
+                {...e, choiceNumber: i, choiceRight: i === right}
             ))
+            return tmp
         }
 
+        const onRightAnsChange = (index) => {
+            setRightAnswer(index)
+            const tmp = fixOptions(index)
+            setNewAnsOptions([...tmp])
+        }
 
         const getNewOrEdited = () => {
-            const tmp = fixOptions()
+            const tmp = fixOptions(rightAnswer)
             //setNewAnsOptions([...newAnsOptions, ...tmp])
             return !validData() ? {
                 question: question,
@@ -57,7 +81,6 @@ export const CreateEditQuizModal = ((props) => {
 
         const handleAdd = () => {
             setNewAnsOptions([...newAnsOptions, {"choiceAnswer": ""}])
-            //setNChoices((c) => c + 1)
         }
 
         const handleRemoval = (index) => {
@@ -66,20 +89,16 @@ export const CreateEditQuizModal = ((props) => {
                 return
             }
 
-            newAnsOptions.splice(index, 1)
-            console.log(`Index: ${index}`)
-            console.log(`rightAnswer: ${rightAnswer}`)
+            let tmp = []
             if (rightAnswer > index) {
-                console.log(`rightAnswer: ${rightAnswer}`)
                 setRightAnswer(r => r - 1)
-                console.log(`rightAnswer: ${rightAnswer}`)
+                tmp = fixOptions(rightAnswer)
             }
-            console.log(`rightAnswer: ${rightAnswer}`)
-
-            const tmp = fixOptions()
-
+            else
+                tmp = [...newAnsOptions]
+            console.log(tmp)
+            tmp.splice(index, 1)
             setNewAnsOptions([...tmp])
-            //setNChoices((c) => c - 1)
         }
 
         const handleAnswerChanges = (e, i) => {
@@ -87,21 +106,23 @@ export const CreateEditQuizModal = ((props) => {
             setNewAnsOptions([...temp])
         }
 
-        let formKey = 0
-        const newChoices = () => (newAnsOptions.map((a, i) =>
+
+        const newChoices = () => (
+            newAnsOptions.map((a, i) =>
                 (
                     <InputGroup className="mb-3">
                         <FormControl
                             required
-                            key={"q_" + formKey++}
+                            key={"q_" + i}
                             type="text"
                             placeholder="Possible answer"
                             value={a.choiceAnswer}
                             onChange={(e) => handleAnswerChanges(e, i)}
                         />
-                        <InputGroup.Radio name="correct" defaultChecked={a.choiceRight}
-                                          onChange={() => setRightAnswer(i)}/>
-                        {i > 3 &&
+                        <InputGroup.Radio name="correct"
+                                          checked={a.choiceRight}
+                                          onChange={() => onRightAnsChange(i)}/>
+                        {newAnsOptions.length > 2 &&
                             <Button variant="outline-secondary" id="button-addon2" onClick={() => handleRemoval(i)}>
                                 Remove
                             </Button>}
@@ -142,6 +163,7 @@ export const CreateEditQuizModal = ((props) => {
                             <Form.Label>Order in session:</Form.Label>
                             <InputGroup>
                                 <FormControl
+                                    key={"order_number"}
                                     placeholder="Order Number?"
                                     aria-label="Order in session"
                                     aria-describedby="order"
@@ -153,6 +175,7 @@ export const CreateEditQuizModal = ((props) => {
                             <Form.Label>Question:</Form.Label>
                             <InputGroup>
                                 <FormControl
+                                    key={"question_input"}
                                     placeholder="Question?"
                                     aria-label="A Question"
                                     aria-describedby="question"

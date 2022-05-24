@@ -25,7 +25,7 @@ data class SessionOutputModel(
     val guestCode: Int?,
     val limitOfParticipants: Int,
     val geolocation: String?,
-    val radius: Double?,
+    val radius: Int?,
     val quizzes: List<String>,
 ) {
     constructor(session: SessionDoc): this(

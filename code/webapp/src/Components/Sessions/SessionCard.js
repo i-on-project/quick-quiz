@@ -8,9 +8,13 @@ export const SessionCard = (props) => {
 
     const [status, setStatus] = useState(props.status)
 
-    const handleClick = () => {
+    const handleOpenClick = () => {
         props.openSession(props.name, props.link)
     }
+    const handleDeleteClick = () => {
+        props.deleteSession(props.name, props.link)
+    }
+
 
     const updateStatus = (newStatus) => {
         setStatus(newStatus)
@@ -18,30 +22,29 @@ export const SessionCard = (props) => {
         const setError = (error) => error !== null ? console.log(`Error Starting Session ${error}`) : null
 
         const setData = (data) => {
-            if(data !== null)
-                console.log(`status Updated to ${newStatus}, response: ${data} -> Navigate somewhere`)
+            console.log(`status Updated to ${newStatus}, response: ${data} -> Navigate somewhere`)
         }
 
-        console.log(`Status ${newStatus}`)
-        if(newStatus === 'STARTED')
-            goPOST(`/api/web/v1.0/auth/sessions/${props.id}/live`,'', setData, setError)
-        else if(newStatus === 'CLOSED')
-            goPOST(`/api/web/v1.0/auth/sessions/${props.id}/close`,'', setData, setError)
+        if (newStatus === 'STARTED')
+            goPOST(props.startHref, '', setData, setError)
+        else if (newStatus === 'CLOSED')
+            goPOST(props.closeHref, '', setData, setError)
     }
 
 
     return (
 
-        <Card style={{width: '18rem'}}>
+        <Card style={{width: '18rem'}} className="me-3 mb-3">
             <Card.Body>
                 <Card.Title>{props.name}</Card.Title>
-                <Button variant="primary" onClick={handleClick}>Open</Button>
                 <Form.Select value={status}
                              onChange={(e) => updateStatus(e.target.value)}>
                     {status === 'NOT_STARTED' && <option value='NOT_STARTED'>Not Started</option>}
-                    {status !== 'CLOSED' && <option value='STARTED'>Started</option> }
-                    {status !== 'NOT_STARTED' && <option value='CLOSED'>Closed</option> }
+                    {status !== 'CLOSED' && <option value='STARTED'>Started</option>}
+                    {status !== 'NOT_STARTED' && <option value='CLOSED'>Closed</option>}
                 </Form.Select>
+                <Button variant="primary" onClick={handleOpenClick} className="mt-3">Open</Button>
+                <Button variant="primary" onClick={handleDeleteClick} className="ms-3 mt-3">Delete</Button>
             </Card.Body>
         </Card>
     )

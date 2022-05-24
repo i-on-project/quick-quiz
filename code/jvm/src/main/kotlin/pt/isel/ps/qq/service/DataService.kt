@@ -108,6 +108,7 @@ class DataService(
                 aux.add(quiz.id)
             }
             val session = SessionDoc(template, sessionID, input, aux)
+
             return sessionRepo.save(session)
         }
 
@@ -116,8 +117,11 @@ class DataService(
         val session = SessionDoc(
             id = sessionId,
             name = input.name,
+            description = input.description,
             owner = owner,
             limitOfParticipants = input.limitOfParticipants ?: 10,
+            geolocation = input.geolocation,
+            radius = input.radius,
             status = QqStatus.NOT_STARTED,
             numberOfParticipants = 0
         )
@@ -203,12 +207,12 @@ class DataService(
             numberOfAnswers = 0
         )
         val toReturn = quizRepo.save(quiz)
-        try {
+       /* try {
             sessionRepo.updateSessionQuizzes(sessionId, owner, quiz.id ,CustomRequestUpdateQuizAction.ADD)
         } catch(ex: Exception) {
             quizRepo.deleteById(quiz.id)
             throw ex
-        }
+        }*/
         return toReturn
     }
 

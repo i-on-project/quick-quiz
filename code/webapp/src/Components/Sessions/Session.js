@@ -9,11 +9,13 @@ import {CreateEditQuizModal} from "../Quizzes/CreateEditQuizModal";
 import {getSession} from "../../Services/SessionService";
 import {useParams} from "react-router";
 import {SessionForm} from "./SessionForm";
+import {getActionHref, getEntityLinksHref, getLinksHref} from "../../Services/SirenService";
 
 export const Session = (props) => {
     const [loading, setLoading] = useState(false)
     const [session, setSession] = useState(null)
     const [quizzes, setQuizzes] = useState(null)
+    const [quizzesLinks, setQuizzesLinks] = useState(null)
     const [show, setShow] = useState(false)
     const [error, setError] = useState(null)
     const [title, setTitle] = useState('')
@@ -30,46 +32,44 @@ export const Session = (props) => {
         const getMeSession = (data) => {
             setSession(data)
         }
-        console.log(props)
-        if (props.session !== undefined && props.session !== null) { //TODO: Use or Remove as props
-            setSession(props.session)
 
-        } else {
-            goGET(`/api/web/v1.0/auth/sessions/${id}`, getMeSession, setSessionError)
-        }
+        goGET(`/api/web/v1.0/auth/sessions/${id}`, getMeSession, setSessionError)
+
     }, [id])
 
     useEffect(() => {
         if (session !== null) {
-            //console.log(session.properties)
             setTitle(session.properties.name)
             if (session.properties.quizzes.length > 0) {
-                //console.log(session.links[0].href)
-                const setError = (error) => {
-                    if (error !== null)
-                        alert(`Failed to retrieve Session from ${session.links[0].href} with error ${error}`)
-                }
-
-                const compareOrder = (a, b) => {
-                    if (a < b) return -1
-                    if (a > b) return 1
-                    return 0
-                }
-
-                const setData = (data) => {
-                    if (data) {
-                        const t = data.properties.sort((a, b) => compareOrder(a.order, b.order))
-                        setQuizzes(t)
-                    }
-                }
-                goGET(session.links[0].href, setData, setError)
+                getQuizzes()
             }
         }
     }, [session])
 
+    const getQuizzes = () => {
+        const setError = (error) => {
+            if (error !== null)
+                alert(`Failed to retrieve Session from ${getLinksHref(session.links, "related")} with error ${error}`)
+        }
+
+        const compareOrder = (a, b) => {
+            if (a < b) return -1
+            if (a > b) return 1
+            return 0
+        }
+
+        const setData = (data) => {
+            if (data) {
+                const quizList = data.entities.map(e => e)
+                const t = quizList.sort((a, b) => compareOrder(a.properties.order, b.properties.order))
+                setQuizzes(t)
+            }
+        }
+        goGET(getLinksHref(session.links, "related"), setData, setError)
+    }
+
     const openSession = (name, link) => {
         setLoading(true)
-        //console.log(`name: ${name} -> link: ${link}`)
         const setError = (error) => {
             if (error !== null)
                 alert(`Failed to retrieve Session from ${link} with error ${error}`)
@@ -94,31 +94,27 @@ export const Session = (props) => {
 
     const createQuizHandler = (quiz) => {
         const setError = (error) => error !== null ? console.log(`Error Creating with error ${error} `) : null
-        const setData = (data) => data !== null ? console.log(`Created Quiz Successfully!! Response: ${data}`) : null
-
+        const setData = (data) => {
+            console.log(`Created Quiz Successfully!! Response: ${data}`)
+            handleClose()
+            getQuizzes()
+        }
         const apiLink = session.actions.find(a => a.name === 'Add-Quiz').href
         goPOST(apiLink, quiz, setData, setError)
 
     }
 
     const updateSessionHandler = (updatedSession) => {
-        //console.log(updatedSession)
-
         setLoading(true)
-        //console.log(`name: ${name} -> link: ${link}`)
         const setError = (error) => {
             if (error !== null)
                 alert(`Failed to update Session from ${updatedSession} with error ${error}`)
         }
 
-
-        const apiLink = session.actions.find(a => a.name === 'Update-Session').href
-        const method = session.actions.find(a => a.name === 'Update-Session').method
-        /*        console.log(`APILink: ${apiLink}`)
-                console.log(`Method: ${method}`)*/
+        const apiLink = getActionHref(session.actions, 'Update-Session')
+        //const method = session.actions.find(a => a.name === 'Update-Session').method //TODO: getMethod
 
         goPOST(apiLink, updatedSession, null, setError, 'PUT', setLoading)
-
     }
 
     return (
@@ -139,9 +135,11 @@ export const Session = (props) => {
             <Container>
                 <Row>
                     {quizzes !== null && quizzes.length > 0 && (
-                        quizzes.map(q => <QuizCard key={q.id}
-                                                   name={q.question}
-                                                   data={q}
+                        quizzes.map(q => <QuizCard key={q.properties.id}
+                                                   name={q.properties.question}
+                                                   data={q.properties}
+                                                   quizHref={q.href}
+                                                   reloadQuizzes={getQuizzes}
                         />)
                     )}
                 </Row>

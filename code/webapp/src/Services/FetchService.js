@@ -27,7 +27,8 @@ export const goPOST = (address, submitData, setData, setError, method = 'POST', 
 
         })
         .finally(() => {
-            setLoading(false);
+            if(setLoading !== undefined && setLoading !== null)
+                setLoading(false);
         });
 };
 
@@ -50,15 +51,16 @@ export const goDEL = (address, setData, setError, setLoading) => {
         .then((actualData) => {
             if(setData)
                 setData(actualData)
-
+            console.log(`I'm in fetch data`)
         })
         .catch((err) => {
             if(setError)
                 setError(err.message)
-
+            console.log(`I'm in fetch error in catch ${err.message}`)
         })
         .finally(() => {
-            setLoading(false);
+            if(setLoading !== undefined && setLoading !== null)
+                setLoading(false);
         });
 };
 

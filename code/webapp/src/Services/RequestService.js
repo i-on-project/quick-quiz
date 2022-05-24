@@ -2,12 +2,9 @@ import { cancellableFetch } from "./CancellableFetch"
 
 const parse = (response, setData, setError) => {
     response.body.then((data) => {
-        
-        /// May be incorrect
+
         if(response.signal.aborted) return
-        
-        
-        
+
         if(response.ok) setData(data)
         else setError(data)
     })

@@ -9,10 +9,11 @@ import {UserContext} from "./UserContextProvider";
 export const NavBarComponent = () => {
 
     const userContext = useContext(UserContext)
-    const [displayName, setDisplayName] = useState(userContext.displayName)
+
     const logoutHandler = () => {
         goPOST('/api/web/v1.0/auth/logout',null, null, null)
         userContext.updateUser(null, null)
+
     }
 
     const isLoggedIn = () => userContext.userName !== null && userContext.isLoading === false

@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*
 import pt.isel.ps.qq.UserInfoScope
 import pt.isel.ps.qq.data.*
 import pt.isel.ps.qq.data.elasticdocs.QqStatus
+import pt.isel.ps.qq.data.elasticdocs.SessionQuizDoc
 import pt.isel.ps.qq.exceptions.*
 import pt.isel.ps.qq.service.AuthenticationService
 import pt.isel.ps.qq.service.DataService
@@ -174,7 +175,7 @@ class RegisteredController(
                 title = "Create",
                 method = SirenSupportedMethods.POST,
                 href = Uris.API.Web.V1_0.Auth.Session.PATH
-            ),
+            )
             /*SirenAction( TODO: what can be done here
                 name = "GoLive-Session",
                 title = "Start",
@@ -191,7 +192,25 @@ class RegisteredController(
                     clazz = listOf("SessionSummary"),
                     rel = listOf("self"),
                     href = Uris.API.Web.V1_0.Auth.Session.Id.make(it.id).toString(),
-                    properties = SessionSummaryOutputModel(it)
+                    properties = SessionSummaryOutputModel(it),
+                    links = listOf(
+                        SirenLink(
+                            rel = listOf("self", "delete"),
+                            title = "Delete",
+                            type = SirenSupportedMethods.DELETE.toString(),
+                            href = Uris.API.Web.V1_0.Auth.Session.Id.make(it.id).toString()),
+                        SirenLink(
+                            rel = listOf("self", "start"),
+                            title = "Start",
+                            type = SirenSupportedMethods.POST.toString(),
+                            href = Uris.API.Web.V1_0.Auth.Session.Id.Live.make(it.id).toString()),
+                        SirenLink(
+                            rel = listOf("self", "close"),
+                            title = "Close",
+                            type = SirenSupportedMethods.POST.toString(),
+                            href = Uris.API.Web.V1_0.Auth.Session.Id.Close.make(it.id).toString())
+
+                    )
                 )
             },
             actions = actionList,
@@ -298,12 +317,13 @@ class RegisteredController(
                     title = "New quiz",
                     method = SirenSupportedMethods.POST,
                     href = Uris.API.Web.V1_0.Auth.Session.Id.Quiz.make(id).toString()
-                ), SirenAction(
+                )
+/*                , SirenAction(
                     name = "Remove-Quiz",
                     title = "Remove quiz",
                     method = SirenSupportedMethods.DELETE,
                     href = Uris.API.Web.V1_0.Auth.Session.Id.Quiz.make(id).toString()
-                )
+                )*/
             )
             when(doc.status) {
                 QqStatus.STARTED -> {
@@ -359,7 +379,7 @@ class RegisteredController(
     @PutMapping(Uris.API.Web.V1_0.Auth.Session.Id.CONTROLLER_ENDPOINT)
     fun editSessionById(request: HttpServletRequest, @PathVariable id: String, @RequestBody input: EditSessionInputModel): ResponseEntity<Any> {
         return try {
-            val doc = service.editSession(scope.getUser().userName, id, input)
+             val doc = service.editSession(scope.getUser().userName, id, input)
             val body = SirenModel(
                 clazz = listOf("EditSession"), properties = Acknowledge.TRUE, links = listOf(
                     SirenLink(
@@ -509,9 +529,7 @@ class RegisteredController(
         return try {
             service.removeQuizFromSession(scope.getUser().userName, id)
             val body = SirenModel(
-                clazz = listOf("RemoveQuizFromSession"),
-                properties = Acknowledge.TRUE,
-                title = "Quiz was removed successfully"
+                clazz = listOf("DeleteSession"), properties = Acknowledge.TRUE, title = "Session successfully deleted."
             )
             ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
         } catch(ex: SessionIllegalStatusOperationException) {
@@ -583,7 +601,7 @@ class RegisteredController(
     fun getQuizFullInformation(request: HttpServletRequest, @PathVariable id: String): ResponseEntity<Any> {
         val quiz = service.getQuizValidatingOwner(scope.getUser().userName, id)
         val body = SirenModel(
-            clazz = listOf("Quiz"),
+            clazz = listOf("Quiz"), //TODO: add actions update
             properties = quiz
         )
         return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
@@ -593,9 +611,32 @@ class RegisteredController(
     @GetMapping(Uris.API.Web.V1_0.Auth.Quiz.SessionId.CONTROLLER_ENDPOINT)
     fun getAllQuizzesForSession(@PathVariable sessionid: String): ResponseEntity<Any> {
         val quizzes = service.getAllSessionQuizzes(sessionid)
+
+/*                , SirenAction(
+                    name = "Remove-Quiz",
+                    title = "Remove quiz",
+                    method = SirenSupportedMethods.DELETE,
+                    href = Uris.API.Web.V1_0.Auth.Session.Id.Quiz.make(id).toString()
+                )*/
+
         val body = SirenModel(
             clazz = listOf("Quiz"),
-            properties = quizzes
+            properties = ListInfo(size = quizzes.size, total = quizzes.size),
+            entities = quizzes.map {
+                SirenEntity(
+                    clazz = listOf("quizzes"),
+                    rel = listOf("self"),
+                    href = Uris.API.Web.V1_0.Auth.Quiz.Id.make(it.id).toString(),
+                    properties = it,
+                    links = listOf(
+                        SirenLink(
+                            rel = listOf("self", "update_status"),
+                            title = "Start",
+                            type = SirenSupportedMethods.POST.toString(),
+                            href = Uris.API.Web.V1_0.Auth.Quiz.Id.UpdateStatus.make(it.id).toString())
+                    )
+                )
+            }
         )
         return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }

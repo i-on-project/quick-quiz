@@ -11,6 +11,7 @@ data class SessionInputModel(
     val description: String? = null,
     val limitOfParticipants: Int?,
     val geolocation: String?,
+    val radius: Int?,
     val templateId: String? = null
 )
 
@@ -64,6 +65,7 @@ data class EditSessionInputModel(
     val name: String?,
     val limitOfParticipants: Int?,
     val geolocation: String?,
+    val radius: Int?,
     val description: String?,
     val status: QqStatus?
     //TODO: Missing radius

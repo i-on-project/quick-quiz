@@ -3,9 +3,9 @@ import {Container, Modal, Row, Spinner} from "react-bootstrap";
 import Button from "react-bootstrap/Button";
 import {SessionCard} from "./SessionCard";
 import {Navigate, Redirect} from "react-router-dom";
-import {goGET, goPOST} from "../../Services/FetchService";
+import {goDEL, goGET, goPOST} from "../../Services/FetchService";
 import {CreateSessionModal} from "./CreateSessionModal";
-
+import {getActionHref, getEntityLinksHref, getLinksFromEntity} from "../../Services/SirenService";
 
 
 export const Sessions = () => {
@@ -18,8 +18,6 @@ export const Sessions = () => {
     const [page, setPage] = useState(0)
     const [totalPages, setTotalPages] = useState(-1)
     const [sessionCreated, setSessionCreated] = useState(null)
-
-
 
 
     useEffect(() => {
@@ -55,8 +53,14 @@ export const Sessions = () => {
                 alert('Session was not created and Error received: ' + error)
         }
 
-        const apiLink = sessions.actions.find(a => a.name === 'Create-Session').href
-        goPOST(apiLink, newSession, setData, setError, 'POST', setLoading)
+        const apiLink = getActionHref(sessions.actions, "Create-Session")
+
+        if(apiLink !== null)
+            goPOST(apiLink, newSession, setData, setError, 'POST', setLoading)
+        else {
+            setError("Missing Action!")
+            setLoading(true)
+        }
 
     }
 
@@ -79,21 +83,37 @@ export const Sessions = () => {
         setSessionId(id)
     }
 
-    // const goBack = () => {
-    //     setInSession(false)
-    // }
+    const deleteSession = (id) => {
+        setLoading(true)
+        const setData = (data) => {
+            console.log(data)
+            window.location.reload(false);
+
+        }
+
+        const setError = (error) => {
+            if (error !== null)
+                alert('Session was not Deleted and Error received: ' + error)
+        }
+
+        console.log(sessions.entities)
+        const apiLink = getEntityLinksHref(sessions.entities, id, "delete")
+
+        if (apiLink !== null)
+            goDEL(apiLink, setData, setError, setLoading)
+
+    }
 
     const handleCLose = () => setNewSession(false)
 
 
     const newButton = () => (
-        <Button className="btn btn-success" type="submit"
+        <Button className="btn btn-success" type="submit" className="mb-3"
                 onClick={() => setNewSession(true)}> New Session
         </Button>
     )
 
     const handleNext = () => {
-        console.log(`Number of pages: ${totalPages}`)
         if (page >= totalPages) setPage(0)
         else setPage((curr) => curr + 1)
     }
@@ -105,7 +125,7 @@ export const Sessions = () => {
 
     return (
         <Fragment>
-           {sessionId !== null && <Navigate to={`./${sessionId}`} session={sessionCreated} />}
+            {sessionId !== null && <Navigate to={`./${sessionId}`} session={sessionCreated}/>}
             <Container>
                 <Row>
                     <h1>Sessions</h1>
@@ -123,7 +143,12 @@ export const Sessions = () => {
                                      link={e.href}
                                      id={e.properties.id}
                                      status={e.properties.status}
-                                     openSession={() => openSession(e.properties.id)}/>)}
+                                     startHref = {getLinksFromEntity(e, "start")}
+                                     closeHref = {getLinksFromEntity(e, "close")}
+                                     openSession={() => openSession(e.properties.id)}
+                                     deleteSession={() => deleteSession(e.properties.id)}
+                        />)
+                    }
                     {loading === false && inSession === true && inSession === true && (
                         <Navigate to={`/sessions/${sessionId}`}/>)}
                     {/*  {loading === false && inSession === true && session !== null && (

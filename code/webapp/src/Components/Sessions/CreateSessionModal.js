@@ -1,6 +1,7 @@
 import {SessionForm} from "./SessionForm";
 import {Button, Form, FormControl, InputGroup, Modal} from "react-bootstrap";
 import React, {useState, Fragment} from "react";
+import {getCurrentLocation} from "../../Services/LocationService";
 
 
 export const CreateSessionModal = ((props) => {
@@ -20,13 +21,14 @@ export const CreateSessionModal = ((props) => {
         event.preventDefault();
 
         if (form.checkValidity() === false) {
-           event.stopPropagation();
-        }
-        else {
+            event.stopPropagation();
+        } else {
             const newSession = {
                 name: name,
                 description: description,
                 limitOfParticipants: limitOfParticipants,
+                geolocation: geolocation,
+                radius: radius
             }
             if (props.createSession != null) {
                 props.createSession(newSession)
@@ -35,9 +37,21 @@ export const CreateSessionModal = ((props) => {
         setValidated(true);
     };
 
+    const updateLocation = () => {
+        const success = (pos) => {
+            const crd = pos.coords;
+            setGeolocation(`${crd.latitude},${crd.longitude},${crd.accuracy}`)
+        }
+
+        const error = (err) => {
+            console.warn(`ERROR(${err.code}): ${err.message}`);
+        }
+
+        getCurrentLocation(success, error)
+    }
 
     const handleClose = () => {
-        if(props.handleClose != null) {
+        if (props.handleClose != null) {
             props.handleClose()
         }
     }
@@ -84,12 +98,37 @@ export const CreateSessionModal = ((props) => {
                         />
                     </InputGroup>
 
-                    <InputGroup>
-                        <InputGroup.Checkbox aria-label="Checkbox for following text input"
-                                             onChange={(e) => setUseGeo(e.target.value)}
-                                             />
-                        <Form.Label> Use Geolocation</Form.Label>
+                    <Form.Label className={"mb-2 mt-3"}>Geolocation:</Form.Label>
+                    <InputGroup className="mb-3">
+                        <FormControl
+                            key={"geo_location"}
+                            type="text"
+                            placeholder="Add Geolocation (optional)"
+                            value={geolocation}
+
+                            onChange={(e) => setGeolocation(e.target.value)}
+                        />
+                        <Button variant="outline-secondary" id="button-addon2" onClick={updateLocation}>
+                            Update location
+                        </Button>
                     </InputGroup>
+
+                    {geolocation !== null && geolocation !== '' && (
+                        <Form.Label className={"mb-2 mt-3"}>Radius (meters):</Form.Label>)}
+
+                    {geolocation !== null && geolocation !== '' && (
+                        <InputGroup className="mb-3">
+                            <FormControl
+                                required={geolocation !== null && geolocation !== ''}
+                                min={50}
+                                key={"geo_radius"}
+                                type="number"
+                                placeholder="Add Radius (min 50m)"
+                                value={radius}
+                                onChange={(e) => setRadius(e.target.value)}
+                            />
+                        </InputGroup>
+                    )}
 
                 </Modal.Body>
 
