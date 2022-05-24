@@ -1,5 +1,5 @@
 
-export const goPOST = (address, submitData, setData, setError, method = 'POST', setLoading = null) => {
+export const goPOST = (address, submitData, setData, setError, method = 'POST', setLoading) => {
 
     fetch(address, {
         method: method,
@@ -32,7 +32,7 @@ export const goPOST = (address, submitData, setData, setError, method = 'POST', 
         });
 };
 
-export const goDEL = (address, setData, setError, setLoading = null) => {
+export const goDEL = (address, setData, setError, setLoading) => {
 
     fetch(address, {
         method: 'DELETE',
@@ -64,7 +64,7 @@ export const goDEL = (address, setData, setError, setLoading = null) => {
         });
 };
 
-export const goGET = (address, setData, setError, setLoading=null) => {
+export const goGET = (address, setData, setError, setLoading) => {
 
     fetch(address, {
         method: 'GET',
@@ -91,7 +91,7 @@ export const goGET = (address, setData, setError, setLoading=null) => {
 
         })
         .finally(() => {
-            if(setLoading !== null)
+            if(setLoading !== undefined && setLoading !== null)
                 setLoading(false);
         });
 };

@@ -68,15 +68,10 @@ export const RegisterUser = () => {
                                     {error && (
                                         <div>{`There is a problem fetching the post data - ${error}`}</div>
                                     )}
-                                    {data && (
-                                        <div>{data.properties.userName}</div>
-                                    )}
-                                    {data && (
-                                        <div>{data.properties.token}</div>
-                                    )}
 
                                     {data && (
-                                        <a href={`http://localhost:3000/logmein?user=${data.properties.userName}&token=${data.properties.token}`}> LogMeIn </a>)}
+                                        <div>{data.userName}</div>
+                                    )}
                                 </Card.Body>
                             </Card>
                         </Card.Body>
