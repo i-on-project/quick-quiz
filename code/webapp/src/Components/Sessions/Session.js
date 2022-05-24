@@ -1,4 +1,4 @@
-import React, {useEffect, useState, Fragment} from "react";
+import React, {useEffect, useState, Fragment, useReducer} from "react";
 import {Card, Container, Form, FormControl, FormLabel, InputGroup, Modal, Row} from "react-bootstrap";
 import {EditableInput} from "../UtilComponents/EditableInput";
 import Button from "react-bootstrap/Button";
@@ -12,6 +12,8 @@ import {SessionForm} from "./SessionForm";
 import {getActionHref, getEntityLinksHref, getLinksHref} from "../../Services/SirenService";
 
 export const Session = (props) => {
+
+    const initialState = {session: null}
     const [loading, setLoading] = useState(false)
     const [session, setSession] = useState(null)
     const [quizzes, setQuizzes] = useState(null)
@@ -20,6 +22,42 @@ export const Session = (props) => {
     const [error, setError] = useState(null)
     const [title, setTitle] = useState('')
     const {id} = useParams()
+
+
+    const reducer = (state, action) => {
+        switch (action.type) {
+            case 'loadQuizzes':
+                setSession(action.payload)
+                return loadQuizzes();
+            default:
+                return;
+        }
+    }
+    const loadQuizzes = () => {
+        if (session.properties.quizzes.length > 0) {
+            //console.log(session.links[0].href)
+            const setError = (error) => {
+                if (error !== null)
+                    alert(`Failed to retrieve Session from ${session.links[0].href} with error ${error}`)
+            }
+
+            const compareOrder = (a, b) => {
+                if (a < b) return -1
+                if (a > b) return 1
+                return 0
+            }
+
+            const setData = (data) => {
+                if (data) {
+                    const t = data.properties.sort((a, b) => compareOrder(a.order, b.order))
+                    setQuizzes(t)
+                }
+            }
+            goGET(session.links[0].href, setData, setError)
+        }
+    }
+
+    const [state, dispatch] = useReducer(reducer, initialState);
 
     useEffect(() => {
         /*Prevent reset state*/
@@ -30,12 +68,14 @@ export const Session = (props) => {
             }
         }
         const getMeSession = (data) => {
-            setSession(data)
+            dispatch({type: 'loadQuizzes', payload: data})
         }
 
         goGET(`/api/web/v1.0/auth/sessions/${id}`, getMeSession, setSessionError)
 
     }, [id])
+
+
 
     useEffect(() => {
         if (session !== null) {
@@ -44,6 +84,7 @@ export const Session = (props) => {
                 getQuizzes()
             }
         }
+
     }, [session])
 
     const getQuizzes = () => {
@@ -82,9 +123,12 @@ export const Session = (props) => {
     const newQuiz = () => {
         setShow(true)
     }
-    const handleClose = () => {
+    const handleClose = (reload = false) => {
         setShow(false)
+        //if (reload)
+
     }
+
 
     const newButton = () => (
         <Button className="btn btn-success left" type="submit"
