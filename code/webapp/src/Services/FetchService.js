@@ -10,10 +10,9 @@ export const goPOST = (address, submitData, setData, setError, method = 'POST', 
     })
         .then((response) => {
             if (!response.ok) {
-                throw new Error(
-                    `This is an HTTP error: The status is ${response.status}`
-                );
+                return response.text().then(text => { throw new Error(text) })
             }
+            else
             return response.json();
         })
         .then((actualData) => {
@@ -22,8 +21,13 @@ export const goPOST = (address, submitData, setData, setError, method = 'POST', 
 
         })
         .catch((err) => {
-            if(setError)
-                setError(err.message)
+            if(setError) {
+                const jerror = JSON.parse(err.message)
+                if(jerror)
+                    setError(jerror)
+                else
+                    setError(err.message)
+            }
 
         })
         .finally(() => {

@@ -23,7 +23,7 @@ data class SessionDoc(
     val radius: Int? = null,
     val radiusUnit: String? = null,
     val liveDate: Long? = null,
-    val quizzes: List<String> = emptyList(),
+    val quizzes: List<String> = emptyList(), //TODO: Remove
     val status: QqStatus,
     var numberOfParticipants: Int = 0
 

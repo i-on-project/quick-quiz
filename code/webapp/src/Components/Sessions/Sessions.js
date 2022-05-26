@@ -2,7 +2,7 @@ import React, {Fragment, useEffect, useState} from "react";
 import {Container, Modal, Row, Spinner} from "react-bootstrap";
 import Button from "react-bootstrap/Button";
 import {SessionCard} from "./SessionCard";
-import {Navigate, Redirect} from "react-router-dom";
+import {Navigate} from "react-router-dom";
 import {goDEL, goGET, goPOST} from "../../Services/FetchService";
 import {CreateSessionModal} from "./CreateSessionModal";
 import {getActionHref, getEntityLinksHref, getLinksFromEntity} from "../../Services/SirenService";
@@ -20,9 +20,7 @@ export const Sessions = () => {
     const [sessionCreated, setSessionCreated] = useState(null)
 
 
-    useEffect(() => {
-
-        setLoading(true)
+    const getSessions = () => {
 
         const setError = (error) => {
             alert(`Failed to update Session from ${`/api/web/v1.0/auth/sessions?page=${page === -1 ? 0 : page}`} with error ${error}`)
@@ -35,6 +33,12 @@ export const Sessions = () => {
         }
 
         goGET(`/api/web/v1.0/auth/sessions?page=${page === -1 ? 0 : page}`, setData, setError, setLoading)
+    }
+
+    useEffect(() => {
+
+        setLoading(true)
+        getSessions()
 
     }, [page])
 
@@ -65,7 +69,7 @@ export const Sessions = () => {
     }
 
     //const goToSession = (id) => <Redirect to={`\/${id}`} />
-    /*const openSession = (name, link) => {
+/*    const openSession = (name, link) => {
         setLoading(true)
         //console.log(`name: ${name} -> link: ${link}`)
         const setError = (error) => {
@@ -87,7 +91,7 @@ export const Sessions = () => {
         setLoading(true)
         const setData = (data) => {
             console.log(data)
-            window.location.reload(false);
+            getSessions()
 
         }
 
@@ -147,6 +151,7 @@ export const Sessions = () => {
                                      closeHref = {getLinksFromEntity(e, "close")}
                                      openSession={() => openSession(e.properties.id)}
                                      deleteSession={() => deleteSession(e.properties.id)}
+                                     reloadSessions={() => getSessions()}
                         />)
                     }
                     {loading === false && inSession === true && inSession === true && (

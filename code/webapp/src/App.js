@@ -11,6 +11,8 @@ import {Templates} from "./Components/Templates/Templates";
 import {Sessions} from "./Components/Sessions/Sessions";
 import {Session} from "./Components/Sessions/Session";
 import History from "./Components/History/HistoryPage";
+import {InSession} from "./Components/InSessionComponent";
+import {InSessionOrg} from "./Components/Sessions/InSessionOrg";
 
 
 function App() {
@@ -30,7 +32,7 @@ function App() {
                             <Route path="/register" element={<RegisterUser/>}/>
                             <Route path="/sessions" element={<Sessions/>}/>
                             <Route path="/sessions/:id" element={<Session/>}/>
-                           {/* <Route path="/insession/:id" element={<Session/>}/>*/}
+                            <Route path="/owninsession/:id" element={<InSessionOrg/>}/>
                             <Route path="/templates" element={<Templates/>}/>
                             <Route path="/history" element={<History />} />
                             <Route path="/login" element={<LoginUser/>}/>

@@ -1,3 +1,4 @@
+/*
 import React from "react";
 import {Card, Container, Row} from "react-bootstrap";
 import * as stompClient from "../Utils/websocket-listener";
@@ -41,3 +42,4 @@ export class InSession extends React.Component {
         );
     }
 }
+*/

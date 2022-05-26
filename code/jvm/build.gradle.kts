@@ -5,6 +5,7 @@ plugins {
 	id("io.spring.dependency-management") version "1.0.11.RELEASE"
 	kotlin("jvm") version "1.6.10"
 	kotlin("plugin.spring") version "1.6.10"
+	kotlin("plugin.serialization") version "1.6.21"
 }
 
 group = "pt.isel.ps"
@@ -31,8 +32,7 @@ dependencies {
 	implementation("javax.validation:validation-api:2.0.1.Final")
 	implementation("org.springframework.boot:spring-boot-starter-websocket:2.6.7")
 	implementation("org.springframework.boot:spring-boot-starter-data-rest:2.6.7")
-
-
+	implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 

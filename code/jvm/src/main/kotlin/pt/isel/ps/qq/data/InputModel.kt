@@ -2,7 +2,7 @@ package pt.isel.ps.qq.data
 
 import pt.isel.ps.qq.data.elasticdocs.QqStatus
 import pt.isel.ps.qq.data.elasticdocs.QuestionType
-import java.util.UUID
+import java.util.*
 
 private val emailRegex = Regex("^[a-zA-Z0-9_!#\$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+\$")
 
@@ -18,7 +18,7 @@ data class SessionInputModel(
 data class RegisterInputModel(
     val userName: String,
     val displayName: String
-){
+) {
     init {
         require(userName.matches(emailRegex))
         require(displayName.isNotBlank())
@@ -39,7 +39,7 @@ data class LoginMeInputModel(
 ) {
     init {
         require(userName.matches(emailRegex)) { "Invalid Email " }
-        require(UUID.fromString(loginToken) != null) {"Invalid Token"}
+        require(UUID.fromString(loginToken) != null) { "Invalid Token" }
     }
 }
 
@@ -51,6 +51,10 @@ data class GetQuizInputModel(
     val guestId: String,
     val sessionId: String,
     val quizId: String
+)
+
+data class GetAllAnswersInputModel(
+    val sessionId: String
 )
 
 data class GiveAnswerInputModel(

@@ -6,8 +6,8 @@ export const getActionHref = (actions, name) => {
         return null
 }
 
-export const getLinksHref = (links, relName) => {
-    const link = links.find(a => a.rel.includes(relName))
+export const getLinksHref = (links, relName, title) => {
+    const link = links.find(a => a.rel.includes(relName) && a.title === title)
     if (link)
         return link.href
     else

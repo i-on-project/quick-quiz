@@ -1,16 +1,20 @@
-import {Form, ListGroup, Modal} from "react-bootstrap";
+import {Form, ListGroup, Modal, ProgressBar} from "react-bootstrap";
 import Button from "react-bootstrap/Button";
-import React, {Fragment, useState} from "react";
+import React, {Fragment, useEffect, useState} from "react";
 import {CreateEditQuizModal} from "./CreateEditQuizModal";
 import {goDEL, goPOST} from "../../Services/FetchService";
 
 
-export const QuizCard = (props) => {
+export const QuizCardInSession = (props) => {
     const [show, setShow] = useState(false)
     const [dataForEdit, setDataForEdit] = useState(null)
     const [status, setStatus] = useState(props.data.quizState)
-    const [shoAns, setShowAns] = useState(false)
+    const [ans, setAns] = useState(null)
+    const [showAns, setShowAns] = useState(false)
 
+    /*    useEffect(() => {
+            console.log(props.answers)
+        }, [ans])*/
     const handleClick = () => {
         /*props.openSession(props.name, props.link)*/
         console.log(`Data in Quiz Card: ${props.data}`)
@@ -61,6 +65,43 @@ export const QuizCard = (props) => {
         goPOST(`${props.quizHref}/updatestatus`, toUpdate, setData, setError, 'PUT')
     }
 
+    const getMultiChoiceView = () => {
+        const stats = new Array(props.data.answerChoices.length).fill(0);
+        props.answers.forEach((ans) => stats[ans.answerNumber] += 1)
+
+        const content = props.data.answerChoices.map((choice, idx) => {
+            let color = "danger"
+            if (choice.choiceRight) color = "success"
+
+            return (
+                <ListGroup variant="flush">
+                    <ListGroup.Item key={idx}>
+                        <div className={"bg-light d-flex justify-content-between"}>
+                            <p>{choice.choiceAnswer}</p>
+                            <p>{stats[choice.choiceNumber] + ' of ' + props.answers.length}</p>
+                        </div>
+                        <ProgressBar variant={color} now={(stats[choice.choiceNumber] / props.answers.length) * 100}/>
+                    </ListGroup.Item>
+                </ListGroup>)
+        })
+        return content
+    }
+
+    const getAnswers = () => (
+        <Fragment>
+            {props.data.answerType === 'MULTIPLE_CHOICE' && getMultiChoiceView()}
+            {props.data.answerType !== 'MULTIPLE_CHOICE' &&
+                props.answers.map((a, i) =>
+                    <ListGroup horizontal>
+                        <ListGroup.Item className="col-1 ms-3">{i + 1}</ListGroup.Item>
+                        <ListGroup.Item className="col-11">{a.answer}</ListGroup.Item>
+                    </ListGroup>
+                )
+            }
+        </Fragment>
+    )
+
+
     return (<Fragment>
         {/*{['md'].map((breakpoint) => (*/}
 
@@ -68,6 +109,7 @@ export const QuizCard = (props) => {
             <ListGroup.Item className="col-4">{props.data.question}</ListGroup.Item>
             <ListGroup.Item className="col-3">{props.data.answerType}</ListGroup.Item>
             <ListGroup.Item className="col-1">{props.data.order}</ListGroup.Item>
+            <ListGroup.Item>Answers: {props.answers.length} </ListGroup.Item>
             <ListGroup.Item className="col-2">
                 <Form.Select value={status}
                              onChange={(e) => updateStatus(e.target.value)}>
@@ -89,13 +131,13 @@ export const QuizCard = (props) => {
             </ListGroup.Item>
             }
             {status !== 'NOT_STARTED' && <ListGroup.Item>
-                <Button variant="primary" type="submit" onClick={() => removeQuiz(props.data.id)}>
+                <Button variant="primary" type="submit" onClick={() => setShowAns( sa => !sa)}>
                     Answers
                 </Button>
             </ListGroup.Item>
             }
         </ListGroup>
-
+        {props.answers.length > 0 && showAns && getAnswers(props.data.id)}
         <Modal show={show}>
             <CreateEditQuizModal data={dataForEdit}
                                  handleClose={handleClose}

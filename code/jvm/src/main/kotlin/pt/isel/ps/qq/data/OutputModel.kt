@@ -1,7 +1,6 @@
 package pt.isel.ps.qq.data
 
 import pt.isel.ps.qq.data.elasticdocs.*
-import pt.isel.ps.qq.utils.getCurrentTimeSeconds
 
 data class SessionSummaryOutputModel(
     val id: String,
@@ -119,4 +118,20 @@ data class MultipleChoiceOutputModel(
     val choiceNumber: Int,
     val choiceAnswer: String,
     val choiceRight: Boolean
+)
+
+data class AnswersOutputModel(
+    val id: String,
+    val answers: List<Answer> = emptyList()
+) {
+    constructor(doc: AnswersDoc): this(
+        id = doc.id,
+        answers = doc.answers.map { a -> Answer(a.quizId, a.answer, a.answerNumber) }
+    )
+}
+
+data class Answer(
+    val quizId: String,
+    val answer: String? = null,
+    val answerNumber: Int? = null
 )

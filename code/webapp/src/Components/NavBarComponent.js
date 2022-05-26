@@ -1,6 +1,6 @@
-import React, {useContext, useEffect, useState} from 'react'
+import React, {Fragment, useContext, useEffect, useState} from 'react'
 import {Container, Navbar} from "react-bootstrap";
-import {Link} from "react-router-dom";
+import {Navigate, Link} from "react-router-dom";
 import Button from "react-bootstrap/Button";
 import {goPOST} from "../Services/FetchService";
 
@@ -9,18 +9,20 @@ import {UserContext} from "./UserContextProvider";
 export const NavBarComponent = () => {
 
     const userContext = useContext(UserContext)
+    const [logout, setLogout] = useState(false)
 
     const logoutHandler = () => {
         goPOST('/api/web/v1.0/auth/logout',null, null, null)
         userContext.updateUser(null, null)
-
+        setLogout(true)
     }
 
     const isLoggedIn = () => userContext.userName !== null && userContext.isLoading === false
     const isNotLoggedIn = () => userContext.userName === null && userContext.isLoading === false
 
     return (
-        <div>
+        <Fragment>
+            {logout && <Navigate to={"/"} />}
             <Navbar bg="light" expand="lg">
                 <Container>
                     <Navbar.Text><Link to="/">Home</Link></Navbar.Text>
@@ -36,6 +38,6 @@ export const NavBarComponent = () => {
 
                 </Container>
             </Navbar>
-        </div>
+        </Fragment>
     );
 }

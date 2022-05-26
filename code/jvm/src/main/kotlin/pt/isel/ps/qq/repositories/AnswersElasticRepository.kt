@@ -6,4 +6,6 @@ import pt.isel.ps.qq.data.elasticdocs.AnswersDoc
 import pt.isel.ps.qq.repositories.customelastic.AnswerCustomRequests
 
 @Repository
-interface AnswersElasticRepository: ElasticsearchRepository<AnswersDoc, String>, AnswerCustomRequests
+interface AnswersElasticRepository: ElasticsearchRepository<AnswersDoc, String>, AnswerCustomRequests {
+    fun findAnswersDocsBySessionId(sessionId: String): List<AnswersDoc>
+}

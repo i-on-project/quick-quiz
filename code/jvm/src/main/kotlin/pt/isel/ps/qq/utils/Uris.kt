@@ -1,6 +1,5 @@
 package pt.isel.ps.qq.utils
 
-import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.util.UriTemplate
 import java.net.URI
 import javax.servlet.http.HttpServletRequest
@@ -103,6 +102,15 @@ object Uris {
 
                             object Quiz {
                                 const val ENDPOINT = "/quiz"
+                                const val PATH = "${Session.Id.PATH}$ENDPOINT"
+                                const val CONTROLLER_ENDPOINT = "${Session.ENDPOINT}${Id.ENDPOINT}${ENDPOINT}"
+                                private val TEMPLATE = UriTemplate(PATH)
+                                fun make(id: String): URI = TEMPLATE.expand(mapOf("id" to id))
+                                fun url(host: String, id: String) = "${host}${make(id)}"
+                            }
+
+                            object Answers {
+                                const val ENDPOINT = "/answers"
                                 const val PATH = "${Session.Id.PATH}$ENDPOINT"
                                 const val CONTROLLER_ENDPOINT = "${Session.ENDPOINT}${Id.ENDPOINT}${ENDPOINT}"
                                 private val TEMPLATE = UriTemplate(PATH)

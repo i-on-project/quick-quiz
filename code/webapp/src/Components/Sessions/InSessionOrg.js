@@ -1,24 +1,29 @@
-import React, {useEffect, useState, Fragment} from "react";
-import {Card, Container, Form, FormControl, FormLabel, InputGroup, Modal, Row} from "react-bootstrap";
-import {EditableInput} from "../UtilComponents/EditableInput";
-import Button from "react-bootstrap/Button";
-import {goGET, goPOST} from "../../Services/FetchService";
-import {SessionCard} from "./SessionCard";
+import React, {Fragment, useEffect, useState} from "react";
+import {Card, Container, Modal, Row} from "react-bootstrap";
+import {SessionForm} from "./SessionForm";
 import {QuizCard} from "../Quizzes/QuizCard";
 import {CreateEditQuizModal} from "../Quizzes/CreateEditQuizModal";
-import {getSession} from "../../Services/SessionService";
+import {goGET, goPOST} from "../../Services/FetchService";
 import {useParams} from "react-router";
-import {SessionForm} from "./SessionForm";
-import {getActionHref, getEntityLinksHref, getLinksHref} from "../../Services/SirenService";
+import {getActionHref, getLinksHref} from "../../Services/SirenService";
+import Button from "react-bootstrap/Button";
+import {QuizCardInSession} from "../Quizzes/QuizCardInSession";
 
-export const Session = (props) => {
+
+/* register websocket */
+
+
+export const InSessionOrg = () => {
     const [loading, setLoading] = useState(false)
     const [session, setSession] = useState(null)
     const [quizzes, setQuizzes] = useState(null)
+    const [answers, setAnswers] = useState(null)
+    const [numberParticipants, setNumberParticipants] = useState(0)
     const [quizzesLinks, setQuizzesLinks] = useState(null)
     const [show, setShow] = useState(false)
     const [error, setError] = useState(null)
-    const [title, setTitle] = useState('')
+    const [title, setTitle] = useState(null)
+    const [guestCode, setGuestCode] = useState(null)
     const {id} = useParams()
 
     useEffect(() => {
@@ -32,7 +37,7 @@ export const Session = (props) => {
         const getMeSession = (data) => {
             setSession(data)
         }
-
+       /* console.log(`Session Id: ${id}`)*/
         goGET(`/api/web/v1.0/auth/sessions/${id}`, getMeSession, setSessionError)
 
     }, [id])
@@ -40,11 +45,21 @@ export const Session = (props) => {
     useEffect(() => {
         if (session !== null) {
             setTitle(session.properties.name)
-            if (session.properties.quizzes.length > 0) {
-                getQuizzes()
-            }
+            setGuestCode(session.properties.guestCode)
+            getQuizzes()
+            getAnswers()
+
         }
     }, [session])
+
+/*
+    useEffect(() => {
+        if (quizzes !== null) {
+            getAnswers()
+
+        }
+    }, [quizzes])
+*/
 
     const getQuizzes = () => {
         const setError = (error) => {
@@ -65,9 +80,23 @@ export const Session = (props) => {
                 setQuizzes(t)
             }
         }
-        goGET(getLinksHref(session.links, "related",'Quizzes'), setData, setError)
+        goGET(getLinksHref(session.links, "related", 'Quizzes'), setData, setError)
     }
 
+    const getAnswers = () => {
+        const setError = (error) => {
+            if (error !== null)
+                alert(`Failed to retrieve Session from ${getLinksHref(session.links, "related")} with error ${error}`)
+        }
+
+        const setData = (data) => {
+            if (data) {
+                setAnswers(data.entities)
+                setNumberParticipants(data.properties.total)
+            }
+        }
+        goGET(getLinksHref(session.links, "related", 'Answers'), setData, setError)
+    }
 
 
     const newQuiz = () => {
@@ -78,7 +107,7 @@ export const Session = (props) => {
     }
 
     const newButton = () => (
-        <Button className="btn btn-success left" type="submit"
+        <Button className="btn btn-success mb-3 mt-3" type="submit"
                 onClick={newQuiz}> Add Quiz
         </Button>
     )
@@ -108,42 +137,58 @@ export const Session = (props) => {
         goPOST(apiLink, updatedSession, null, setError, 'PUT', setLoading)
     }
 
+    const getQuizAnswers = (id) => {
+        const ans = [];
+        if(answers != null && answers[0] != null) {
+            answers.forEach( aw =>
+                aw.properties.answers.forEach(a => {
+                    if(a.quizId === id){
+                        ans.push(a)
+                } })
+            )
+        }
+        return ans
+    }
+
     return (
         <Fragment>
             <Container>
                 <Row>
-                    <Card>
-                        <Card.Body>
-
-                            <Card.Title>{title}</Card.Title>
-                            {session !== null && (
+                    <Card className={"mt-3"}>
+                        <Card.Title>{title} - Session Code: {guestCode} - Number of
+                            Participants: {numberParticipants}</Card.Title>
+                        {/*
+                            <Card.Body>
+                           {session !== null && (
                                 <SessionForm session={session.properties} updateSession={updateSessionHandler}/>)}
-                        </Card.Body>
+                        </Card.Body>*/}
                     </Card>
                 </Row>
             </Container>
             {/******************** if there are quizzes *********************************/}
-            <Container>
-                <Row>
-                    {quizzes !== null && quizzes.length > 0 && (
-                        quizzes.map(q => <QuizCard key={q.properties.id}
-                                                   name={q.properties.question}
-                                                   data={q.properties}
-                                                   quizHref={q.href}
-                                                   reloadQuizzes={getQuizzes}
-                        />)
-                    )}
-                </Row>
-            </Container>
+
             <Container>
                 <Row>
                     {newButton()}
                 </Row>
             </Container>
+            <Container>
+                <Row>
+                    {quizzes !== null && quizzes.length > 0 && (
+                        quizzes.map(q => <QuizCardInSession key={q.properties.id}
+                                                            name={q.properties.question}
+                                                            data={q.properties}
+                                                            quizHref={q.href}
+                                                            reloadQuizzes={getQuizzes}
+                                                            answers={getQuizAnswers(q.properties.id)}
+                        />)
+                    )}
+                </Row>
+            </Container>
+
             <Modal show={show}>
                 <CreateEditQuizModal handleClose={handleClose} createQuiz={createQuizHandler}/>
             </Modal>
         </Fragment>
     )
-
 }
