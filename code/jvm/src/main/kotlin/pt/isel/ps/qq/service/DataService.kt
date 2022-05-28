@@ -321,5 +321,9 @@ class DataService(
         return quizRepo.findSessionQuizDocsBySessionIdAndQuizStateNot(sessionId, QqStatus.NOT_STARTED)
     }
 
+    fun checkSessionIsLive(sessionId: String): Boolean {
+        return sessionRepo.countSessionDocByIdAndStatus(sessionId, QqStatus.STARTED) > 0
+    }
+
 
 }

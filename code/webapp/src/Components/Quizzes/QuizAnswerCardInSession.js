@@ -36,6 +36,7 @@ export const QuizAnswerCardInSession = (props) => {
             console.log(data)
             handleClose()
             props.messageOrganizer()
+            props.reloadQuizzes()
             //send message to organizer
         }
         goPOST('/api/web/v1.0/non_auth/give_answer', {...answer, guestId: props.answerId}, saved, error)

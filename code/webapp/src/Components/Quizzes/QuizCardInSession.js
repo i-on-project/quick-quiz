@@ -31,6 +31,7 @@ export const QuizCardInSession = (props) => {
         const setError = (error) => error !== null ? console.log(`Error Updating Quiz: ${id} with error ${error} `) : null
         const setData = (data) => {
             handleClose()
+            props.sendMessageToParticipants()
             props.reloadQuizzes()
         }
         goPOST(props.quizHref, quiz, setData, setError, 'PUT')
@@ -60,7 +61,7 @@ export const QuizCardInSession = (props) => {
             if (data !== null) {
                 console.log(`Updated Quiz ${props.data.id} Successfully!! Response: ${data}`)
                 setStatus(newStatus)
-                props.sendTestMessage()
+                props.sendMessageToParticipants()
             }
         }
         goPOST(`${props.quizHref}/updatestatus`, toUpdate, setData, setError, 'PUT')

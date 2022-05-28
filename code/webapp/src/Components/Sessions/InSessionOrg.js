@@ -53,15 +53,6 @@ export const InSessionOrg = () => {
         }
     }, [session])
 
-    /*
-        useEffect(() => {
-            if (quizzes !== null) {
-                getAnswers()
-
-            }
-        }, [quizzes])
-    */
-
     const getQuizzes = () => {
         const setError = (error) => {
             if (error !== null)
@@ -118,6 +109,7 @@ export const InSessionOrg = () => {
         const setData = (data) => {
             console.log(`Created Quiz Successfully!! Response: ${data}`)
             handleClose()
+            sendMessageToParticipants()
             getQuizzes()
         }
         const apiLink = session.actions.find(a => a.name === 'Add-Quiz').href
@@ -133,8 +125,6 @@ export const InSessionOrg = () => {
         }
 
         const apiLink = getActionHref(session.actions, 'Update-Session')
-        //const method = session.actions.find(a => a.name === 'Update-Session').method //TODO: getMethod
-
         goPOST(apiLink, updatedSession, null, setError, 'PUT', setLoading)
     }
 
@@ -152,18 +142,13 @@ export const InSessionOrg = () => {
         return ans
     }
 
-    const sendTestMessage = () => {
+    const sendMessageToParticipants = () => {
         client.sendMessage(`/app/insession/${id}`, JSON.stringify({
-            name: 'Test Name',
-            message: 'TEst MEssage'
+            name: 'Organizer',
+            message: 'New/Updated Quizz'
         }));
     }
 
-    const testButton = () => (
-        <Button className="btn btn-success mb-3 mt-3"
-                onClick={sendTestMessage}> Send Test MEssage
-        </Button>
-    )
 
     return (
         <Fragment>
@@ -172,20 +157,12 @@ export const InSessionOrg = () => {
                     <Card className={"mt-3"}>
                         <Card.Title>{title} - Session Code: {guestCode} - Number of
                             Participants: {numberParticipants}</Card.Title>
-                        {/*
-                            <Card.Body>
-                           {session !== null && (
-                                <SessionForm session={session.properties} updateSession={updateSessionHandler}/>)}
-                        </Card.Body>*/}
                     </Card>
                 </Row>
             </Container>
             {/******************** if there are quizzes *********************************/}
 
             <Container>
-                <Row>
-                    {testButton()}
-                </Row>
                 <Row>
                     {newButton()}
                 </Row>
@@ -199,7 +176,7 @@ export const InSessionOrg = () => {
                                                             quizHref={q.href}
                                                             reloadQuizzes={getQuizzes}
                                                             answers={getQuizAnswers(q.properties.id)}
-                                                            sendTestMessage={sendTestMessage}
+                                                            sendMessageToParticipants={sendMessageToParticipants}
                         />)
                     )}
                 </Row>
@@ -220,9 +197,11 @@ export const InSessionOrg = () => {
                           }}
                           onMessage={(msg) => {
                               console.log(msg);
+                              getAnswers()
                           }}
                           ref={(client) => {
                               setClient(client)
+
                           }}/>}
         </Fragment>
     )

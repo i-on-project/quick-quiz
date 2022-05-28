@@ -2,11 +2,10 @@ package pt.isel.ps.qq.repositories
 
 import org.springframework.data.domain.Pageable
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
-import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.stereotype.Repository
-import pt.isel.ps.qq.repositories.customelastic.SessionCustomRequests
 import pt.isel.ps.qq.data.elasticdocs.QqStatus
 import pt.isel.ps.qq.data.elasticdocs.SessionDoc
+import pt.isel.ps.qq.repositories.customelastic.SessionCustomRequests
 
 @Repository
 interface SessionElasticRepository: ElasticsearchRepository<SessionDoc, String>, SessionCustomRequests {
@@ -16,5 +15,5 @@ interface SessionElasticRepository: ElasticsearchRepository<SessionDoc, String>,
   fun findSessionDocsByOwnerOrderById(owner: String, page: Pageable): List<SessionDoc>
   fun findSessionDocsByGuestCodeAndStatus(guestCode: Int, status: QqStatus): List<SessionDoc>
   fun countSessionDocByOwnerAndStatus(owner: String, status: QqStatus): Long
-
+  fun countSessionDocByIdAndStatus(id: String, status: QqStatus): Long
 }

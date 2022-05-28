@@ -12,9 +12,6 @@ export const QuizAnswerModal = (props) => {
     const [answerChoice, setAnswerChoice] = useState(!hasAnswer() || props.answer.answerNumber === undefined
         ? null : props.answer.answerNumber)
 
-    console.log(props.answer)
-    console.log(answer)
-    console.log(answerChoice) //TODO: WHY NULL
 
     const MultiChoiceView = (choice, index) => (
         <Fragment>

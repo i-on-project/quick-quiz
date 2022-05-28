@@ -5,7 +5,7 @@ import {UserContext, UserContextProvider} from "./Components/UserContextProvider
 import {HomeComponent} from "./Components/HomeComponent";
 import {RegisterUser} from "./Components/RegisterUser";
 import {LoginUser} from "./Components/LoginUser";
-import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
+import {BrowserRouter as Router, Navigate, Route, Routes} from "react-router-dom";
 import {NavBarComponent} from "./Components/NavBarComponent";
 import {Templates} from "./Components/Templates/Templates";
 import {Sessions} from "./Components/Sessions/Sessions";

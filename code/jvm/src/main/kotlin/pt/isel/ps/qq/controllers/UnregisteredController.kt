@@ -1,6 +1,7 @@
 package pt.isel.ps.qq.controllers
 
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import pt.isel.ps.qq.data.*
@@ -10,6 +11,7 @@ import pt.isel.ps.qq.utils.Uris
 import pt.isel.ps.qq.utils.getBaseUrlHostFromRequest
 import java.time.Duration
 import java.util.*
+import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -126,10 +128,27 @@ class UnregisteredController(
     fun giveAnswer(request: HttpServletRequest, @RequestBody input: GiveAnswerInputModel): ResponseEntity<Any> {
         return ResponseEntity.ok().body(dataService.giveAnswer(input))
     }
+    //TODO: create a cookie handler and move this there
+    private fun expireCookie(cookie: Cookie): String {
+        val builder = StringBuilder("${cookie.name}=;")
+        builder.append("Expires=Thu, 01 Jan 1970 00:00:01 GMT;")
+        builder.append("Path=/;")
+        builder.append("Secure;")
+        builder.append("HttpOnly;")
+        return builder.toString()
+    }
 
     @GetMapping(Uris.API.Web.V1_0.NonAuth.GetAnswer.ENDPOINT)
-    fun getAnswer(@PathVariable answerId: String): ResponseEntity<Any> {
+    fun getAnswer(@PathVariable answerId: String, request: HttpServletRequest): ResponseEntity<Any> {
         val ansDoc = dataService.getAnswer(answerId)
+        if(!dataService.checkSessionIsLive(ansDoc.sessionId)) {
+            println("Session not found")
+            val cookie = request.cookies.find { it.name == "InSession" }!!
+            val headers = HttpHeaders()
+            headers.add("Set-Cookie", expireCookie(cookie))
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).headers(headers).contentType(ProblemJson.MEDIA_TYPE).body("Session Not Found")
+        }
+
         return ResponseEntity.ok().body(ansDoc)
     }
 

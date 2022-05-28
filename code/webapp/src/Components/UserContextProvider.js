@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {Fragment, useEffect, useState} from 'react';
 import {goPOST, goGET} from "../Services/FetchService";
 
 const func = () => {
@@ -9,6 +9,7 @@ const appUser = {
     userName: null,
     displayName: null,
     isLoading: false,
+    inSession: null,
     updateUser: func,
 }
 
@@ -20,9 +21,35 @@ export const UserContextProvider = ({children}) => {
     const updateContext = (contextUpdates = {}) => {
         setContext(currentContext => ({...currentContext, ...contextUpdates}))
     }
+    const checkCookie = () => {
+        const answerCookie = getCookie('InSession')
+        console.log(`Answer Cookie: ${answerCookie}`)
+        if (answerCookie !== null) {
 
+            updateContext({
+                inSession: answerCookie
+            })
+        }
+    }
+//https://www.w3schools.com/js/js_cookies.asp
+    const getCookie = (cname) => {
+        let name = cname + "=";
+        let decodedCookie = decodeURIComponent(document.cookie);
+        let ca = decodedCookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return null;
+    }
 
     useEffect(() => {
+
         if (appUser.userName === null) {
             const setData = (data) => {
                 if (data !== null) {
@@ -36,8 +63,9 @@ export const UserContextProvider = ({children}) => {
             updateContext({isLoading: true})
             const setError = (error) => {
                 //console.log(`I'm Error Fetched in COntext: ${error}`)
-                updateContext({ isLoading: false })
+                updateContext({isLoading: false})
             }
+            checkCookie()
             goGET("/api/web/v1.0/auth/checkuser", setData, setError)
         }
 

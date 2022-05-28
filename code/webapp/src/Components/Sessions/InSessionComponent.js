@@ -1,8 +1,9 @@
-import React, {useEffect, useState} from "react";
+import React, {Fragment, useEffect, useState} from "react";
 import {Card, Container, Row} from "react-bootstrap";
 import {useParams} from "react-router";
 import SockJsClient from 'react-stomp';
 import {goGET} from "../../Services/FetchService";
+
 
 import {QuizAnswerCardInSession} from "../Quizzes/QuizAnswerCardInSession";
 
@@ -31,6 +32,7 @@ export const InSession = () => {
 
         const getMeSession = (data) => {
             setAnswer(data)
+            sendTestMessage()
             console.log(data)
         }
         goGET(`/api/web/v1.0/non_auth/answer/${id}`, getMeSession, setSessionError)
@@ -51,7 +53,7 @@ export const InSession = () => {
     }
 
     return (
-        <div>
+        <Fragment>
             <h1 className={"text-center mb-5 mt-3"}>Participant: {id}</h1>
             <Container>
                 <Row>
@@ -82,12 +84,11 @@ export const InSession = () => {
                                               onMessage={(msg) => {
                                                   console.log(msg);
                                                   getQuizzes()
-                                              }} ref={(client) => {
-                setClient(client)
-            }}/>}
-            />
+                                              }}
+                                              ref={(client) => setClient(client)
+                                              } />
             }
-        </div>
+        </Fragment>
 
     );
 }

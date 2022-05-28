@@ -38,6 +38,8 @@ export const NavBarComponent = () => {
 
                 </Container>
             </Navbar>
+            {userContext.inSession !== null && <Navigate to={`/insession/${userContext.inSession}`}/>}
+
         </Fragment>
     );
 }
