@@ -8,7 +8,7 @@ data class AnswersDoc(
     @Id
     val id: String,
     val sessionId: String,
-    var answers: MutableList<Answer> = mutableListOf()
+    val answers: MutableList<Answer> = mutableListOf()
 )
 
 data class Answer(
@@ -16,3 +16,4 @@ data class Answer(
     val answer: String? = null,
     val answerNumber: Int? = null
 )
+

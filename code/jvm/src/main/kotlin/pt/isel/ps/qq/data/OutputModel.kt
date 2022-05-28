@@ -8,7 +8,7 @@ data class SessionSummaryOutputModel(
     val status: QqStatus,
     val description: String?
 ) {
-    constructor(session: SessionDoc): this(
+    constructor(session: SessionDoc) : this(
         id = session.id,
         name = session.name,
         status = session.status,
@@ -27,7 +27,7 @@ data class SessionOutputModel(
     val radius: Int?,
     val quizzes: List<String>,
 ) {
-    constructor(session: SessionDoc): this(
+    constructor(session: SessionDoc) : this(
         name = session.name,
         status = session.status,
         description = session.description,
@@ -71,7 +71,7 @@ data class TemplateOutputModel(
     val radiusUnit: String? = null,
     val quizzes: List<QuizTemplateOutputModel>
 ) {
-    constructor(template: TemplateDoc): this(
+    constructor(template: TemplateDoc) : this(
         limitOfParticipants = template.limitOfParticipants,
         geolocation = template.geolocation,
         radius = template.radius,
@@ -85,7 +85,7 @@ data class QuizTemplateOutputModel(
     val answerType: QuestionType,
     val answerChoices: List<MultipleChoiceOutputModel>? = null,
 ) {
-    constructor(input: QuizTemplate): this(
+    constructor(input: QuizTemplate) : this(
         question = input.question,
         answerType = input.answerType,
         answerChoices = input.answerChoices?.map {
@@ -124,7 +124,7 @@ data class AnswersOutputModel(
     val id: String,
     val answers: List<Answer> = emptyList()
 ) {
-    constructor(doc: AnswersDoc): this(
+    constructor(doc: AnswersDoc) : this(
         id = doc.id,
         answers = doc.answers.map { a -> Answer(a.quizId, a.answer, a.answerNumber) }
     )
@@ -134,4 +134,8 @@ data class Answer(
     val quizId: String,
     val answer: String? = null,
     val answerNumber: Int? = null
+)
+
+data class ParticipantOutputModel(
+    val participantId: String
 )

@@ -8,7 +8,7 @@ import {useParams} from "react-router";
 import {getActionHref, getLinksHref} from "../../Services/SirenService";
 import Button from "react-bootstrap/Button";
 import {QuizCardInSession} from "../Quizzes/QuizCardInSession";
-
+import SockJsClient from 'react-stomp';
 
 /* register websocket */
 
@@ -24,6 +24,7 @@ export const InSessionOrg = () => {
     const [error, setError] = useState(null)
     const [title, setTitle] = useState(null)
     const [guestCode, setGuestCode] = useState(null)
+    const [client, setClient] = useState(null)
     const {id} = useParams()
 
     useEffect(() => {
@@ -37,7 +38,7 @@ export const InSessionOrg = () => {
         const getMeSession = (data) => {
             setSession(data)
         }
-       /* console.log(`Session Id: ${id}`)*/
+        /* console.log(`Session Id: ${id}`)*/
         goGET(`/api/web/v1.0/auth/sessions/${id}`, getMeSession, setSessionError)
 
     }, [id])
@@ -52,14 +53,14 @@ export const InSessionOrg = () => {
         }
     }, [session])
 
-/*
-    useEffect(() => {
-        if (quizzes !== null) {
-            getAnswers()
+    /*
+        useEffect(() => {
+            if (quizzes !== null) {
+                getAnswers()
 
-        }
-    }, [quizzes])
-*/
+            }
+        }, [quizzes])
+    */
 
     const getQuizzes = () => {
         const setError = (error) => {
@@ -139,16 +140,30 @@ export const InSessionOrg = () => {
 
     const getQuizAnswers = (id) => {
         const ans = [];
-        if(answers != null && answers[0] != null) {
-            answers.forEach( aw =>
+        if (answers != null && answers[0] != null) {
+            answers.forEach(aw =>
                 aw.properties.answers.forEach(a => {
-                    if(a.quizId === id){
+                    if (a.quizId === id) {
                         ans.push(a)
-                } })
+                    }
+                })
             )
         }
         return ans
     }
+
+    const sendTestMessage = () => {
+        client.sendMessage(`/app/insession/${id}`, JSON.stringify({
+            name: 'Test Name',
+            message: 'TEst MEssage'
+        }));
+    }
+
+    const testButton = () => (
+        <Button className="btn btn-success mb-3 mt-3"
+                onClick={sendTestMessage}> Send Test MEssage
+        </Button>
+    )
 
     return (
         <Fragment>
@@ -169,6 +184,9 @@ export const InSessionOrg = () => {
 
             <Container>
                 <Row>
+                    {testButton()}
+                </Row>
+                <Row>
                     {newButton()}
                 </Row>
             </Container>
@@ -181,6 +199,7 @@ export const InSessionOrg = () => {
                                                             quizHref={q.href}
                                                             reloadQuizzes={getQuizzes}
                                                             answers={getQuizAnswers(q.properties.id)}
+                                                            sendTestMessage={sendTestMessage}
                         />)
                     )}
                 </Row>
@@ -189,6 +208,22 @@ export const InSessionOrg = () => {
             <Modal show={show}>
                 <CreateEditQuizModal handleClose={handleClose} createQuiz={createQuizHandler}/>
             </Modal>
+
+            {session !== null && <SockJsClient url='http://localhost:8080/insession/'
+                          topics={[`/topic/orginsession/${id}`]}
+                          onConnect={() => {
+                              console.log("connected");
+                              console.log(`/app/insession/${id}`)
+                          }}
+                          onDisconnect={() => {
+                              console.log("Disconnected");
+                          }}
+                          onMessage={(msg) => {
+                              console.log(msg);
+                          }}
+                          ref={(client) => {
+                              setClient(client)
+                          }}/>}
         </Fragment>
     )
 }

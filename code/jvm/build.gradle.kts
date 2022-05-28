@@ -20,8 +20,6 @@ repositories {
 }
 
 dependencies {
-	//implementation("org.springframework.security:spring-security-config")
-	//implementation("org.springframework.security:spring-security-web")
 	implementation("org.unbroken-dome.siren:siren-core:0.2.0")
 	implementation("com.sun.mail:javax.mail:1.6.2")
 	implementation("org.springframework.boot:spring-boot-starter-web")

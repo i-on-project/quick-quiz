@@ -689,6 +689,7 @@ class RegisteredController(
         }
     }
 
+
     @PutMapping(Uris.API.Web.V1_0.Auth.Quiz.Id.UpdateStatus.CONTROLLER_ENDPOINT)
     fun updateQuizStatus(
         request: HttpServletRequest,
@@ -699,6 +700,7 @@ class RegisteredController(
             service.updateQuizStatus(scope.getUser().userName, id, input)
             val body = SirenModel(clazz = listOf("TODO"))
             ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
+
         } catch (ex: SessionNotFoundException) {
             exceptionHandle(request, id, ex)
         } catch (ex: SessionAuthorizationException) {

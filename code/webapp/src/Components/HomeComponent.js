@@ -1,8 +1,8 @@
 import {Card, Container, FormControl, InputGroup, Row} from "react-bootstrap";
-import React, {useEffect, useState, useContext} from 'react'
+import React, {Fragment, useEffect, useState, useContext} from 'react'
 import Button from "react-bootstrap/Button";
 import {goPOST} from "../Services/FetchService";
-import {InSession} from "./InSessionComponent";
+import {Navigate} from "react-router-dom";
 
 import {UserContext} from "./UserContextProvider";
 
@@ -11,10 +11,9 @@ export const HomeComponent = () => {
 
     const userContext = useContext(UserContext)
 
-    const [data, setData] = useState(null);
     const [error, setError] = useState(null);
-
     const [session, setSession] = useState(null);
+    const [goToParticipantSession, setGoToParticipantSession] = useState(false)
 
     const sessionhangeHandler = (event) => {
         setSession(event.target.value);
@@ -28,11 +27,17 @@ export const HomeComponent = () => {
 
     function joinSessionAction () {
         const postData = {sessionCode: session}
-        goPOST(`/api/web/v1.0/non_auth/join_session`, postData, setData, setError)
+        const setMeSession = (data) => {
+            setSession(data)
+            console.log(data)
+            setGoToParticipantSession(true)
+        }
+        goPOST(`/api/web/v1.0/non_auth/join_session`, postData, setMeSession, setError)
     }
 
     return (
-        <div>
+        <Fragment>
+            {goToParticipantSession && <Navigate to={`insession/${session.participantId}`} /> }
             <Container>
                 <Row>
                     <Card>
@@ -53,9 +58,9 @@ export const HomeComponent = () => {
                             </Button>
 
                             {error && (
-                                <div>{`There is a problem fetching the post data - ${error}`}</div>
+                                <div>{`There is a problem joining the session - ${error}`}</div>
                             )}
-                            {data && (
+                            {/*{data && (
 
                                 <div>{`GuestId: ${data.id}`}</div>
                             )}
@@ -65,12 +70,12 @@ export const HomeComponent = () => {
                                 <div>{`SessionId: ${data.sessionId}`}</div>
                             )}
 
-                            {data && (<InSession props={data} /> )}
+                            {data && (<InSession props={data} /> )}*/}
                         </Card.Body>
                     </Card>
                 </Row>
 
             </Container>
-        </div>
+        </Fragment>
     );
 }

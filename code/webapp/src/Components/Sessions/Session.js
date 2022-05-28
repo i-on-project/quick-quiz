@@ -40,9 +40,7 @@ export const Session = (props) => {
     useEffect(() => {
         if (session !== null) {
             setTitle(session.properties.name)
-            if (session.properties.quizzes.length > 0) {
-                getQuizzes()
-            }
+            getQuizzes()
         }
     }, [session])
 

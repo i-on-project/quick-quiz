@@ -1,5 +1,4 @@
 import {NavBarComponent} from "./NavBarComponent";
-import {NavbarComponentNotAuth} from "./NavbarComponentNotAuth";
 import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 import {HomeComponent} from "./HomeComponent";
 import {RegisterUser} from "./RegisterUser";
@@ -23,6 +22,5 @@ export const MasterComponent = () => {
                 </div>
             </Router>
         </div>
-
     )
 }

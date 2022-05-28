@@ -1,6 +1,5 @@
 package pt.isel.ps.qq
 
-import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.elasticsearch.client.RestHighLevelClient
@@ -11,14 +10,14 @@ import org.springframework.data.elasticsearch.client.ClientConfiguration
 import org.springframework.data.elasticsearch.client.RestClients
 import org.springframework.data.elasticsearch.config.AbstractElasticsearchConfiguration
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories
-import org.springframework.http.converter.HttpMessageConverter
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import pt.isel.ps.qq.filters.UserFilter
 import pt.isel.ps.qq.repositories.UserElasticRepository
 import pt.isel.ps.qq.utils.Uris
-import java.util.Random
+import java.util.*
 import javax.mail.Session
+
 
 @Configuration
 class MvcConfig(
@@ -47,6 +46,26 @@ class MvcConfig(
         return registrationBean
     }
 
+
+    @Bean
+    fun cors(): WebMvcConfigurer {
+        return object : WebMvcConfigurer {
+            override fun addCorsMappings(registry: CorsRegistry) {
+                registry.addMapping("/**")
+                    .allowCredentials(true)
+                    .allowedHeaders(
+                        "Access-Control-Request-Method",
+                        "Access-Control-Request-Headers",
+                        "token",
+                        "Content-Type",
+                        "X-Requested-With",
+                        "accept,Origin"
+                    )
+                    .allowedMethods("*")
+                    .allowedOriginPatterns("*")
+            }
+        }
+    }
     /*override fun configureMessageConverters(converters: MutableList<HttpMessageConverter<*>>) {
         converters.removeIf{ it is MappingJackson2HttpMessageConverter }
 
@@ -58,6 +77,31 @@ class MvcConfig(
     }*/
 }
 
+
+/*@Configuration
+@EnableWebMvc
+class WebConfig : WebMvcConfigurer {
+    override fun addCorsMappings(registry: CorsRegistry) {
+        registry.addMapping("/**")
+            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+            .allowedOrigins("*")
+            .allowedHeaders("*");
+    }
+}*/*/
+
+/*@Configuration
+class WebConfig : WebMvcAutoConfiguration(), WebMvcConfigurer {
+
+    override fun addCorsMappings(registry: CorsRegistry) {
+        registry.addMapping("/**")
+            .allowedOrigins(CorsConfiguration.ALL)
+            .allowedMethods(CorsConfiguration.ALL)
+            .allowedHeaders(CorsConfiguration.ALL)
+            .exposedHeaders("Location")
+            .allowCredentials(true)
+    }
+}*/*/
+
 @Configuration
 @EnableElasticsearchRepositories
 class ElasticSearchConfig: AbstractElasticsearchConfiguration() {
@@ -68,3 +112,4 @@ class ElasticSearchConfig: AbstractElasticsearchConfiguration() {
         return RestClients.create(clientConfiguration).rest()
     }
 }
+

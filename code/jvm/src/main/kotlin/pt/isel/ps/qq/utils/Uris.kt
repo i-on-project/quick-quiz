@@ -54,6 +54,27 @@ object Uris {
                         const val ENDPOINT = "/give_answer"
                         const val PATH = "${NonAuth.PATH}$ENDPOINT"
                     }
+
+                    object GetAnswer {
+                        const val ENDPOINT = "/answer/{answerId}"
+                        const val PATH = "${NonAuth.PATH}${GiveAnswer.ENDPOINT}"
+                    }
+
+                    object Quiz {
+                        const val ENDPOINT = "/quiz"
+                        const val PATH = "${NonAuth.PATH}$ENDPOINT"
+                        fun url(host: String) = "${host}${PATH}"
+
+                        object SessionId {
+                            const val ENDPOINT = "/session/{answerId}"
+                            const val PATH = "${Quiz.PATH}$ENDPOINT"
+                            const val CONTROLLER_ENDPOINT = "${Quiz.ENDPOINT}${ENDPOINT}"
+                            private val TEMPLATE = UriTemplate(PATH)
+                            fun make(id: String): URI = TEMPLATE.expand(mapOf("answerId" to id))
+                            fun url(host: String, id: String) = "${host}${make(id)}"
+                        }
+
+                    }
                 }
 
                 object Auth {

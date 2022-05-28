@@ -60,6 +60,7 @@ export const QuizCardInSession = (props) => {
             if (data !== null) {
                 console.log(`Updated Quiz ${props.data.id} Successfully!! Response: ${data}`)
                 setStatus(newStatus)
+                props.sendTestMessage()
             }
         }
         goPOST(`${props.quizHref}/updatestatus`, toUpdate, setData, setError, 'PUT')

@@ -1,4 +1,3 @@
-/*
 import SockJS from 'sockjs-client'
 import Stomp from 'stompjs'
 
@@ -10,4 +9,4 @@ export const register = (registrations) => {
             stompClient.subscribe(registration.route, registration.callback);
         });
     });
-}*/
+}
