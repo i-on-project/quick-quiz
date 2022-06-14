@@ -25,6 +25,7 @@ export const InSessionOrg = () => {
     const [title, setTitle] = useState(null)
     const [guestCode, setGuestCode] = useState(null)
     const [client, setClient] = useState(null)
+    const [wsSourceUrl, setWsSourceUrl] = useState(null)
     const {id} = useParams()
 
     useEffect(() => {
@@ -39,12 +40,15 @@ export const InSessionOrg = () => {
             setSession(data)
         }
         /* console.log(`Session Id: ${id}`)*/
+        setWsSourceUrl("/insessionws") //window.location.protocol + "//" + window.location.host +
         goGET(`/api/web/v1.0/auth/sessions/${id}`, getMeSession, setSessionError)
 
     }, [id])
 
     useEffect(() => {
         if (session !== null) {
+            console.log('ws endpoint')
+            console.log(wsSourceUrl)
             setTitle(session.properties.name)
             setGuestCode(session.properties.guestCode)
             getQuizzes()
@@ -83,8 +87,8 @@ export const InSessionOrg = () => {
 
         const setData = (data) => {
             if (data) {
-                setAnswers(data.entities)
                 setNumberParticipants(data.properties.total)
+                setAnswers(data.entities)
             }
         }
         goGET(getLinksHref(session.links, "related", 'Answers'), setData, setError)
@@ -109,7 +113,8 @@ export const InSessionOrg = () => {
         const setData = (data) => {
             console.log(`Created Quiz Successfully!! Response: ${data}`)
             handleClose()
-            sendMessageToParticipants()
+            if (quiz.status === 'STARTED')
+                sendMessageToParticipants()
             getQuizzes()
         }
         const apiLink = session.actions.find(a => a.name === 'Add-Quiz').href
@@ -143,7 +148,7 @@ export const InSessionOrg = () => {
     }
 
     const sendMessageToParticipants = () => {
-        client.sendMessage(`/app/insession/${id}`, JSON.stringify({
+        client.sendMessage(`/topic/insession/${id}`, JSON.stringify({
             name: 'Organizer',
             message: 'New/Updated Quizz'
         }));
@@ -186,23 +191,23 @@ export const InSessionOrg = () => {
                 <CreateEditQuizModal handleClose={handleClose} createQuiz={createQuizHandler}/>
             </Modal>
 
-            {session !== null && <SockJsClient url='http://localhost:8080/insession/'
-                          topics={[`/topic/orginsession/${id}`]}
-                          onConnect={() => {
-                              console.log("connected");
-                              console.log(`/app/insession/${id}`)
-                          }}
-                          onDisconnect={() => {
-                              console.log("Disconnected");
-                          }}
-                          onMessage={(msg) => {
-                              console.log(msg);
-                              getAnswers()
-                          }}
-                          ref={(client) => {
-                              setClient(client)
+            {session !== null && wsSourceUrl !== null && <SockJsClient url={`${wsSourceUrl}`}
+                                               topics={[`/queue/insession/${id}`]}
+                                               onConnect={() => {
+                                                   console.log("connected");
+                                                   console.log(`/queue/insession/${id}`)
+                                               }}
+                                               onDisconnect={() => {
+                                                   console.log("Disconnected");
+                                               }}
+                                               onMessage={(msg) => {
+                                                   console.log(msg);
+                                                   getAnswers()
+                                               }}
+                                               ref={(client) => {
+                                                   setClient(client)
 
-                          }}/>}
+                                               }}/>}
         </Fragment>
     )
 }

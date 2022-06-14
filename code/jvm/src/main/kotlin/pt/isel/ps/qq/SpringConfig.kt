@@ -15,6 +15,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import pt.isel.ps.qq.filters.UserFilter
 import pt.isel.ps.qq.repositories.UserElasticRepository
 import pt.isel.ps.qq.utils.Uris
+import java.net.URI
 import java.util.*
 import javax.mail.Session
 
@@ -23,7 +24,7 @@ import javax.mail.Session
 class MvcConfig(
     private val elasticRepository: UserElasticRepository,
     private val scope: UserInfoScope
-): WebMvcConfigurer {
+) : WebMvcConfigurer {
 
     @Bean
     fun mailSession(): Session {
@@ -66,50 +67,45 @@ class MvcConfig(
             }
         }
     }
-    /*override fun configureMessageConverters(converters: MutableList<HttpMessageConverter<*>>) {
-        converters.removeIf{ it is MappingJackson2HttpMessageConverter }
-
-        val customJson = MappingJackson2HttpMessageConverter()
-        customJson.setPrettyPrint(false)
-        customJson.apply {  objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY) }
-
-        converters.add(customJson)
-    }*/
 }
 
 
-/*@Configuration
-@EnableWebMvc
-class WebConfig : WebMvcConfigurer {
-    override fun addCorsMappings(registry: CorsRegistry) {
-        registry.addMapping("/**")
-            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-            .allowedOrigins("*")
-            .allowedHeaders("*");
-    }
-}*/*/
-
-/*@Configuration
-class WebConfig : WebMvcAutoConfiguration(), WebMvcConfigurer {
-
-    override fun addCorsMappings(registry: CorsRegistry) {
-        registry.addMapping("/**")
-            .allowedOrigins(CorsConfiguration.ALL)
-            .allowedMethods(CorsConfiguration.ALL)
-            .allowedHeaders(CorsConfiguration.ALL)
-            .exposedHeaders("Location")
-            .allowCredentials(true)
-    }
-}*/*/
-
 @Configuration
 @EnableElasticsearchRepositories
-class ElasticSearchConfig: AbstractElasticsearchConfiguration() {
-
+class ElasticSearchConfig : AbstractElasticsearchConfiguration() {
+    /*    @Bean
+        @Primary
+        fun elasticsearchTemplate(): ElasticsearchOperations? {
+            return ElasticsearchRestTemplate(elasticsearchClient())
+        }*/
     @Bean
     override fun elasticsearchClient(): RestHighLevelClient {
-        val clientConfiguration = ClientConfiguration.builder().connectedTo("localhost:9200").build()
+
+        val connString =
+            "https://Q2doMkxXDr:JkguAbiLFVaNpyUt@dogwood-417900457.eu-west-1.bonsaisearch.net:443" //todo: environment variable
+        val connUri: URI = URI.create(connString)
+        val auth: List<String> = connUri.userInfo.split(":")
+
+        val clientConfiguration = ClientConfiguration
+            .builder()
+            .connectedTo("localhost:9200")
+            .build()
         return RestClients.create(clientConfiguration).rest()
+
+/*        val cp: CredentialsProvider = BasicCredentialsProvider()
+        cp.setCredentials(AuthScope.ANY, UsernamePasswordCredentials(auth[0], auth[1]))
+
+        val rhlc = RestHighLevelClient(
+            RestClient.builder(HttpHost(connUri.host, connUri.port, connUri.scheme))
+                .setHttpClientConfigCallback(
+                    RestClientBuilder.HttpClientConfigCallback { httpAsyncClientBuilder: HttpAsyncClientBuilder ->
+                        httpAsyncClientBuilder.setDefaultCredentialsProvider(cp)
+                            .setKeepAliveStrategy(DefaultConnectionKeepAliveStrategy())
+                    })
+        )
+        return rhlc*/
     }
+
+
 }
 

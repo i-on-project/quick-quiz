@@ -6,7 +6,6 @@ import {Card, Container, FormControl, InputGroup, Row} from "react-bootstrap";
 export const LoginUser = () => {
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
-
     const [userName, setUserName] = useState(null);
 
 
@@ -14,11 +13,15 @@ export const LoginUser = () => {
         setUserName(event.target.value);
     };
 
+    const setDataForUrl = (fData) => {
+        fData.properties.host = window.location.host;
+        setData(fData);
+    }
 
     const toggleButtonState = () => {
         const postData = {userName: userName}
         console.log(postData)
-        goPOST(`/api/web/v1.0/non_auth/login`, postData, setData, setError)
+        goPOST(`/api/web/v1.0/non_auth/login`, postData, setDataForUrl, setError)
     };
 
     return (
@@ -62,7 +65,7 @@ export const LoginUser = () => {
                                 )}
 
                                 {data && (
-                                    <a href={`http://localhost:3000/logmein?user=${data.properties.userName}&token=${data.properties.token}`}> LogMeIn </a>)}
+                                    <a href={`http://${data.properties.host}/logmein?user=${data.properties.userName}&token=${data.properties.token}`}> LogMeIn </a>)}
                             </Card.Body>
                         </Card>
                     ) : <div/>}

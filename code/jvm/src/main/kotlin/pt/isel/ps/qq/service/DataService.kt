@@ -1,11 +1,14 @@
 package pt.isel.ps.qq.service
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import pt.isel.ps.qq.data.*
 import pt.isel.ps.qq.data.elasticdocs.*
 import pt.isel.ps.qq.data.elasticdocs.Answer
 import pt.isel.ps.qq.exceptions.*
+import pt.isel.ps.qq.filters.TestFilter
 import pt.isel.ps.qq.repositories.*
 import pt.isel.ps.qq.repositories.customelastic.CustomRequestUpdateQuizAction
 import pt.isel.ps.qq.utils.UniqueCodeGenerator
@@ -85,6 +88,7 @@ class DataService(
 
     companion object {
         const val PAGE_SIZE = 10
+        val logger: Logger = LoggerFactory.getLogger(TestFilter::class.java)
     }
 
     /**
@@ -313,7 +317,9 @@ class DataService(
         return quizRepo.findQuizDocsBySessionId(sessionid)
     }
 
+
     fun getAnswer(answerId: String): AnswersDoc {
+        logger.info("answerId:  ${answerId}")
         return answerRepo.findById(answerId).get() //TODO: add checks here
     }
 

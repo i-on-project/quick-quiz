@@ -17,12 +17,15 @@ export const RegisterUser = () => {
     const displayNameChangeHandler = (event) => {
         setDisplayName(event.target.value);
     };
-
+    const setDataForUrl = (fData) => {
+        fData.properties.host = window.location.host;
+        setData(fData);
+    }
 
     const toggleButtonState = () => {
         const postData = {userName: userName, displayName: displayName}
         console.log(postData)
-        goPOST(`/api/web/v1.0/non_auth/register`, postData, setData, setError)
+        goPOST(`/api/web/v1.0/non_auth/register`, postData, setDataForUrl, setError)
     };
 
     return (
@@ -70,8 +73,10 @@ export const RegisterUser = () => {
                                     )}
 
                                     {data && (
-                                        <div>{data.userName}</div>
-                                    )}
+                                        <div>{data.userName}</div>)}
+
+                                    {data && (
+                                        <a href={`http://${data.properties.host}/logmein?user=${data.properties.userName}&token=${data.properties.token}`}> LogMeIn </a>)}
                                 </Card.Body>
                             </Card>
                         </Card.Body>

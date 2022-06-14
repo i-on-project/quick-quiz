@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "pt.isel.ps"
-version = "0.0.1-SNAPSHOT"
+version = "0.1"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 repositories {
@@ -23,7 +23,10 @@ dependencies {
 	implementation("org.unbroken-dome.siren:siren-core:0.2.0")
 	implementation("com.sun.mail:javax.mail:1.6.2")
 	implementation("org.springframework.boot:spring-boot-starter-web")
-	implementation("org.springframework.data:spring-data-elasticsearch:4.3.3") //Bonsai Max Elastic version 7.10.2 -> Spting plugin elastic plugin 7.9.3
+	//implementation("org.springframework.data:spring-data-elasticsearch:4.4.0") //Bonsai Max Elastic version 7.10.2 -> Spting plugin elastic plugin 7.9.3
+	implementation("org.springframework.data:spring-data-elasticsearch:4.1.14") //Bonsai Max Elastic version 7.10.2 -> Spting plugin elastic plugin 7.9.3
+
+
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
@@ -35,6 +38,9 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 
 }
+
+
+
 
 tasks.withType<KotlinCompile> {
 	kotlinOptions {

@@ -4,7 +4,6 @@ import {goPOST, goGET} from "../Services/FetchService";
 const func = () => {
 }
 
-
 const appUser = {
     userName: null,
     displayName: null,

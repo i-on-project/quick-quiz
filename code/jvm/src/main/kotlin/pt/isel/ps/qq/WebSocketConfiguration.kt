@@ -12,26 +12,13 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 class WebSocketConfiguration : WebSocketMessageBrokerConfigurer {
 
     override fun registerStompEndpoints(stompEndpointRegistry: StompEndpointRegistry) {
-        stompEndpointRegistry.addEndpoint("/insession")
-            .setAllowedOrigins("http://localhost:3000")
+        stompEndpointRegistry.addEndpoint("/insessionws")
+            //.setAllowedOrigins("http://localhost:3000")
+            .setAllowedOriginPatterns("*")
             .withSockJS()
     }
 
     override fun configureMessageBroker(registry: MessageBrokerRegistry) {
-        registry.enableSimpleBroker("/topic/")
-        registry.setApplicationDestinationPrefixes("/app")
+        registry.enableSimpleBroker("/topic/", "/queue/")
     }
-
-/*    override fun registerStompEndpoints(registry: StompEndpointRegistry) {
-        registry.addEndpoint("/session_quiz").withSockJS()
-    }
-
-    override fun configureMessageBroker(registry: MessageBrokerRegistry) {
-        registry.enableSimpleBroker(MESSAGE_PREFIX)
-        registry.setApplicationDestinationPrefixes("/app")
-    }
-
-    companion object {
-        const val MESSAGE_PREFIX = "/topic/updatedQuiz"
-    }*/
 }
