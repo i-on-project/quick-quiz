@@ -1,9 +1,9 @@
-package pt.isel.ps.qq.data.elasticdocs
+package pt.isel.ps.qq.data.docs
 
 import org.springframework.data.annotation.Id
-import org.springframework.data.elasticsearch.annotations.Document
+import org.springframework.data.mongodb.core.mapping.Document
 
-@Document(indexName ="guest_sessions")
+@Document(collection  ="guest_sessions")
 data class AnswersDoc(
     @Id
     val id: String,

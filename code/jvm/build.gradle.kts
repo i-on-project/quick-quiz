@@ -24,8 +24,9 @@ dependencies {
 	implementation("com.sun.mail:javax.mail:1.6.2")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	//implementation("org.springframework.data:spring-data-elasticsearch:4.4.0") //Bonsai Max Elastic version 7.10.2 -> Spting plugin elastic plugin 7.9.3
-	implementation("org.springframework.data:spring-data-elasticsearch:4.1.14") //Bonsai Max Elastic version 7.10.2 -> Spting plugin elastic plugin 7.9.3
-
+	//implementation("org.springframework.data:spring-data-elasticsearch:4.1.14") //Bonsai Max Elastic version 7.10.2 -> Spting plugin elastic plugin 7.9.3
+	implementation("org.springframework.boot:spring-boot-starter-data-mongodb:2.7.0")
+	//compile 'com.sendgrid:sendgrid-java:4.0.1'
 
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")

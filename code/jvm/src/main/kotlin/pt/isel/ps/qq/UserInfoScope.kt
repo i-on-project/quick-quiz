@@ -2,7 +2,7 @@ package pt.isel.ps.qq
 
 import org.springframework.stereotype.Component
 import org.springframework.web.context.annotation.RequestScope
-import pt.isel.ps.qq.data.elasticdocs.UserDoc
+import pt.isel.ps.qq.data.docs.UserDoc
 
 @Component
 @RequestScope

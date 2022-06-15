@@ -1,7 +1,7 @@
-package pt.isel.ps.qq.data.elasticdocs
+package pt.isel.ps.qq.data.docs
 
 import org.springframework.data.annotation.Id
-import org.springframework.data.elasticsearch.annotations.Document
+import org.springframework.data.mongodb.core.mapping.Document
 import pt.isel.ps.qq.data.EditQuizInputModel
 import pt.isel.ps.qq.data.MultipleChoiceInputModel
 import pt.isel.ps.qq.exceptions.AtLeast1CorrectChoice
@@ -12,7 +12,7 @@ enum class QuestionType {
     MULTIPLE_CHOICE, SHORT, LONG
 }
 
-@Document(indexName = "session_quizzes")
+@Document(collection  = "session_quizzes")
 data class SessionQuizDoc(
     @Id val id: String,
     val sessionId: String,
@@ -102,7 +102,7 @@ data class SessionQuizDoc(
 }
 
 
-@Document(indexName = "template_quizzes")
+@Document(collection = "template_quizzes")
 data class TemplateQuizDoc(
     @Id val id: String,
     val templateId: String,

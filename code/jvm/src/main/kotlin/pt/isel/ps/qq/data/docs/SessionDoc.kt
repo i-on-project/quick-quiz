@@ -1,17 +1,14 @@
-package pt.isel.ps.qq.data.elasticdocs
+package pt.isel.ps.qq.data.docs
 
 import org.springframework.data.annotation.Id
-import org.springframework.data.elasticsearch.annotations.Document
-import org.springframework.data.elasticsearch.annotations.Field
-import org.springframework.data.elasticsearch.annotations.FieldType
+import org.springframework.data.mongodb.core.mapping.Document
 import pt.isel.ps.qq.data.EditSessionInputModel
 import pt.isel.ps.qq.data.SessionInputModel
 import pt.isel.ps.qq.utils.getCurrentTimeSeconds
-import java.util.UUID
 
-@Document(indexName = "sessions")
+@Document(collection  = "sessions")
 data class SessionDoc(
-    @Id @Field(type = FieldType.Keyword, fielddata = true)
+    @Id
     val id: String,
     val name: String,
     val description: String? = null,
@@ -55,6 +52,19 @@ data class SessionDoc(
         geolocation = input.geolocation ?: template.geolocation,
         quizzes = quizzes,
         status = QqStatus.NOT_STARTED,
+    )
+
+    constructor(session: SessionDoc, status: QqStatus, guestCode: Int?): this(
+        id = session.id,
+        name = session.name,
+        liveDate = getCurrentTimeSeconds(),
+        description = session.description,
+        owner = session.owner,
+        limitOfParticipants = session.limitOfParticipants,
+        geolocation = session.geolocation ,
+        quizzes = session.quizzes,
+        status = status,
+        guestCode = guestCode
     )
 }
 

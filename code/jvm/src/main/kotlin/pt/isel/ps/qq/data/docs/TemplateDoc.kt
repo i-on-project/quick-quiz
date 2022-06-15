@@ -1,14 +1,14 @@
-package pt.isel.ps.qq.data.elasticdocs
+package pt.isel.ps.qq.data.docs
 
 import org.springframework.data.annotation.Id
-import org.springframework.data.elasticsearch.annotations.Document
+import org.springframework.data.mongodb.core.mapping.Document
 import pt.isel.ps.qq.data.CreateTemplateInputModel
 import pt.isel.ps.qq.data.QuizTemplateInputModel
 import pt.isel.ps.qq.exceptions.AtLeast1CorrectChoice
 import pt.isel.ps.qq.exceptions.AtLeast2Choices
 import java.util.*
 
-@Document(indexName = "templates")
+@Document(collection  = "templates")
 data class TemplateDoc(
     @Id val id: String,
     val owner: String,

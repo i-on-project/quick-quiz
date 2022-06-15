@@ -1,26 +1,22 @@
 package pt.isel.ps.qq.service
 
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import pt.isel.ps.qq.data.LoginInputModel
 import pt.isel.ps.qq.data.LoginMeInputModel
 import pt.isel.ps.qq.data.RegisterInputModel
-import pt.isel.ps.qq.data.elasticdocs.UserDoc
-import pt.isel.ps.qq.data.elasticdocs.UserStatus
+import pt.isel.ps.qq.data.docs.UserDoc
+import pt.isel.ps.qq.data.docs.UserStatus
 import pt.isel.ps.qq.exceptions.*
-import pt.isel.ps.qq.repositories.UserElasticRepository
-import pt.isel.ps.qq.utils.Uris
+import pt.isel.ps.qq.repositories.UserRepository
 import pt.isel.ps.qq.utils.getCurrentTimeSeconds
-import java.net.URI
 import java.util.*
-import javax.mail.*
-import javax.mail.internet.InternetAddress
-import javax.mail.internet.MimeMessage
 
 //TODO: elastic time triggers ?! -> status management
 
 @Service
 class AuthenticationService(
-    private val userRepo: UserElasticRepository, private val mailSession: Session
+    private val userRepo: UserRepository
 ) {
 
     companion object {
@@ -65,7 +61,7 @@ class AuthenticationService(
         return userRepo.save(user)
     }
 
-    private fun sendEmail(to: String) {
+/*    private fun sendEmail(to: String) {
         val inetAdr = InternetAddress(to)
         try {
             val msg = MimeMessage(mailSession)
@@ -82,7 +78,7 @@ class AuthenticationService(
         } catch(ex: MessagingException) {
             throw ServerMailException(to, ErrorInstance(Uris.API.Web.V1_0.NonAuth.Register.make(), to))
         }
-    }
+    }*/
 
     fun requestLogin(userName: LoginInputModel): UserDoc {
         val user = getUser(userName.userName)
@@ -156,7 +152,7 @@ class AuthenticationService(
 
     private fun getTokenTimeout(): Long = getCurrentTimeSeconds() + TOKEN_TIMEOUT
     private fun getRegistrationTimeout(): Long = getCurrentTimeSeconds() + REGISTRATION_TOKEN_TIMEOUT
-
+    @Transactional(readOnly = true)
     fun checkUserLoginStatus(userName: String, token: String): UserDoc {
         val user = getUser(userName)
         if(user.loginToken != token) throw UserDisabledException() //TODO: create User Login Expired

@@ -1,14 +1,12 @@
 package pt.isel.ps.qq.filters
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.core.annotation.Order
 import org.springframework.dao.DataAccessResourceFailureException
 import pt.isel.ps.qq.UserInfoScope
 import pt.isel.ps.qq.data.ProblemJson
 import pt.isel.ps.qq.exceptions.InvalidCredentialsException
 import pt.isel.ps.qq.exceptions.MissingCookieException
-import pt.isel.ps.qq.repositories.UserElasticRepository
+import pt.isel.ps.qq.repositories.UserRepository
 import java.util.*
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpFilter
@@ -17,7 +15,7 @@ import javax.servlet.http.HttpServletResponse
 
 @Order(1)
 class UserFilter(
-    private val userRepo: UserElasticRepository, private val scope: UserInfoScope
+    private val userRepo: UserRepository, private val scope: UserInfoScope
 ): HttpFilter() {
 
     override fun doFilter(request: HttpServletRequest, response: HttpServletResponse, chain: FilterChain) {

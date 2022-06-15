@@ -5,28 +5,27 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import pt.isel.ps.qq.data.*
-import pt.isel.ps.qq.data.elasticdocs.*
-import pt.isel.ps.qq.data.elasticdocs.Answer
+import pt.isel.ps.qq.data.docs.*
+import pt.isel.ps.qq.data.docs.Answer
 import pt.isel.ps.qq.exceptions.*
 import pt.isel.ps.qq.filters.TestFilter
 import pt.isel.ps.qq.repositories.*
-import pt.isel.ps.qq.repositories.customelastic.CustomRequestUpdateQuizAction
 import pt.isel.ps.qq.utils.UniqueCodeGenerator
 import java.util.*
 
 @Service
 class DataService(
     private val uniqueCodeGenerator: UniqueCodeGenerator,
-    private val sessionRepo: SessionElasticRepository,
-    private val answerRepo: AnswersElasticRepository,
-    private val quizRepo: QuizElasticRepository,
-    private val historyRepo: HistoryElasticRepository,
-    private val templateRepo: TemplateElasticRepository
+    private val sessionRepo: SessionRepository,
+    private val answerRepo: AnswersRepository,
+    private val quizRepo: QuizRepository,
+    private val historyRepo: HistoryRepository,
+    private val templateRepo: TemplateRepository
 ) {
 
 
     fun joinSession(input: JoinSessionInputModel): AnswersDoc {
-        sessionRepo.updateNumberOfParticipants(input.sessionCode)
+        //sessionRepo.updateNumberOfParticipants(input.sessionCode)
         val session = sessionRepo.findSessionDocByGuestCode(input.sessionCode)
             ?: throw Exception("There was no session with that guest code")
         if (session.status != QqStatus.STARTED) throw Exception("Can join only in started sessions")
@@ -37,7 +36,7 @@ class DataService(
     }
 
     fun giveAnswer(input: GiveAnswerInputModel): AnswersDoc {
-        //answerRepo.updateAnswerList(input)
+
         //TODO: Verify Quiz Status / no update if closed / verify not started to understand what happens if a quiz was moved to not_started
         val opt = answerRepo.findById(input.guestId)
         if (opt.isEmpty) throw Exception("Invalid guest code... this guest may not be in the session")
@@ -174,7 +173,10 @@ class DataService(
             ) > 0
         ) throw LiveSessionAlreadyExists()
 
-        sessionRepo.makeSessionGoLive(id, username, generated)
+        var session = getSessionValidatingTheOwner(username, id)
+
+        updateSessionStatus(session, QqStatus.STARTED, generated)
+
         return generated
         // open a websocket
     }
@@ -189,7 +191,7 @@ class DataService(
             session.status,
             "To perform this operation the session status can only be STARTED"
         )
-        sessionRepo.shutDownSession(id, owner)
+        updateSessionStatus(session, QqStatus.CLOSED, session.guestCode)
         val quizList = quizRepo.findQuizDocsBySessionId(session.id)
 
         val history = HistoryDoc(session, quizList, emptyList()) //TODO: put the answers
@@ -200,6 +202,13 @@ class DataService(
 
         // close the websocket
         return toReturn
+    }
+
+    fun updateSessionStatus(session: SessionDoc, status: QqStatus, sessionCode: Int?) {
+        val updatedSession = SessionDoc(session, status, sessionCode)
+
+        sessionRepo.save(updatedSession)
+
     }
 
     //SessionNotFoundException
@@ -244,14 +253,15 @@ class DataService(
             quizState = QqStatus.NOT_STARTED,
             numberOfAnswers = 0
         )
-        val toReturn = quizRepo.save(quiz)
-        /* try {
-             sessionRepo.updateSessionQuizzes(sessionId, owner, quiz.id ,CustomRequestUpdateQuizAction.ADD)
-         } catch(ex: Exception) {
-             quizRepo.deleteById(quiz.id)
-             throw ex
-         }*/
-        return toReturn
+
+
+/* try {
+     sessionRepo.updateSessionQuizzes(sessionId, owner, quiz.id ,CustomRequestUpdateQuizAction.ADD)
+ } catch(ex: Exception) {
+     quizRepo.deleteById(quiz.id)
+     throw ex
+ }*/
+        return quizRepo.save(quiz)
     }
 
     //QuizNotFoundException
@@ -270,7 +280,7 @@ class DataService(
     fun removeQuizFromSession(owner: String, id: String) {
         val quizDoc = getQuizValidatingOwner(owner, id)
         quizRepo.deleteById(quizDoc.id)
-        sessionRepo.updateSessionQuizzes(quizDoc.sessionId, owner, quizDoc.id, CustomRequestUpdateQuizAction.REMOVE)
+//sessionRepo.updateSessionQuizzes(quizDoc.sessionId, owner, quizDoc.id, CustomRequestUpdateQuizAction.REMOVE)
     }
 
     //QuizNotFoundException
@@ -283,7 +293,7 @@ class DataService(
     fun editQuiz(owner: String, id: String, input: EditQuizInputModel): SessionQuizDoc {
         val quizDoc = getQuizValidatingOwner(owner, id)
         val session = getSessionValidatingTheOwner(owner, quizDoc.sessionId)
-        //if(session.status != QqStatus.NOT_STARTED) throw SessionIllegalStatusOperationException(session.status) // conflict 409
+//if(session.status != QqStatus.NOT_STARTED) throw SessionIllegalStatusOperationException(session.status) // conflict 409
         val newQuizDoc = SessionQuizDoc(quizDoc, input)
         return quizRepo.save(newQuizDoc)
     }

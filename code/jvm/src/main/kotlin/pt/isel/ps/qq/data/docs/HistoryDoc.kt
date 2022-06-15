@@ -1,10 +1,10 @@
-package pt.isel.ps.qq.data.elasticdocs
+package pt.isel.ps.qq.data.docs
 
 import org.springframework.data.annotation.Id
-import org.springframework.data.elasticsearch.annotations.Document
+import org.springframework.data.mongodb.core.mapping.Document
 import pt.isel.ps.qq.utils.getCurrentTimeSeconds
 
-@Document(indexName = "history")
+@Document(collection  = "history")
 data class HistoryDoc(
     @Id val id: String,
     val name: String,

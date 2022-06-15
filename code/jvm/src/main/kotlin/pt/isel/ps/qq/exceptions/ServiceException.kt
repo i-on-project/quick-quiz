@@ -1,6 +1,6 @@
 package pt.isel.ps.qq.exceptions
 
-import pt.isel.ps.qq.data.elasticdocs.QqStatus
+import pt.isel.ps.qq.data.docs.QqStatus
 
 open class ServiceException(message: String? = null): Exception(message)
 

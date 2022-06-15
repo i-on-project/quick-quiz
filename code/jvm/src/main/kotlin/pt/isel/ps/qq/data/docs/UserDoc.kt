@@ -1,13 +1,14 @@
-package pt.isel.ps.qq.data.elasticdocs
+package pt.isel.ps.qq.data.docs
 
 import org.springframework.data.annotation.Id
-import org.springframework.data.elasticsearch.annotations.Document
+
+import org.springframework.data.mongodb.core.mapping.Document
 
 enum class UserStatus {
     PENDING_REGISTRATION, ENABLED, DISABLED;
 }
 
-@Document(indexName = "users")
+@Document(collection  = "users")
 data class UserDoc(
     @Id
     val userName: String,

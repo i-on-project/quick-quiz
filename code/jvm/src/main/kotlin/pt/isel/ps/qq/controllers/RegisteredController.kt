@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import pt.isel.ps.qq.UserInfoScope
 import pt.isel.ps.qq.data.*
-import pt.isel.ps.qq.data.elasticdocs.QqStatus
+import pt.isel.ps.qq.data.docs.QqStatus
 import pt.isel.ps.qq.exceptions.*
 import pt.isel.ps.qq.service.AuthenticationService
 import pt.isel.ps.qq.service.DataService

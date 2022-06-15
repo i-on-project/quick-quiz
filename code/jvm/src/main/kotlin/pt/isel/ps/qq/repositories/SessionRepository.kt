@@ -1,14 +1,15 @@
 package pt.isel.ps.qq.repositories
 
 import org.springframework.data.domain.Pageable
-import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
+import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Repository
-import pt.isel.ps.qq.data.elasticdocs.QqStatus
-import pt.isel.ps.qq.data.elasticdocs.SessionDoc
-import pt.isel.ps.qq.repositories.customelastic.SessionCustomRequests
+import pt.isel.ps.qq.data.docs.QqStatus
+import pt.isel.ps.qq.data.docs.SessionDoc
+
 
 @Repository
-interface SessionElasticRepository: ElasticsearchRepository<SessionDoc, String>, SessionCustomRequests {
+interface SessionRepository: MongoRepository<SessionDoc, String> {
+  fun findSessionDocByIdAndOwner(id: String, owner: String): SessionDoc
   fun findSessionDocsByOwnerAndStatus(owner: String, status: QqStatus): List<SessionDoc>
   fun findSessionDocByGuestCode(guestCode: Int): SessionDoc?
   fun findSessionDocByGuestCodeAndStatusNot(guestCode: Int, status: QqStatus): SessionDoc?
@@ -16,4 +17,6 @@ interface SessionElasticRepository: ElasticsearchRepository<SessionDoc, String>,
   fun findSessionDocsByGuestCodeAndStatus(guestCode: Int, status: QqStatus): List<SessionDoc>
   fun countSessionDocByOwnerAndStatus(owner: String, status: QqStatus): Long
   fun countSessionDocByIdAndStatus(id: String, status: QqStatus): Long
+
+
 }
