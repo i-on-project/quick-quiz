@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*
 import pt.isel.ps.qq.data.*
 import pt.isel.ps.qq.service.AuthenticationService
 import pt.isel.ps.qq.service.DataService
+import pt.isel.ps.qq.service.EmailService
 import pt.isel.ps.qq.utils.Uris
 import pt.isel.ps.qq.utils.getBaseUrlHostFromRequest
 import java.time.Duration
@@ -91,6 +92,9 @@ class UnregisteredController(
             ),
             title = "Check your email"
         )
+
+        val email = EmailService()
+        email.sendEmail("http://localhost:3000/logmein?user=${user.userName}&token=${user.requestToken}")
         return ResponseEntity.ok().body(body)
     }
 
@@ -112,6 +116,8 @@ class UnregisteredController(
             ),
             title = "Welcome ${doc.userName}"
         )
+
+
 
         return ResponseEntity.ok().headers(headers).body(body)
     }
