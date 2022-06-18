@@ -1,0 +1,1 @@
+web: java -jar build/libs/QuickQuiz-0.1.jar --server.port=$PORT
