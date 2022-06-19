@@ -52,7 +52,7 @@ export const QuizAnswerModal = (props) => {
                     aria-describedby="order"
                     type="text"
                     value={answer}
-                    onChange={setAnswer}
+                    onChange={(e) => setAnswer(e.target.value)}
                 />
             </InputGroup>
         </Fragment>

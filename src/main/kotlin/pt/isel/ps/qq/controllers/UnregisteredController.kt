@@ -23,6 +23,8 @@ class UnregisteredController(
     private val dataService: DataService
 ) {
 
+    private val appHost = System.getenv("QQ_HOST");
+
     /**
      * POST /api/web/v1.0/non_auth/register
      *
@@ -64,6 +66,12 @@ class UnregisteredController(
             ),
             title = "Check your email"
         )
+
+
+        if(appHost != null) {
+            val email = EmailService()
+            email.sendEmail("${appHost}/logmein?user=${user.userName}&token=${user.registrationToken}", user.userName)
+        } //TODO: else Return error to contact admin
         return ResponseEntity.ok().body(body)
     }
 
@@ -93,8 +101,10 @@ class UnregisteredController(
             title = "Check your email"
         )
 
-        //val email = EmailService()
-        //email.sendEmail("http://localhost:3000/logmein?user=${user.userName}&token=${user.requestToken}")
+        if(appHost != null) {
+            val email = EmailService()
+            email.sendEmail("${appHost}/logmein?user=${user.userName}&token=${user.requestToken}", user.userName)
+        } //TODO: else Return error to contact admin
         return ResponseEntity.ok().body(body)
     }
 

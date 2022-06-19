@@ -5,14 +5,14 @@ import java.io.IOException;
 
 class EmailService {
 
-    fun sendEmail(linkForLogin: String): Response {
+    fun sendEmail(linkForLogin: String, toEmail: String): Response {
         val from = Email("ionquickquiz@gmail.com");
-        val subject = "Sending with SendGrid is Fun";
-        val to = Email("mexia.vitor@gmail.com");
+        val subject = "Log In to QuickQuiz";
+        val to = Email(toEmail);
         val content = Content("text/plain", "Please click here to login to QuickQuiz: ${linkForLogin}");
         val mail = Mail(from, subject, to, content);
 
-        val sg = SendGrid("") //TODO: create environment variable
+        val sg = SendGrid(System.getenv("SENDGRID_API_KEY")) //TODO: create environment variable
         val request = Request();
         try {
             request.method = Method.POST;

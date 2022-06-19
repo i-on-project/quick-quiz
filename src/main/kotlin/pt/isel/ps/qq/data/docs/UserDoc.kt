@@ -34,7 +34,9 @@ data class UserDoc(
             displayName = user.displayName,
             status = user.status,
             requestToken = token,
-            requestExpireDate = date
+            requestExpireDate = date,
+            loginToken = user.loginToken,
+            loginExpireDate = user.loginExpireDate
         )
         fun userLogin(user: UserDoc, token: String, date: Long) = UserDoc(
             userName = user.userName,
