@@ -68,7 +68,7 @@ class MvcConfig(
         }
     }
    override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
-        registry.addResourceHandler("/static/**")
+        registry.addResourceHandler("/static/static/**")
             .addResourceLocations("classpath:/static/")
     }
 

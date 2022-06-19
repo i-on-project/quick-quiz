@@ -64,12 +64,16 @@ node {
     nodeProjectDir.set(file("${project.projectDir}/src/main/webapp"))
 }
 
-tasks.npmInstall
+tasks.npmInstall  {
+    nodeModulesOutputFilter {
+        exclude("notExistingFile")
+    }
+}
 
 val buildTaskUsingNpm = tasks.register<NpmTask>("buildNpm") {
     dependsOn(tasks.npmInstall)
     npmCommand.set(listOf("run", "build"))
-    //args.set(listOf("--", "--out-dir", "${buildDir}/npm-output"))
+    args.set(listOf("--", "--out-dir", "src/main/webapp/build/npm-output"))
     inputs.dir("src/main/webapp/src")
     outputs.dir("src/main/webapp/npm-output")
 }

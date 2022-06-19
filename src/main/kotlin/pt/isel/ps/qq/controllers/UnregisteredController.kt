@@ -93,8 +93,8 @@ class UnregisteredController(
             title = "Check your email"
         )
 
-        val email = EmailService()
-        email.sendEmail("http://localhost:3000/logmein?user=${user.userName}&token=${user.requestToken}")
+        //val email = EmailService()
+        //email.sendEmail("http://localhost:3000/logmein?user=${user.userName}&token=${user.requestToken}")
         return ResponseEntity.ok().body(body)
     }
 

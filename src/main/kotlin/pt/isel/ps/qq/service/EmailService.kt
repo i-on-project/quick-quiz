@@ -12,7 +12,7 @@ class EmailService {
         val content = Content("text/plain", "Please click here to login to QuickQuiz: ${linkForLogin}");
         val mail = Mail(from, subject, to, content);
 
-        val sg = SendGrid("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") //TODO: create environment variable
+        val sg = SendGrid("") //TODO: create environment variable
         val request = Request();
         try {
             request.method = Method.POST;
