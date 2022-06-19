@@ -64,11 +64,7 @@ node {
     nodeProjectDir.set(file("${project.projectDir}/src/main/webapp"))
 }
 
-tasks.npmInstall {
-    nodeModulesOutputFilter {
-        exclude("notExistingFile")
-    }
-}
+tasks.npmInstall
 
 val buildTaskUsingNpm = tasks.register<NpmTask>("buildNpm") {
     dependsOn(tasks.npmInstall)
@@ -89,12 +85,3 @@ tasks.register<Copy>("copyWebApp") {
     from("${project.projectDir}/src/main/webapp/build")
     into("${buildDir}/resources/main/static/.")
 }
-/*
-pyWebApp") {
-    dependsOn(":webapp:build")
-}
-
-tasks.compileKotlin {
-    dependsOn("copyWebApp")
-}
-*/
