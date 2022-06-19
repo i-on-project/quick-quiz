@@ -19,6 +19,7 @@ class TestFilter: HttpFilter() {
 
     override fun doFilter(request: HttpServletRequest, response: HttpServletResponse, chain: FilterChain) {
         logger.info("${request.method} ${request.requestURI}")
+        //logger.info("MongoDb: ${System.getenv("MONGODB")}")
         chain.doFilter(request, response)
     }
 }
