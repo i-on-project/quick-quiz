@@ -11,10 +11,10 @@ import javax.servlet.http.HttpServletResponse
 
 @Order(0)
 @Component
-class TestFilter: HttpFilter() {
+class LogFilter: HttpFilter() {
 
     companion object {
-        val logger: Logger = LoggerFactory.getLogger(TestFilter::class.java)
+        val logger: Logger = LoggerFactory.getLogger(LogFilter::class.java)
     }
 
     override fun doFilter(request: HttpServletRequest, response: HttpServletResponse, chain: FilterChain) {

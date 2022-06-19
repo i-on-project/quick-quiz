@@ -13,7 +13,6 @@ class WebSocketConfiguration : WebSocketMessageBrokerConfigurer {
 
     override fun registerStompEndpoints(stompEndpointRegistry: StompEndpointRegistry) {
         stompEndpointRegistry.addEndpoint("/insessionws")
-            //.setAllowedOrigins("http://localhost:3000")
             .setAllowedOriginPatterns("*")
             .withSockJS()
     }
