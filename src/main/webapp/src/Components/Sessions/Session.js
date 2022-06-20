@@ -10,6 +10,7 @@ import {getSession} from "../../Services/SessionService";
 import {useParams} from "react-router";
 import {SessionForm} from "./SessionForm";
 import {getActionHref, getEntityLinksHref, getLinksHref} from "../../Services/SirenService";
+import {Navigate} from "react-router-dom";
 
 export const Session = (props) => {
     const [loading, setLoading] = useState(false)
@@ -19,6 +20,7 @@ export const Session = (props) => {
     const [show, setShow] = useState(false)
     const [error, setError] = useState(null)
     const [title, setTitle] = useState('')
+    const [inSession, setInSession] = useState(false)
     const {id} = useParams()
 
     useEffect(() => {
@@ -63,9 +65,8 @@ export const Session = (props) => {
                 setQuizzes(t)
             }
         }
-        goGET(getLinksHref(session.links, "related",'Quizzes'), setData, setError)
+        goGET(getLinksHref(session.links, "related", 'Quizzes'), setData, setError)
     }
-
 
 
     const newQuiz = () => {
@@ -76,11 +77,16 @@ export const Session = (props) => {
     }
 
     const newButton = () => (
-        <Button className="btn btn-success left" type="submit"
+        <Button variant="primary" className="btn  left mt-3 mb-3"
                 onClick={newQuiz}> Add Quiz
         </Button>
     )
 
+    const startButton = () => (
+        <Button className="btn btn-success left mt-3 mb-3"
+                onClick={handleStartSession}> Start Session
+        </Button>
+    )
     const createQuizHandler = (quiz) => {
         const setError = (error) => error !== null ? console.log(`Error Creating with error ${error} `) : null
         const setData = (data) => {
@@ -106,9 +112,42 @@ export const Session = (props) => {
         goPOST(apiLink, updatedSession, null, setError, 'PUT', setLoading)
     }
 
+    const updateStatus = () => {
+
+
+        const setError = (error) => {
+            console.log(error)
+            if (error.type === 'LiveSessionAlreadyExists') {
+                alert('Another Session is already Live. Please close that session before starting a new one.')
+            } else {
+                alert('An error occurred. PLease try again and if the error persists contact your administrator.')
+            }
+        }
+
+        const setData = (data) => {
+            setInSession(true)
+        }
+
+        const goLivehref = session.actions.find(a => a.name === 'GoLive-Session').href
+
+        goPOST(goLivehref, '', setData, setError)
+
+    }
+
+    const handleStartSession = () => updateStatus()
+
     return (
         <Fragment>
+            {inSession && (<Navigate to={`/owninsession/${id}`}/>)}
+            {session !== null && session.properties.status === 'NOT_STARTED' &&
+                <Container>
+                    <Row>
+                        {startButton()}
+                    </Row>
+                </Container>
+            }
             <Container>
+
                 <Row>
                     <Card>
                         <Card.Body>
@@ -118,6 +157,11 @@ export const Session = (props) => {
                                 <SessionForm session={session.properties} updateSession={updateSessionHandler}/>)}
                         </Card.Body>
                     </Card>
+                </Row>
+            </Container>
+            <Container>
+                <Row>
+                    {newButton()}
                 </Row>
             </Container>
             {/******************** if there are quizzes *********************************/}
@@ -133,11 +177,7 @@ export const Session = (props) => {
                     )}
                 </Row>
             </Container>
-            <Container>
-                <Row>
-                    {newButton()}
-                </Row>
-            </Container>
+
             <Modal show={show}>
                 <CreateEditQuizModal handleClose={handleClose} createQuiz={createQuizHandler}/>
             </Modal>

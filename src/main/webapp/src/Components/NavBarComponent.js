@@ -8,6 +8,8 @@ import {UserContext} from "./UserContextProvider";
 
 export const NavBarComponent = () => {
 
+    //console.log("render")
+
     const userContext = useContext(UserContext)
     const [logout, setLogout] = useState(false)
 
@@ -16,13 +18,24 @@ export const NavBarComponent = () => {
         userContext.updateUser(null, null)
         setLogout(true)
     }
+    let redirect = null
+
+    if(logout) {
+        redirect = <Navigate to={"/"}  />
+        //console.log("logout")
+        setLogout(false)
+    }
 
     const isLoggedIn = () => userContext.userName !== null && userContext.isLoading === false
     const isNotLoggedIn = () => userContext.userName === null && userContext.isLoading === false
+/*
+    console.log(logout)
+    console.log(redirect)*/
 
     return (
         <Fragment>
-            {logout && <Navigate to={"/"} />}
+            {redirect }
+
             <Navbar bg="light" expand="lg">
                 <Container>
                     <Navbar.Text><Link to="/">Home</Link></Navbar.Text>
@@ -31,7 +44,7 @@ export const NavBarComponent = () => {
                     {isLoggedIn() ? <Navbar.Brand href="/history">History</Navbar.Brand> : null}
                     {isLoggedIn() ? <Navbar.Text>Welcome {userContext.displayName}</Navbar.Text>   : null}
                     {isLoggedIn() ? <Button className="btn btn-success" type="submit"
-                                                    onClick={logoutHandler}> Logout
+                                                    onClick={logoutHandler}><Link to={"/"}/> Logout
                     </Button> : null}
                     {isNotLoggedIn() ? <Navbar.Brand href="/register">Register</Navbar.Brand> : null}
                     {isNotLoggedIn() ? <Navbar.Brand href="/login">Login</Navbar.Brand> : null}

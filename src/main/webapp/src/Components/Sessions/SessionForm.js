@@ -33,30 +33,6 @@ export const SessionForm = (props) => {
     const [create, setCreate] = useState(false)
     const [validated, setValidated] = useState(false)
 
-    /*    const [state, dispatch] = useReducer(reducer, initialState)
-
-        const reducer = (state, action) => {
-            switch (action.type) {
-                case 'set-mode': {
-                    return state;
-                }
-                case 'set-images': {
-                    return state;
-                }
-                case 'set-query': {
-                    return state;
-                }
-                case 'fetch-next-page': {
-                    return state;
-                }
-                case 'reset': {
-                    return initialState;
-                }
-                default:
-                    return initialState;
-            }
-        };*/
-
 
     useEffect(() => {
         if (props.updateSession === null || props.updateSession === undefined) {
@@ -151,13 +127,22 @@ export const SessionForm = (props) => {
             />
         </InputGroup>
         <Form.Label className={"mb-2 mt-3"}>Session Status:</Form.Label>
-        <Form.Select value={status}
+        <InputGroup>
+            <FormControl
+                placeholder="Session Status"
+                aria-label="Session Status"
+                aria-describedby="session_status"
+                disabled={true}
+                value={status}
+            />
+        </InputGroup>
+{/*        <Form.Select value={status}
                      onChange={(e) => setStatus(e.target.value)}
                      disabled={!edit}>
             <option value='NOT_STARTED'>Not Started</option>
             <option value='STARTED'>Started</option>
             <option value='CLOSED'>Closed</option>
-        </Form.Select>
+        </Form.Select>*/}
 
         <Form.Label className={"mb-2 mt-3"}>Limit Of Participants:</Form.Label>
         <InputGroup>

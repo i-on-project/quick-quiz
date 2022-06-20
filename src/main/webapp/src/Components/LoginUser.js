@@ -53,6 +53,16 @@ export const LoginUser = () => {
                     {data || error ?  (
                         <Card>
                             <Card.Body>
+                                Please check your email to login.
+                            </Card.Body>
+                        </Card>
+                    ) : <div/>}
+                </Row>
+                <Row>
+                    {data || error ?  (
+                        <Card>
+                            <Card.Body>
+                                <strong>Debug Info:</strong>
                                 {error && (
                                     <div>{`There is a problem fetching the post data - ${error}`}</div>
                                 )}

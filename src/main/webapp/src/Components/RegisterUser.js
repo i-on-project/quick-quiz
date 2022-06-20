@@ -29,7 +29,7 @@ export const RegisterUser = () => {
     };
 
     return (
-        <div>
+        <fragment>
 
             <Container>
                 <Row>
@@ -40,7 +40,7 @@ export const RegisterUser = () => {
                             <InputGroup className="mb-3">
                                 <InputGroup.Text id="username"/>
                                 <FormControl
-                                    placeholder="Username"
+                                    placeholder="Email"
                                     aria-label="Username"
                                     aria-describedby="basic-addon1"
                                     onChange={userNameChangeHandler}
@@ -60,30 +60,42 @@ export const RegisterUser = () => {
                             <Button className="btn btn-success" type="submit"
                                     onClick={toggleButtonState}> Save
                             </Button>
-                            {/*                                <button className="btn btn-danger"
-                                        onClick={this.cancel.bind(this)}
-                                        style={{marginLeft: "10px"}}>Cancel
-                                </button>*/}
 
-                            <Card>
-
-                                <Card.Body>
-                                    {error && (
-                                        <div>{`There is a problem fetching the post data - ${error}`}</div>
-                                    )}
-
-                                    {data && (
-                                        <div>{data.userName}</div>)}
-
-                                    {data && (
-                                        <a href={`http://${data.properties.host}/logmein?user=${data.properties.userName}&token=${data.properties.token}`}> LogMeIn </a>)}
-                                </Card.Body>
-                            </Card>
                         </Card.Body>
                     </Card>
                 </Row>
+                <Row>
+                    {data || error ? (
+                        <Card>
+                            <Card.Body>
+                                Please check your email to complete registration.
+                            </Card.Body>
+                        </Card>
+                    ) : <div/>}
+                </Row>
+                <Row>
+                    {data || error ? (
+                        <Card>
+
+                            <Card.Body>
+                                <strong>Debug Info:</strong>
+                                {error && (
+                                    <div>{`There is a problem fetching the post data - ${error}`}</div>
+                                )}
+
+                                {data && (
+                                    <div>{data.userName}</div>)}
+
+                                {data && (
+                                    <a href={`http://${data.properties.host}/logmein?user=${data.properties.userName}&token=${data.properties.token}`}> LogMeIn </a>)}
+                            </Card.Body>
+                        </Card>
+
+                    ) : <div/>}
+
+                </Row>
 
             </Container>
-        </div>
-    );
+        </fragment>
+    )
 }

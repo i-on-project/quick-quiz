@@ -59,7 +59,7 @@ export const Sessions = () => {
 
         const apiLink = getActionHref(sessions.actions, "Create-Session")
 
-        if(apiLink !== null)
+        if (apiLink !== null)
             goPOST(apiLink, newSession, setData, setError, 'POST', setLoading)
         else {
             setError("Missing Action!")
@@ -67,20 +67,6 @@ export const Sessions = () => {
         }
 
     }
-
-    //const goToSession = (id) => <Redirect to={`\/${id}`} />
-/*    const openSession = (name, link) => {
-        setLoading(true)
-        //console.log(`name: ${name} -> link: ${link}`)
-        const setError = (error) => {
-            if (error !== null)
-                alert(`Failed to retrieve Session from ${link} with error ${error}`)
-        }
-        getSession(link, setSession, setError)
-
-        setInSession(true)
-        setLoading(false)
-    }*/
 
     const openSession = (id) => {
         setInSession(true)
@@ -147,8 +133,8 @@ export const Sessions = () => {
                                      link={e.href}
                                      id={e.properties.id}
                                      status={e.properties.status}
-                                     startHref = {getLinksFromEntity(e, "start")}
-                                     closeHref = {getLinksFromEntity(e, "close")}
+                                     startHref={getLinksFromEntity(e, "start")}
+                                     closeHref={getLinksFromEntity(e, "close")}
                                      openSession={() => openSession(e.properties.id)}
                                      deleteSession={() => deleteSession(e.properties.id)}
                                      reloadSessions={() => getSessions()}
@@ -163,13 +149,14 @@ export const Sessions = () => {
                             <CreateSessionModal createSession={createSession} handleClose={handleCLose}/>)
                         </Modal>)}
                 </Row>
-
-                <Row>
-                    <Container>
-                        <Button variant="primary" onClick={handlePrev}>Prev</Button>
-                        <Button variant="primary" onClick={handleNext}>Next</Button>
-                    </Container>
-                </Row>
+                {loading === false && inSession === false && sessions !== null && totalPages > 1 &&
+                    <Row>
+                        <Container>
+                            <Button variant="primary" onClick={handlePrev}>Prev</Button>
+                            <Button variant="primary" onClick={handleNext}>Next</Button>
+                        </Container>
+                    </Row>
+                }
             </Container>
         </Fragment>
     )

@@ -50,7 +50,7 @@ class AuthenticationService(
         val uid = UUID.randomUUID()
 
         val user = UserDoc(
-            userName = input.userName,
+            userName = input.userName.lowercase(),
             displayName = input.displayName,
             status = UserStatus.PENDING_REGISTRATION,
             registrationToken = uid.toString(),
@@ -105,7 +105,7 @@ class AuthenticationService(
             validateToken(user.registrationToken, input.loginToken)
 
             val enabledUser = UserDoc(
-                userName = user.userName,
+                userName = user.userName.lowercase(),
                 displayName = user.displayName,
                 status = UserStatus.ENABLED,
                 loginToken = UUID.randomUUID().toString(),
@@ -129,7 +129,7 @@ class AuthenticationService(
 
 
     private fun getUser(user: String): UserDoc {
-        val opt = userRepo.findById(user)
+        val opt = userRepo.findById(user.lowercase())
         if(opt.isEmpty) throw UserNotFoundException()
         return opt.get()
     }

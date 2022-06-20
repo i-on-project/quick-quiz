@@ -81,7 +81,9 @@ export const InSession = () => {
     return (
 
         <Fragment>
-            <h1 className={"text-center mb-5 mt-3"}>Participant: {id}</h1>
+            <h1 className={"text-center mb-5 mt-3"}>Welcome to Quiz Session</h1>
+            {quizzes !== null && quizzes.length === 0 &&<h3 className={"text-center mb-5 mt-3"}>Quizzes will show below once made available</h3>}
+            <h5 className={"text-center mb-5 mt-3"}>Participant Id: {id} (debug info)</h5>
             <Container>
                 <Row>
                     {quizzes !== null && quizzes.length > 0 && answer !== null && (

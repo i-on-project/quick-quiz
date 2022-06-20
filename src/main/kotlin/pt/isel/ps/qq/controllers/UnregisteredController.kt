@@ -68,7 +68,7 @@ class UnregisteredController(
         )
 
 
-        if(appHost != null) {
+        if(appHost != null && !user.userName?.contains("test")) {
             val email = EmailService()
             email.sendEmail("${appHost}/logmein?user=${user.userName}&token=${user.registrationToken}", user.userName)
         } //TODO: else Return error to contact admin
@@ -77,6 +77,7 @@ class UnregisteredController(
 
     @PostMapping(Uris.API.Web.V1_0.NonAuth.Login.ENDPOINT)
     fun requestLogin(request: HttpServletRequest, @RequestBody userName: LoginInputModel): ResponseEntity<Any> {
+
         val user = authenticationService.requestLogin(userName)
         val body = SirenModel(
             clazz = listOf("RequestLogin"),
@@ -101,7 +102,7 @@ class UnregisteredController(
             title = "Check your email"
         )
 
-        if(appHost != null) {
+        if(appHost != null && !user.userName?.contains("test")) {
             val email = EmailService()
             email.sendEmail("${appHost}/logmein?user=${user.userName}&token=${user.requestToken}", user.userName)
         } //TODO: else Return error to contact admin

@@ -9,6 +9,7 @@ import {getActionHref, getLinksHref} from "../../Services/SirenService";
 import Button from "react-bootstrap/Button";
 import {QuizCardInSession} from "../Quizzes/QuizCardInSession";
 import SockJsClient from 'react-stomp';
+import {Navigate} from "react-router-dom";
 
 /* register websocket */
 
@@ -26,6 +27,7 @@ export const InSessionOrg = () => {
     const [guestCode, setGuestCode] = useState(null)
     const [client, setClient] = useState(null)
     const [wsSourceUrl, setWsSourceUrl] = useState(null)
+    const [closedSession, setClosedSession] = useState(false)
     const {id} = useParams()
 
     useEffect(() => {
@@ -154,9 +156,46 @@ export const InSessionOrg = () => {
         }));
     }
 
+    const closeButton = () => (
+        <Button className="btn btn-success left mt-3 mb-3"
+                onClick={handleCloseSession}> Close Session
+        </Button>
+    )
+
+    const updateStatus = () => {
+
+
+        const setError = (error) => {
+            console.log(error)
+            if (error.type === 'LiveSessionAlreadyExists') {
+                alert('Another Session is already Live. Please close that session before starting a new one.')
+            } else {
+                alert('An error occurred. PLease try again and if the error persists contact your administrator.')
+            }
+        }
+
+        const setData = (data) => {
+            setClosedSession(true)
+        }
+
+        const goLivehref = session.actions.find(a => a.name === 'Stop-Session').href
+
+        goPOST(goLivehref, '', setData, setError)
+
+    }
+
+    const handleCloseSession = () => updateStatus()
 
     return (
         <Fragment>
+            {closedSession && (<Navigate to={`/sessions`}/>)}
+            {!closedSession &&
+                <Container>
+                    <Row>
+                        {closeButton()}
+                    </Row>
+                </Container>
+            }
             <Container>
                 <Row>
                     <Card className={"mt-3"}>

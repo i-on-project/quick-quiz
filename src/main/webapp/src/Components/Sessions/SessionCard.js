@@ -29,7 +29,7 @@ export const SessionCard = (props) => {
         const setError = (error) => {
 
             console.log(error)
-            if(error.type === 'LiveSessionAlreadyExists') {
+            if (error.type === 'LiveSessionAlreadyExists') {
                 alert('Another Session is already Live. Please close that session before starting a new one.')
                 setStatus('NOT_STARTED')
             } else {
@@ -54,6 +54,8 @@ export const SessionCard = (props) => {
             goPOST(props.closeHref, '', setData, setError)
     }
 
+    const handleStartSession = () => updateStatus('STARTED')
+    const handleCloseSession = () => updateStatus('CLOSED')
 
     return (
         <Fragment>
@@ -61,15 +63,15 @@ export const SessionCard = (props) => {
             <Card style={{width: '18rem'}} className="me-3 mb-3">
                 <Card.Body>
                     <Card.Title>{props.name}</Card.Title>
-                    <Form.Select value={status}
-                                 onChange={(e) => updateStatus(e.target.value)}>
-                        {status === 'NOT_STARTED' && <option value='NOT_STARTED'>Not Started</option>}
-                        {status !== 'CLOSED' && <option value='STARTED'>Started</option>}
-                        {status !== 'NOT_STARTED' && <option value='CLOSED'>Closed</option>}
-                    </Form.Select>
-                    <Button variant="primary" onClick={handleOpenClick} className="mt-3">Open</Button>
+                    <Button variant="primary" onClick={handleOpenClick} className="me-3 mt-3">Open</Button>
+                    {status === 'NOT_STARTED' &&
+                        <Button variant="secondary" onClick={handleStartSession} className="me-3 mt-3">Start</Button>}
+                    {status === 'STARTED' &&
+                        <Button variant="secondary" onClick={handleCloseSession} className="me-3 mt-3">Close</Button>}
+
+
                     {status !== 'STARTED' &&
-                        <Button variant="primary" onClick={handleDeleteClick} className="ms-3 mt-3">Delete</Button>}
+                        <Button variant="danger" onClick={handleDeleteClick} className=" mt-3">Delete</Button>}
                 </Card.Body>
             </Card>
         </Fragment>
