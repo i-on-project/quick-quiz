@@ -1,29 +1,24 @@
-package pt.isel.ps.qq.controllers
+package pt.isel.ps.qq.controllers.unauthcontrollers
 
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RestController
 import pt.isel.ps.qq.data.*
 import pt.isel.ps.qq.service.AuthenticationService
-import pt.isel.ps.qq.service.DataService
 import pt.isel.ps.qq.service.EmailService
 import pt.isel.ps.qq.utils.Uris
 import pt.isel.ps.qq.utils.getBaseUrlHostFromRequest
 import java.time.Duration
 import java.util.*
-import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-@RestController
-@RequestMapping(Uris.API.Web.V1_0.NonAuth.PATH)
-class UnregisteredController(
-    private val authenticationService: AuthenticationService,
-    private val dataService: DataService
-) {
+@RestController("UserController")
+class UserController(private val authenticationService: AuthenticationService,
 
-    private val appHost = System.getenv("QQ_HOST");
+) : UnauthMainController() {
 
     /**
      * POST /api/web/v1.0/non_auth/register
@@ -68,9 +63,9 @@ class UnregisteredController(
         )
 
 
-        if(appHost != null && !user.userName?.contains("test")) {
+        if(appHost != null && !user.userName.contains("test")) {
             val email = EmailService()
-            email.sendEmail("${appHost}/logmein?user=${user.userName}&token=${user.registrationToken}", user.userName)
+            email.sendEmail("$appHost/logmein?user=${user.userName}&token=${user.registrationToken}", user.userName)
         } //TODO: else Return error to contact admin
         return ResponseEntity.ok().body(body)
     }
@@ -104,7 +99,7 @@ class UnregisteredController(
 
         if(appHost != null && !user.userName?.contains("test")) {
             val email = EmailService()
-            email.sendEmail("${appHost}/logmein?user=${user.userName}&token=${user.requestToken}", user.userName)
+            email.sendEmail("$appHost/logmein?user=${user.userName}&token=${user.requestToken}", user.userName)
         } //TODO: else Return error to contact admin
         return ResponseEntity.ok().body(body)
     }
@@ -127,65 +122,6 @@ class UnregisteredController(
             ),
             title = "Welcome ${doc.userName}"
         )
-
-
-
         return ResponseEntity.ok().headers(headers).body(body)
     }
-
-    @PostMapping(Uris.API.Web.V1_0.NonAuth.JoinSession.ENDPOINT)
-    fun joinSession(@RequestBody input: JoinSessionInputModel): ResponseEntity<Any> {
-        val ansDoc = dataService.joinSession(input)
-        val headers = HttpHeaders() //TODO: insessuion COOKIE
-        headers.add("Set-Cookie", "InSession=${ansDoc.id}; Max-Age=${Duration.ofDays(7).toSeconds()}; Path=/; Secure; ") // SameSite=Strict
-        return ResponseEntity.ok().headers(headers).body(ParticipantOutputModel(ansDoc.id))
-    }
-
-    @PostMapping(Uris.API.Web.V1_0.NonAuth.GiveAnswer.ENDPOINT)
-    fun giveAnswer(request: HttpServletRequest, @RequestBody input: GiveAnswerInputModel): ResponseEntity<Any> {
-        return ResponseEntity.ok().body(dataService.giveAnswer(input))
-    }
-    //TODO: create a cookie handler and move this there
-    private fun expireCookie(cookie: Cookie): String {
-        val builder = StringBuilder("${cookie.name}=;")
-        builder.append("Expires=Thu, 01 Jan 1970 00:00:01 GMT;")
-        builder.append("Path=/;")
-        builder.append("Secure;")
-        builder.append("HttpOnly;")
-        return builder.toString()
-    }
-
-    @GetMapping(Uris.API.Web.V1_0.NonAuth.GetAnswer.ENDPOINT)
-    fun getAnswer(@PathVariable answerId: String, request: HttpServletRequest): ResponseEntity<Any> {
-        val ansDoc = dataService.getAnswer(answerId)
-        if(!dataService.checkSessionIsLive(ansDoc.sessionId)) {
-            println("Session not found")
-            val cookie = request.cookies.find { it.name == "InSession" }!!
-            val headers = HttpHeaders()
-            headers.add("Set-Cookie", expireCookie(cookie))
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).headers(headers).contentType(ProblemJson.MEDIA_TYPE).body("Session Not Found")
-        }
-
-        return ResponseEntity.ok().body(ansDoc)
-    }
-
-    @GetMapping(Uris.API.Web.V1_0.NonAuth.Quiz.SessionId.CONTROLLER_ENDPOINT)
-    fun getAllQuizzesForAnswerSession(@PathVariable answerId: String): ResponseEntity<Any> {
-        val ansDoc = dataService.getAnswer(answerId) //TODO: checks here
-        val quizzes = dataService.getAllSessionAnswersQuizzes(ansDoc.sessionId)
-
-        val body = SirenModel(
-            clazz = listOf("Quiz"),
-            properties = ListInfo(size = quizzes.size, total = quizzes.size), //TODO: Output model required
-            entities = quizzes.map {
-                SirenEntity(
-                    clazz = listOf("quizzes"),
-                    rel = listOf("self"),
-                    properties = it
-                )
-            }
-        )
-        return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
-    }
 }
-
