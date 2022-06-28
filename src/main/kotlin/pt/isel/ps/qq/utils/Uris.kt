@@ -75,6 +75,13 @@ object Uris {
                         }
 
                     }
+
+                    object SessionStatus {
+                        const val ENDPOINT = "/sessionStatus/{participantId}"
+                        const val PATH = "${NonAuth.PATH}$ENDPOINT"
+                        private val TEMPLATE = UriTemplate(PATH)
+                        fun make(id: String): URI = TEMPLATE.expand(mapOf("participantId" to id))
+                    }
                 }
 
                 object Auth {
@@ -186,11 +193,11 @@ object Uris {
                         }
                         /*TODO:Review this endpoint -> may make more sense in Sessions*/
                         object SessionId {
-                            const val ENDPOINT = "/session/{sessionid}"
+                            const val ENDPOINT = "/session/{sessionId}"
                             const val PATH = "${Quiz.PATH}$ENDPOINT"
                             const val CONTROLLER_ENDPOINT = "${Quiz.ENDPOINT}${ENDPOINT}"
                             private val TEMPLATE = UriTemplate(PATH)
-                            fun make(id: String): URI = TEMPLATE.expand(mapOf("sessionid" to id))
+                            fun make(id: String): URI = TEMPLATE.expand(mapOf("sessionId" to id))
                             fun url(host: String, id: String) = "${host}${make(id)}"
                         }
                     }

@@ -192,9 +192,10 @@ class RegisteredController(
         return exceptionHandling(
             type = "LiveSessionAlreadyExists",
             title = "A Live Session already exists",
-            status = 403,
+            status = 409,
             instance = request.requestURI,
-            values = values(id, ex.message)
+            values = values(id, ex.message),
+            detail = "Another Session is already Live. Please close that session before starting a new one."
         )
     }
 
@@ -275,7 +276,6 @@ class RegisteredController(
                             type = SirenSupportedMethods.POST.toString(),
                             href = Uris.API.Web.V1_0.Auth.Session.Id.Close.make(it.id).toString()
                         )
-
                     )
                 )
             },
@@ -421,7 +421,7 @@ class RegisteredController(
                 actions = actionList,
                 links = listOf(
                     SirenLink(
-                        listOf("List", "Quiz"),
+                        listOf("List", "Quizzes"),
                         "Quizzes",
                         listOf("related"),
                         Uris.API.Web.V1_0.Auth.Quiz.SessionId.make(doc.id).toString()
@@ -730,8 +730,8 @@ class RegisteredController(
 
     /*TODO: Make Pageable*/
     @GetMapping(Uris.API.Web.V1_0.Auth.Quiz.SessionId.CONTROLLER_ENDPOINT)
-    fun getAllQuizzesForSession(@PathVariable sessionid: String): ResponseEntity<Any> {
-        val quizzes = service.getAllSessionQuizzes(sessionid)
+    fun getAllQuizzesForSession(@PathVariable sessionId: String): ResponseEntity<Any> {
+        val quizzes = service.getAllSessionQuizzes(sessionId)
 
 /*                , SirenAction(
                     name = "Remove-Quiz",
@@ -889,6 +889,5 @@ class RegisteredController(
         )
         return ResponseEntity.ok().body(body)
     }
-
 
 }

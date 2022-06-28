@@ -27,8 +27,8 @@ class DataService(
     fun joinSession(input: JoinSessionInputModel): AnswersDoc {
         //sessionRepo.updateNumberOfParticipants(input.sessionCode)
         val session = sessionRepo.findSessionDocByGuestCode(input.sessionCode)
-            ?: throw Exception("There was no session with that guest code")
-        if (session.status != QqStatus.STARTED) throw Exception("Can join only in started sessions")
+            ?: throw SessionNotFoundException("There was no session with that guest code")
+        if (session.status != QqStatus.STARTED) throw SessionIllegalStatusOperationException(session.status, "Can join only in started sessions")
         val guestUuid = UUID.randomUUID().toString()
         val guestSession = AnswersDoc(id = guestUuid, sessionId = session.id)
         answerRepo.save(guestSession)
@@ -341,5 +341,10 @@ class DataService(
         return sessionRepo.countSessionDocByIdAndStatus(sessionId, QqStatus.STARTED) > 0
     }
 
+    fun checkSessionIsLiveNonAuth(participantId: String): Boolean {
+        val opt = answerRepo.findById(participantId)
+        if(opt.isEmpty) return false
+        return checkSessionIsLive(opt.get().sessionId)
+    }
 
 }

@@ -5,6 +5,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import pt.isel.ps.qq.data.*
+import pt.isel.ps.qq.data.docs.QqStatus
+import pt.isel.ps.qq.exceptions.SessionNotFoundException
 import pt.isel.ps.qq.service.AuthenticationService
 import pt.isel.ps.qq.service.DataService
 import pt.isel.ps.qq.service.EmailService
@@ -123,11 +125,31 @@ class UnregisteredController(
     }
 
     @PostMapping(Uris.API.Web.V1_0.NonAuth.JoinSession.ENDPOINT)
-    fun joinSession(@RequestBody input: JoinSessionInputModel): ResponseEntity<Any> {
-        val ansDoc = dataService.joinSession(input)
-        val headers = HttpHeaders() //TODO: insessuion COOKIE
-        headers.add("Set-Cookie", "InSession=${ansDoc.id}; Max-Age=${Duration.ofDays(7).toSeconds()}; Path=/; Secure; ") // SameSite=Strict
-        return ResponseEntity.ok().headers(headers).body(ParticipantOutputModel(ansDoc.id))
+    fun joinSession(request: HttpServletRequest, @RequestBody input: JoinSessionInputModel): ResponseEntity<Any> {
+        try {
+            val ansDoc = dataService.joinSession(input)
+            val headers = HttpHeaders() //TODO: insessuion COOKIE
+            headers.add(
+                "Set-Cookie",
+                "InSession=${ansDoc.id}; Max-Age=${Duration.ofDays(7).toSeconds()}; Path=/; Secure; "
+            ) // SameSite=Strict
+            return ResponseEntity.ok().headers(headers).body(ParticipantOutputModel(ansDoc.id))
+        } catch(ex: SessionNotFoundException) {
+            return exceptionHandle(request, ex)
+        }
+    }
+
+    private fun exceptionHandle(
+        request: HttpServletRequest,
+        ex: SessionNotFoundException
+    ): ResponseEntity<Any> {
+        return exceptionHandling(
+            type = "SessionNotFoundException",
+            title = "This session doesn't exist",
+            status = 404,
+            instance = request.requestURI,
+            values = mapOf("message" to ex.message)
+        )
     }
 
     @PostMapping(Uris.API.Web.V1_0.NonAuth.GiveAnswer.ENDPOINT)
@@ -172,6 +194,43 @@ class UnregisteredController(
                     rel = listOf("self"),
                     properties = it
                 )
+            }
+        )
+        return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
+    }
+
+    private fun exceptionHandling(
+        type: String,
+        title: String,
+        status: Int,
+        instance: String,
+        values: Map<String, Any?> = emptyMap(),
+        detail: String? = null
+    ): ResponseEntity<Any> {
+        val problem = ProblemJson(
+            type = type,
+            title = title,
+            status = status,
+            instance = instance,
+            values = values,
+            detail = detail
+        )
+        return ResponseEntity.status(problem.status).contentType(ProblemJson.MEDIA_TYPE).body(problem.toString())
+    }
+
+    @GetMapping(Uris.API.Web.V1_0.NonAuth.SessionStatus.ENDPOINT)
+    fun getSessionStatusFromParticipantId(request: HttpServletRequest, @PathVariable participantId: String): ResponseEntity<Any> {
+        val isStarted = dataService.checkSessionIsLiveNonAuth(participantId)
+        if(!isStarted) return exceptionHandling(
+            type = "SessionIllegalStatus",
+            title = "The session is not available",
+            status = 409,
+            instance = request.requestURI
+        )
+        val body = SirenModel(
+            clazz = listOf("SessionStatus"),
+            properties = {
+                val status = QqStatus.STARTED
             }
         )
         return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)

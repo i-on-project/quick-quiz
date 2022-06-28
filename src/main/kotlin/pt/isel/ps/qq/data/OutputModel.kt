@@ -57,7 +57,8 @@ data class Acknowledge(
 
 data class ListInfo(
     val size: Int,
-    val total: Int
+    val total: Int,
+    val pageSize: Int = 10
 )
 
 data class LiveSession(
