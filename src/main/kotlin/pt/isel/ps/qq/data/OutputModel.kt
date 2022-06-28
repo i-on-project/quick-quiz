@@ -1,6 +1,6 @@
 package pt.isel.ps.qq.data
 
-import pt.isel.ps.qq.data.docs.*
+import pt.isel.ps.qq.repositories.docs.*
 
 data class SessionSummaryOutputModel(
     val id: String,

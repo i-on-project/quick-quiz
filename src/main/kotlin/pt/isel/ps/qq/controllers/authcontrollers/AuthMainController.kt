@@ -2,8 +2,7 @@ package pt.isel.ps.qq.controllers.authcontrollers
 
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import pt.isel.ps.qq.UserInfoScope
-import pt.isel.ps.qq.service.DataService
+import pt.isel.ps.qq.service.MainDataService
 import pt.isel.ps.qq.utils.Uris
 import javax.servlet.http.Cookie
 
@@ -11,7 +10,7 @@ import javax.servlet.http.Cookie
 @RequestMapping(Uris.API.Web.V1_0.Auth.PATH)
 class AuthMainController ( ) {
     fun calculateLastPage(total: Long): Int {
-        return ((total.toDouble() / DataService.PAGE_SIZE) + 0.5).toInt()
+        return ((total.toDouble() / MainDataService.PAGE_SIZE) + 0.5).toInt()
     }
 
     fun expireCookie(cookie: Cookie): String {

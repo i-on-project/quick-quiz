@@ -5,13 +5,13 @@ import org.springframework.web.bind.annotation.*
 import pt.isel.ps.qq.UserInfoScope
 import pt.isel.ps.qq.controllers.ExceptionsResponseHandler
 import pt.isel.ps.qq.data.*
-import pt.isel.ps.qq.service.DataService
+import pt.isel.ps.qq.service.TemplateService
 import pt.isel.ps.qq.utils.Uris
 import pt.isel.ps.qq.utils.getBaseUrlHostFromRequest
 import javax.servlet.http.HttpServletRequest
 
 @RestController("TemplatesController")
-class TemplatesController (private val service: DataService,
+class TemplatesController (private val service: TemplateService,
                            private val scope: UserInfoScope,
                            private val exHandler: ExceptionsResponseHandler
 ) : AuthMainController()  {

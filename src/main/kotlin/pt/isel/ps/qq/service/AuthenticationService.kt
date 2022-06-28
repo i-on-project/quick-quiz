@@ -5,8 +5,8 @@ import org.springframework.transaction.annotation.Transactional
 import pt.isel.ps.qq.data.LoginInputModel
 import pt.isel.ps.qq.data.LoginMeInputModel
 import pt.isel.ps.qq.data.RegisterInputModel
-import pt.isel.ps.qq.data.docs.UserDoc
-import pt.isel.ps.qq.data.docs.UserStatus
+import pt.isel.ps.qq.repositories.docs.UserDoc
+import pt.isel.ps.qq.repositories.docs.UserStatus
 import pt.isel.ps.qq.exceptions.*
 import pt.isel.ps.qq.repositories.UserRepository
 import pt.isel.ps.qq.utils.getCurrentTimeSeconds

@@ -5,15 +5,15 @@ import org.springframework.web.bind.annotation.*
 import pt.isel.ps.qq.UserInfoScope
 import pt.isel.ps.qq.controllers.ExceptionsResponseHandler
 import pt.isel.ps.qq.data.*
-import pt.isel.ps.qq.data.docs.QqStatus
+import pt.isel.ps.qq.repositories.docs.QqStatus
 import pt.isel.ps.qq.exceptions.*
-import pt.isel.ps.qq.service.DataService
+import pt.isel.ps.qq.service.SessionService
 import pt.isel.ps.qq.utils.Uris
 import pt.isel.ps.qq.utils.getBaseUrlHostFromRequest
 import javax.servlet.http.HttpServletRequest
 
 @RestController("SessionsController")
-class SessionsController(private val service: DataService,
+class SessionsController(private val service: SessionService,
                          private val scope: UserInfoScope,
                          private val exHandler: ExceptionsResponseHandler
 ) : AuthMainController() {
@@ -389,59 +389,6 @@ class SessionsController(private val service: DataService,
         return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }
 
-    /**
-     * POST /api/web/v1.0/auth/session/{id}/quiz
-     *
-     * This handler creates a new quiz and adds it to the session, unless the session is already closed.
-     *
-     * Handler to create a new quiz and add it to the session. The default status of the newly created quiz is
-     * NOT_STARTED, even if the session is already started.
-     * @param request injected HTTP request
-     * @param id id that references the session
-     * @return a ResponseEntity with status code 201, header location and body with a siren response
-     */
-    @PostMapping(Uris.API.Web.V1_0.Auth.Session.Id.Quiz.CONTROLLER_ENDPOINT)
-    fun addQuizToSession(
-        request: HttpServletRequest,
-        @PathVariable id: String,
-        @RequestBody input: AddQuizToSessionInputModel
-    ): ResponseEntity<Any> {
-        return try {
-            val quiz = service.addQuizToSession(scope.getUser().userName, id, input)
-            val host = getBaseUrlHostFromRequest(request)
-            val body = SirenModel(
-                clazz = listOf("Quiz"),
-                properties = Acknowledge.TRUE,
-                entities = listOf(
-                    SirenEntity(
-                        rel = listOf("session"), links = listOf(
-                            SirenLink(
-                                rel = listOf("self"), href = Uris.API.Web.V1_0.Auth.Session.Id.url(host, quiz.sessionId)
-                            )
-                        )
-                    )
-                ),
-                title = "Quiz was added successfully",
-                links = listOf(
-                    SirenLink(
-                        rel = listOf("self"),
-                        href = Uris.API.Web.V1_0.Auth.Quiz.Id.url(host, quiz.id)
-                    )
-                )
-            )
-            ResponseEntity.created(Uris.API.Web.V1_0.Auth.Quiz.Id.make(quiz.id)).contentType(SirenModel.MEDIA_TYPE)
-                .body(body)
-        } catch (ex: SessionNotFoundException) {
-            exHandler.exceptionHandle(request, id, ex)
-        } catch (ex: SessionAuthorizationException) {
-            exHandler.exceptionHandle(request, id, ex)
-        } catch (ex: SessionIllegalStatusOperationException) {
-            exHandler.exceptionHandle(request, id, ex)
-        } catch (ex: AtLeast2Choices) {
-            exHandler.exceptionHandle(request, id, ex)
-        } catch (ex: AtLeast1CorrectChoice) {
-            exHandler.exceptionHandle(request, id, ex)
-        }
-    }
+
 
 }

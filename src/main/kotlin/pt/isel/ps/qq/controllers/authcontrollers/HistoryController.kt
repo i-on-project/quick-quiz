@@ -4,7 +4,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import pt.isel.ps.qq.UserInfoScope
 import pt.isel.ps.qq.data.*
-import pt.isel.ps.qq.service.DataService
+import pt.isel.ps.qq.service.HistoryService
 import pt.isel.ps.qq.utils.Uris
 import pt.isel.ps.qq.utils.getBaseUrlHostFromRequest
 import javax.servlet.http.HttpServletRequest
@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletRequest
 
 @RestController("HistoryController")
 class HistoryController(
-    private val service: DataService,
+    private val service: HistoryService,
     private val scope: UserInfoScope
 ) : AuthMainController() {
     

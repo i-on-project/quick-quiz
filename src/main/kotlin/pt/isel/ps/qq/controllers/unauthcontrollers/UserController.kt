@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse
 
 @RestController("UserController")
 class UserController(private val authenticationService: AuthenticationService,
+                     private val emailService: EmailService
 
 ) : UnauthMainController() {
 
@@ -64,8 +65,7 @@ class UserController(private val authenticationService: AuthenticationService,
 
 
         if(appHost != null && !user.userName.contains("test")) {
-            val email = EmailService()
-            email.sendEmail("$appHost/logmein?user=${user.userName}&token=${user.registrationToken}", user.userName)
+            emailService.sendEmail("$appHost/logmein?user=${user.userName}&token=${user.registrationToken}", user.userName)
         } //TODO: else Return error to contact admin
         return ResponseEntity.ok().body(body)
     }
@@ -98,8 +98,7 @@ class UserController(private val authenticationService: AuthenticationService,
         )
 
         if(appHost != null && !user.userName?.contains("test")) {
-            val email = EmailService()
-            email.sendEmail("$appHost/logmein?user=${user.userName}&token=${user.requestToken}", user.userName)
+            emailService.sendEmail("$appHost/logmein?user=${user.userName}&token=${user.requestToken}", user.userName)
         } //TODO: else Return error to contact admin
         return ResponseEntity.ok().body(body)
     }
