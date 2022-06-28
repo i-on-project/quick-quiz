@@ -24,18 +24,20 @@ repositories {
 }
 
 dependencies {
-    implementation("org.unbroken-dome.siren:siren-core:0.2.0")
-    implementation("com.sun.mail:javax.mail:1.6.2")
+    //implementation("org.unbroken-dome.siren:siren-core:0.2.0")
+    //implementation("com.sun.mail:javax.mail:1.6.2")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb:2.7.0")
+    implementation("org.springframework.boot:spring-boot-starter-websocket:2.6.7")
+    implementation("org.springframework.boot:spring-boot-starter-data-rest:2.6.7")
+
     implementation("com.sendgrid:sendgrid-java:4.0.1")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("javax.validation:validation-api:2.0.1.Final")
-    implementation("org.springframework.boot:spring-boot-starter-websocket:2.6.7")
-    implementation("org.springframework.boot:spring-boot-starter-data-rest:2.6.7")
+
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
 
 

@@ -5,19 +5,13 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.core.io.ClassPathResource
-import org.springframework.core.io.Resource
-import org.springframework.lang.Nullable
-import org.springframework.web.servlet.config.annotation.*
-import org.springframework.web.servlet.resource.ResourceResolver
-import org.springframework.web.servlet.resource.ResourceResolverChain
+import org.springframework.web.servlet.config.annotation.CorsRegistry
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import pt.isel.ps.qq.filters.UserFilter
 import pt.isel.ps.qq.repositories.UserRepository
 import pt.isel.ps.qq.utils.Uris
-import java.io.IOException
 import java.util.*
-import javax.mail.Session
-import javax.servlet.http.HttpServletRequest
 
 
 @Configuration
@@ -26,12 +20,7 @@ class MvcConfig(
     private val scope: UserInfoScope
 ) : WebMvcConfigurer {
 
-    @Bean
-    fun mailSession(): Session {
-        val properties = System.getProperties()
-        properties.setProperty("mail.smtp.host", "localhost")
-        return Session.getDefaultInstance(properties)
-    }
+
 
     @Bean
     fun objectMapper(): ObjectMapper = ObjectMapper().registerKotlinModule()
