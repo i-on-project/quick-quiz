@@ -4,8 +4,8 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import pt.isel.ps.qq.UserInfoScope
 import pt.isel.ps.qq.controllers.ExceptionsResponseHandler
+import pt.isel.ps.qq.controllers.responsebuilders.SessionsResponseBuilder
 import pt.isel.ps.qq.data.*
-import pt.isel.ps.qq.repositories.docs.QqStatus
 import pt.isel.ps.qq.exceptions.*
 import pt.isel.ps.qq.service.SessionService
 import pt.isel.ps.qq.utils.Uris
@@ -15,7 +15,8 @@ import javax.servlet.http.HttpServletRequest
 @RestController("SessionsController")
 class SessionsController(private val service: SessionService,
                          private val scope: UserInfoScope,
-                         private val exHandler: ExceptionsResponseHandler
+                         private val exHandler: ExceptionsResponseHandler,
+                         private val sessionResponse: SessionsResponseBuilder
 ) : AuthMainController() {
 
     /**
@@ -39,68 +40,14 @@ class SessionsController(private val service: SessionService,
     @GetMapping(Uris.API.Web.V1_0.Auth.Session.ENDPOINT)
     fun getAllSessions(request: HttpServletRequest, @RequestParam page: Int?): ResponseEntity<SirenModel> {
         val idx = page ?: 0
-        val list = service.getAllSessions(scope.getUser().userName, idx)
-        val host = getBaseUrlHostFromRequest(request)
-        val links = mutableListOf<SirenLink>()
-        links.add(SirenLink(rel = listOf("first"), href = Uris.API.Web.V1_0.Auth.Session.url(host, 0)))
+        val sessions = service.getAllSessions(scope.getUser().userName, idx)
         val total = service.sessionDocumentsCount()
-        val lastPage = calculateLastPage(total)
-        links.add(SirenLink(rel = listOf("last"), href = Uris.API.Web.V1_0.Auth.Session.url(host, lastPage)))
-        if (idx < lastPage) {
-            links.add(SirenLink(rel = listOf("next"), href = Uris.API.Web.V1_0.Auth.Session.make(idx + 1).toString()))
-        }
-        if (idx > 0) {
-            links.add(SirenLink(rel = listOf("prev"), href = Uris.API.Web.V1_0.Auth.Session.make(idx - 1).toString()))
-        }
-        val actionList: MutableList<SirenAction> = mutableListOf(
-            SirenAction(
-                name = "Create-Session",
-                title = "Create",
-                method = SirenSupportedMethods.POST,
-                href = Uris.API.Web.V1_0.Auth.Session.PATH
-            )
-            /*SirenAction( TODO: what can be done here
-                name = "GoLive-Session",
-                title = "Start",
-                method = SirenSupportedMethods.POST,
-                href = Uris.API.Web.V1_0.Auth.Session.Id.Live.make(id).toString()
-            )*/
-        )
-
-        val body = SirenModel(
-            clazz = listOf("ListSessionSummary"),
-            properties = ListInfo(size = list.size, total = total.toInt()),
-            entities = list.map {
-                SirenEntity(
-                    clazz = listOf("SessionSummary"),
-                    rel = listOf("self"),
-                    href = Uris.API.Web.V1_0.Auth.Session.Id.make(it.id).toString(),
-                    properties = SessionSummaryOutputModel(it),
-                    links = listOf(
-                        SirenLink(
-                            rel = listOf("self", "delete"),
-                            title = "Delete",
-                            type = SirenSupportedMethods.DELETE.toString(),
-                            href = Uris.API.Web.V1_0.Auth.Session.Id.make(it.id).toString()
-                        ),
-                        SirenLink(
-                            rel = listOf("self", "start"),
-                            title = "Start",
-                            type = SirenSupportedMethods.POST.toString(),
-                            href = Uris.API.Web.V1_0.Auth.Session.Id.Live.make(it.id).toString()
-                        ),
-                        SirenLink(
-                            rel = listOf("self", "close"),
-                            title = "Close",
-                            type = SirenSupportedMethods.POST.toString(),
-                            href = Uris.API.Web.V1_0.Auth.Session.Id.Close.make(it.id).toString()
-                        )
-
-                    )
-                )
-            },
-            actions = actionList,
-            links = links
+        val body = sessionResponse.allSessionsResponse(
+            getBaseUrlHostFromRequest(request),
+            total.toInt(),
+            calculateLastPage(total),
+            idx,
+            sessions
         )
         return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }
@@ -121,20 +68,10 @@ class SessionsController(private val service: SessionService,
      */
     @PostMapping(Uris.API.Web.V1_0.Auth.Session.ENDPOINT)
     fun createSession(request: HttpServletRequest, @RequestBody input: SessionInputModel): ResponseEntity<SirenModel> {
-        val doc = service.createSession(scope.getUser().userName, input)
-
-        val body = SirenModel(
-            clazz = listOf("CreateSession"),
-            properties = doc,
-            title = "Session successfully created.",
-            links = listOf(
-                SirenLink(
-                    rel = listOf("self"),
-                    href = Uris.API.Web.V1_0.Auth.Session.Id.make(doc.id).toString()
-                )
-            )
-        )
-        return ResponseEntity.created(Uris.API.Web.V1_0.Auth.Session.Id.make(doc.id)).contentType(SirenModel.MEDIA_TYPE)
+        val session = service.createSession(scope.getUser().userName, input)
+        val body = sessionResponse.createSessionResponse(session)
+        return ResponseEntity.created(Uris.API.Web.V1_0.Auth.Session.Id.make(session.id))
+            .contentType(SirenModel.MEDIA_TYPE)
             .body(body)
     }
 
@@ -158,9 +95,7 @@ class SessionsController(private val service: SessionService,
         //val language = request.locale ?: Locale.ENGLISH
         return try {
             service.deleteSession(scope.getUser().userName, id)
-            val body = SirenModel(
-                clazz = listOf("DeleteSession"), properties = Acknowledge.TRUE, title = "Session successfully deleted."
-            )
+            val body = sessionResponse.deleteSessionResponse()
             ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
         } catch (ex: SessionNotFoundException) {
             exHandler.exceptionHandle(request, id, ex)
@@ -186,75 +121,9 @@ class SessionsController(private val service: SessionService,
     @GetMapping(Uris.API.Web.V1_0.Auth.Session.Id.CONTROLLER_ENDPOINT)
     fun getSessionById(request: HttpServletRequest, @PathVariable id: String): ResponseEntity<Any> {
         return try {
-            val doc = service.getSessionValidatingTheOwner(scope.getUser().userName, id)
-            val host = getBaseUrlHostFromRequest(request)
-            val actionList: MutableList<SirenAction> = mutableListOf(
-                SirenAction(
-                    name = "Delete-Session",
-                    title = "Delete",
-                    method = SirenSupportedMethods.DELETE,
-                    href = Uris.API.Web.V1_0.Auth.Session.Id.make(id).toString()
-                ), SirenAction(
-                    name = "Update-Session",
-                    title = "Edit",
-                    method = SirenSupportedMethods.PUT,
-                    href = Uris.API.Web.V1_0.Auth.Session.Id.make(id).toString()
-                ), SirenAction(
-                    name = "Add-Quiz",
-                    title = "New quiz",
-                    method = SirenSupportedMethods.POST,
-                    href = Uris.API.Web.V1_0.Auth.Session.Id.Quiz.make(id).toString()
-                )
-/*                , SirenAction(
-                    name = "Remove-Quiz",
-                    title = "Remove quiz",
-                    method = SirenSupportedMethods.DELETE,
-                    href = Uris.API.Web.V1_0.Auth.Session.Id.Quiz.make(id).toString()
-                )*/
-            )
-            when (doc.status) {
-                QqStatus.STARTED -> {
-                    actionList.add(
-                        SirenAction(
-                            name = "Stop-Session",
-                            title = "Stop",
-                            method = SirenSupportedMethods.POST,
-                            href = Uris.API.Web.V1_0.Auth.Session.Id.Close.make(id).toString()
-                        )
-                    )
-                }
-                QqStatus.NOT_STARTED -> {
-                    actionList.add(
-                        SirenAction(
-                            name = "GoLive-Session",
-                            title = "Start",
-                            method = SirenSupportedMethods.POST,
-                            href = Uris.API.Web.V1_0.Auth.Session.Id.Live.make(id).toString()
-                        )
-                    )
-                }
-                else -> {} //do nothing
-            }
-            val body = SirenModel(
-                clazz = listOf("Session"),
-                properties = SessionOutputModel(doc), // todo: entities = listOf(SirenEntity.quizzesSirenEntity(doc.id),SirenEntity.userSirenEntity(doc.owner)),
-                actions = actionList,
-                links = listOf(
-                    SirenLink(
-                        listOf("List", "Quiz"),
-                        "Quizzes",
-                        listOf("related"),
-                        Uris.API.Web.V1_0.Auth.Quiz.SessionId.make(doc.id).toString()
-                    ),
-                    SirenLink(
-                        listOf("List", "Answers"),
-                        "Answers",
-                        listOf("related"),
-                        Uris.API.Web.V1_0.Auth.Session.Id.Answers.make(doc.id).toString()
-                    )
-                )
-            )
-            ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
+            val session = service.getSessionValidatingTheOwner(scope.getUser().userName, id)
+            val body = sessionResponse.getSessionResponse(id, session)
+            return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
         } catch (ex: SessionNotFoundException) {
             exHandler.exceptionHandle(request, id, ex)
         } catch (ex: SessionAuthorizationException) {
@@ -283,15 +152,8 @@ class SessionsController(private val service: SessionService,
         @RequestBody input: EditSessionInputModel
     ): ResponseEntity<Any> {
         return try {
-            val doc = service.editSession(scope.getUser().userName, id, input)
-            val body = SirenModel(
-                clazz = listOf("EditSession"), properties = Acknowledge.TRUE, links = listOf(
-                    SirenLink(
-                        rel = listOf("self"),
-                        href = Uris.API.Web.V1_0.Auth.Session.Id.url(getBaseUrlHostFromRequest(request), doc.id)
-                    )
-                ), title = "Session successfully updated."
-            )
+            val session = service.editSession(scope.getUser().userName, id, input)
+            val body = sessionResponse.editSessionResponse(getBaseUrlHostFromRequest(request), session.id)
             ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
         } catch (ex: SessionNotFoundException) {
             exHandler.exceptionHandle(request, id, ex)
@@ -318,11 +180,7 @@ class SessionsController(private val service: SessionService,
     fun startSession(request: HttpServletRequest, @PathVariable id: String): ResponseEntity<Any> {
         return try {
             val code = service.makeSessionLive(scope.getUser().userName, id)
-            val body = SirenModel(
-                clazz = listOf("LiveSession"),
-                properties = LiveSession(code.toString().padStart(9, '0')),
-                title = "Session went live successfully."
-            )
+            val body = sessionResponse.startSessionResponse(code)
             ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
         } catch (ex: SessionNotFoundException) {
             exHandler.exceptionHandle(request, id, ex)
@@ -356,9 +214,7 @@ class SessionsController(private val service: SessionService,
     fun closeSession(request: HttpServletRequest, @PathVariable id: String): ResponseEntity<Any> {
         return try {
             service.shutdownSession(scope.getUser().userName, id)
-            val body = SirenModel(
-                clazz = listOf("LiveSession"), properties = Acknowledge.TRUE, title = "Session was closed successfully."
-            )
+            val body = sessionResponse.closeSessionResponse()
             ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
         } catch (ex: SessionNotFoundException) {
             exHandler.exceptionHandle(request, id, ex)
@@ -371,21 +227,9 @@ class SessionsController(private val service: SessionService,
 
     @GetMapping(Uris.API.Web.V1_0.Auth.Session.Id.Answers.CONTROLLER_ENDPOINT)
     fun getAllAnswers(request: HttpServletRequest, @PathVariable id: String): ResponseEntity<Any> {
-        val list = service.getAllAnswersForSession(scope.getUser().userName, id)
+        val participantsAndAnswers = service.getAllAnswersForSession(scope.getUser().userName, id)
 
-        val body = SirenModel(
-            clazz = listOf("ListAnswersSummary"),
-            properties = ListInfo(size = list.size, total = list.size),
-            entities = list.map {
-                SirenEntity(
-                    clazz = listOf("AnswerSummary"),
-                    rel = listOf("self"),
-                    //href = Uris.API.Web.V1_0.Auth.Session.Id.make(it.id).toString(),
-                    properties = AnswersOutputModel(it), //TODO
-
-                )
-            }
-        )
+        val body = sessionResponse.getAllAnswersResponse(participantsAndAnswers)
         return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }
 

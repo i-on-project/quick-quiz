@@ -5,6 +5,8 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import pt.isel.ps.qq.controllers.CookieHandler
+import pt.isel.ps.qq.controllers.responsebuilders.UserResponseBuilder
 import pt.isel.ps.qq.data.*
 import pt.isel.ps.qq.service.AuthenticationService
 import pt.isel.ps.qq.service.EmailService
@@ -17,7 +19,9 @@ import javax.servlet.http.HttpServletResponse
 
 @RestController("UserController")
 class UserController(private val authenticationService: AuthenticationService,
-                     private val emailService: EmailService
+                     private val emailService: EmailService,
+                     private val responseBuilder: UserResponseBuilder,
+                     private val cookie: CookieHandler
 
 ) : UnauthMainController() {
 
@@ -40,31 +44,9 @@ class UserController(private val authenticationService: AuthenticationService,
     @PostMapping(Uris.API.Web.V1_0.NonAuth.Register.ENDPOINT)
     fun registerUser(request: HttpServletRequest, @RequestBody input: RegisterInputModel): ResponseEntity<Any> {
         val user = authenticationService.register(input)
-        val body = SirenModel(
-            clazz = listOf("Register"),
-            properties = RequestLoginOutputModel(userName = user.userName, token = user.registrationToken!!, timeout = user.registrationExpireDate!!),
-            actions = listOf(
-                SirenAction(
-                    name = "Logmein",
-                    title = "Login",
-                    method = SirenSupportedMethods.POST,
-                    href = Uris.API.Web.V1_0.NonAuth.Logmein.url(getBaseUrlHostFromRequest(request)),
-                    fields = listOf(
-                        SirenField(
-                            name = "userName",
-                            value = user.userName
-                        ), SirenField(
-                            name = "loginToken",
-                            value = user.loginToken
-                        )
-                    )
-                )
-            ),
-            title = "Check your email"
-        )
+        val body = responseBuilder.registerUserResponse(user, getBaseUrlHostFromRequest(request))
 
-
-        if(appHost != null && !user.userName.contains("test")) {
+        if(!user.userName.contains("test")) {
             emailService.sendEmail("$appHost/logmein?user=${user.userName}&token=${user.registrationToken}", user.userName)
         } //TODO: else Return error to contact admin
         return ResponseEntity.ok().body(body)
@@ -72,32 +54,10 @@ class UserController(private val authenticationService: AuthenticationService,
 
     @PostMapping(Uris.API.Web.V1_0.NonAuth.Login.ENDPOINT)
     fun requestLogin(request: HttpServletRequest, @RequestBody userName: LoginInputModel): ResponseEntity<Any> {
-
         val user = authenticationService.requestLogin(userName)
-        val body = SirenModel(
-            clazz = listOf("RequestLogin"),
-            properties = RequestLoginOutputModel(userName = user.userName, token = user.requestToken!!, timeout = user.requestExpireDate!!),
-            actions = listOf(
-                SirenAction(
-                    name = "Logmein",
-                    title = "Login",
-                    method = SirenSupportedMethods.POST,
-                    href = Uris.API.Web.V1_0.NonAuth.Logmein.url(getBaseUrlHostFromRequest(request)),
-                    fields = listOf(
-                        SirenField(
-                            name = "userName",
-                            value = user.userName
-                        ), SirenField(
-                            name = "loginToken",
-                            value = user.loginToken
-                        )
-                    )
-                )
-            ),
-            title = "Check your email"
-        )
+        val body = responseBuilder.requestLoginResponse(user, getBaseUrlHostFromRequest(request))
 
-        if(appHost != null && !user.userName?.contains("test")) {
+        if(!user.userName.contains("test")) {
             emailService.sendEmail("$appHost/logmein?user=${user.userName}&token=${user.requestToken}", user.userName)
         } //TODO: else Return error to contact admin
         return ResponseEntity.ok().body(body)
@@ -105,22 +65,12 @@ class UserController(private val authenticationService: AuthenticationService,
 
     @PostMapping(Uris.API.Web.V1_0.NonAuth.Logmein.ENDPOINT)
     fun loginUser(response: HttpServletResponse, @RequestBody input: LoginMeInputModel): ResponseEntity<Any> {
-        val doc = authenticationService.logmein(input)
-        val str = "${doc.userName},${doc.loginToken}"
+        val user = authenticationService.logmein(input)
+        val str = "${user.userName},${user.loginToken}"
         val base64 = Base64.getEncoder().encodeToString(str.toByteArray())
-
         val headers = HttpHeaders()
-        headers.add("Set-Cookie", "Authorization=$base64; Max-Age=${Duration.ofDays(7).toSeconds()}; Path=/;  HttpOnly; SameSite=lax;") //
-
-        val body = SirenModel(
-            clazz = listOf("Login"),
-            //properties = Acknowledge.TRUE,
-            properties = RequestLoginOutputModel(
-                userName = doc.userName,
-                displayName = doc.displayName,
-            ),
-            title = "Welcome ${doc.userName}"
-        )
+        headers.add("Set-Cookie", cookie.createCookie("Authorization",base64,  Duration.ofDays(7).toSeconds()))
+        val body = responseBuilder.loginUserResponse(user)
         return ResponseEntity.ok().headers(headers).body(body)
     }
 }

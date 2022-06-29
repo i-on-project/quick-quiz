@@ -42,7 +42,7 @@ class QuizService(
                 )
             },
             quizState = QqStatus.NOT_STARTED,
-            numberOfAnswers = 0
+            //numberOfAnswers = 0
         )
 
 

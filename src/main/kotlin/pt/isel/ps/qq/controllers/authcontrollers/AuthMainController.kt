@@ -13,14 +13,4 @@ class AuthMainController ( ) {
         return ((total.toDouble() / MainDataService.PAGE_SIZE) + 0.5).toInt()
     }
 
-    fun expireCookie(cookie: Cookie): String {
-        val builder = StringBuilder("${cookie.name}=;")
-        builder.append("Expires=Thu, 01 Jan 1970 00:00:01 GMT;")
-        builder.append("Path=/;")
-        builder.append("Secure;")
-        builder.append("HttpOnly;")
-        return builder.toString()
-    }
-
-
 }

@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import pt.isel.ps.qq.UserInfoScope
 import pt.isel.ps.qq.controllers.ExceptionsResponseHandler
+import pt.isel.ps.qq.controllers.responsebuilders.QuizzesresponseBuilder
 import pt.isel.ps.qq.data.*
 import pt.isel.ps.qq.exceptions.*
 import pt.isel.ps.qq.service.QuizService
@@ -14,7 +15,8 @@ import javax.servlet.http.HttpServletRequest
 @RestController("QuizzesController")
 class QuizzesController(private val service: QuizService,
                         private val scope: UserInfoScope,
-                        private val exHandler: ExceptionsResponseHandler
+                        private val exHandler: ExceptionsResponseHandler,
+                        private val quizzesresponseBuilder: QuizzesresponseBuilder
 ) : AuthMainController()  {
 
     /**
@@ -32,9 +34,7 @@ class QuizzesController(private val service: QuizService,
     fun removeQuizFromSession(request: HttpServletRequest, @PathVariable id: String): ResponseEntity<Any> {
         return try {
             service.removeQuizFromSession(scope.getUser().userName, id)
-            val body = SirenModel(
-                clazz = listOf("DeleteSession"), properties = Acknowledge.TRUE, title = "Session successfully deleted."
-            )
+            val body = quizzesresponseBuilder.removeQuizResponse()
             ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
         } catch (ex: SessionIllegalStatusOperationException) {
             exHandler.exceptionHandle(request, id, ex)
@@ -63,7 +63,7 @@ class QuizzesController(private val service: QuizService,
     ): ResponseEntity<Any> {
         return try {
             service.editQuiz(scope.getUser().userName, id, input)
-            val body = SirenModel(clazz = listOf("TODO"))
+            val body = quizzesresponseBuilder.editQuizResponse()
             ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
         } catch (ex: SessionNotFoundException) {
             exHandler.exceptionHandle(request, id, ex)
@@ -91,7 +91,7 @@ class QuizzesController(private val service: QuizService,
     ): ResponseEntity<Any> {
         return try {
             service.updateQuizStatus(scope.getUser().userName, id, input)
-            val body = SirenModel(clazz = listOf("TODO"))
+            val body = quizzesresponseBuilder.updateQuizStatusResponse()
             ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
 
         } catch (ex: SessionNotFoundException) {
@@ -114,10 +114,7 @@ class QuizzesController(private val service: QuizService,
     @GetMapping(Uris.API.Web.V1_0.Auth.Quiz.Id.CONTROLLER_ENDPOINT)
     fun getQuizFullInformation(request: HttpServletRequest, @PathVariable id: String): ResponseEntity<Any> {
         val quiz = service.getQuizValidatingOwner(scope.getUser().userName, id)
-        val body = SirenModel(
-            clazz = listOf("Quiz"), //TODO: add actions update
-            properties = quiz
-        )
+        val body = quizzesresponseBuilder.getQuizResponse(quiz)
         return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }
 
@@ -125,34 +122,7 @@ class QuizzesController(private val service: QuizService,
     @GetMapping(Uris.API.Web.V1_0.Auth.Quiz.SessionId.CONTROLLER_ENDPOINT)
     fun getAllQuizzesForSession(@PathVariable sessionid: String): ResponseEntity<Any> {
         val quizzes = service.getAllSessionQuizzes(sessionid)
-
-/*                , SirenAction(
-                    name = "Remove-Quiz",
-                    title = "Remove quiz",
-                    method = SirenSupportedMethods.DELETE,
-                    href = Uris.API.Web.V1_0.Auth.Session.Id.Quiz.make(id).toString()
-                )*/
-
-        val body = SirenModel(
-            clazz = listOf("Quiz"),
-            properties = ListInfo(size = quizzes.size, total = quizzes.size),
-            entities = quizzes.map {
-                SirenEntity(
-                    clazz = listOf("quizzes"),
-                    rel = listOf("self"),
-                    href = Uris.API.Web.V1_0.Auth.Quiz.Id.make(it.id).toString(),
-                    properties = it,
-                    links = listOf(
-                        SirenLink(
-                            rel = listOf("self", "update_status"),
-                            title = "Start",
-                            type = SirenSupportedMethods.POST.toString(),
-                            href = Uris.API.Web.V1_0.Auth.Quiz.Id.UpdateStatus.make(it.id).toString()
-                        )
-                    )
-                )
-            }
-        )
+        val body = quizzesresponseBuilder.getAllQuizzesForSessionResponse(quizzes)
         return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }
 
@@ -175,27 +145,7 @@ class QuizzesController(private val service: QuizService,
     ): ResponseEntity<Any> {
         return try {
             val quiz = service.addQuizToSession(scope.getUser().userName, id, input)
-            val host = getBaseUrlHostFromRequest(request)
-            val body = SirenModel(
-                clazz = listOf("Quiz"),
-                properties = Acknowledge.TRUE,
-                entities = listOf(
-                    SirenEntity(
-                        rel = listOf("session"), links = listOf(
-                            SirenLink(
-                                rel = listOf("self"), href = Uris.API.Web.V1_0.Auth.Session.Id.url(host, quiz.sessionId)
-                            )
-                        )
-                    )
-                ),
-                title = "Quiz was added successfully",
-                links = listOf(
-                    SirenLink(
-                        rel = listOf("self"),
-                        href = Uris.API.Web.V1_0.Auth.Quiz.Id.url(host, quiz.id)
-                    )
-                )
-            )
+            val body = quizzesresponseBuilder.addQuizzResponse(getBaseUrlHostFromRequest(request), quiz.sessionId, quiz.id)
             ResponseEntity.created(Uris.API.Web.V1_0.Auth.Quiz.Id.make(quiz.id)).contentType(SirenModel.MEDIA_TYPE)
                 .body(body)
         } catch (ex: SessionNotFoundException) {

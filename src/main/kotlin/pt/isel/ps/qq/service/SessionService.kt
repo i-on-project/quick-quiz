@@ -20,13 +20,13 @@ class SessionService(
 ): MainDataService(sessionRepo, templateRepo) {
 
 
-    fun joinSession(input: JoinSessionInputModel): AnswersDoc {
+    fun joinSession(input: JoinSessionInputModel): ParticipantDoc {
         //sessionRepo.updateNumberOfParticipants(input.sessionCode)
         val session = sessionRepo.findSessionDocByGuestCode(input.sessionCode)
             ?: throw Exception("There was no session with that guest code")
         if (session.status != QqStatus.STARTED) throw Exception("Can join only in started sessions")
         val guestUuid = UUID.randomUUID().toString()
-        val guestSession = AnswersDoc(id = guestUuid, sessionId = session.id)
+        val guestSession = ParticipantDoc(id = guestUuid, sessionId = session.id)
         answerRepo.save(guestSession)
         return guestSession
     }
@@ -43,7 +43,7 @@ class SessionService(
         return sessionRepo.save(newDoc)
     }
 
-    fun getAllAnswersForSession(owner: String, id: String): List<AnswersDoc> {
+    fun getAllAnswersForSession(owner: String, id: String): List<ParticipantDoc> {
         getSessionValidatingTheOwner(owner, id)
         return answerRepo.findAnswersDocsBySessionId(id)
     }

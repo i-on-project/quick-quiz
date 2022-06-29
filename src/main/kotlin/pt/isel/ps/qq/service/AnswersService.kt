@@ -4,12 +4,12 @@ import org.springframework.stereotype.Service
 import pt.isel.ps.qq.data.GiveAnswerInputModel
 import pt.isel.ps.qq.repositories.AnswersRepository
 import pt.isel.ps.qq.repositories.docs.Answer
-import pt.isel.ps.qq.repositories.docs.AnswersDoc
+import pt.isel.ps.qq.repositories.docs.ParticipantDoc
 
 @Service
 class AnswersService(private val answerRepo: AnswersRepository,) {
 
-    fun giveAnswer(input: GiveAnswerInputModel): AnswersDoc {
+    fun giveAnswer(input: GiveAnswerInputModel): ParticipantDoc {
 
         //TODO: Verify Quiz Status / no update if closed / verify not started to understand what happens if a quiz was moved to not_started
         val opt = answerRepo.findById(input.guestId)
@@ -28,7 +28,7 @@ class AnswersService(private val answerRepo: AnswersRepository,) {
     }
 
 
-    fun getAnswer(answerId: String): AnswersDoc {
+    fun getParticipant(answerId: String): ParticipantDoc {
         return answerRepo.findById(answerId).get() //TODO: add checks here
     }
 }

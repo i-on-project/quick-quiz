@@ -16,7 +16,7 @@ data class HistoryDoc(
     val quizzes: List<HistoryQuiz>,
     var numberOfParticipants: Int
 ) {
-    constructor(session: SessionDoc, quizzes: List<SessionQuizDoc>, answers: List<AnswersDoc>): this(
+    constructor(session: SessionDoc, quizzes: List<SessionQuizDoc>, answers: List<ParticipantDoc>): this(
         id = session.id,
         name = session.name,
         description = session.description,
@@ -34,7 +34,7 @@ data class HistoryDoc(
                 order = quiz.order,
                 answerType = quiz.answerType,
                 answerChoices = quiz.answerChoices ?: emptyList(),
-                numberOfAnswers = quiz.numberOfAnswers,
+                numberOfAnswers = 0,//quiz.numberOfAnswers,
                 answers = aux
             )
         },

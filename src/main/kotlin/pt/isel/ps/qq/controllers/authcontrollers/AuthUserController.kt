@@ -10,34 +10,34 @@ import pt.isel.ps.qq.data.RequestLoginOutputModel
 import pt.isel.ps.qq.data.SirenModel
 import pt.isel.ps.qq.service.AuthenticationService
 import pt.isel.ps.qq.utils.Uris
+import pt.isel.ps.qq.controllers.CookieHandler
+import pt.isel.ps.qq.controllers.ExceptionsResponseHandler
+import pt.isel.ps.qq.controllers.responsebuilders.UserResponseBuilder
 import javax.servlet.http.HttpServletRequest
 
 @RestController("AuthUserController")
 class AuthUserController(private val authService: AuthenticationService,
-                         private val scope: UserInfoScope) : AuthMainController() {
+                         private val scope: UserInfoScope,
+                         private val cookie: CookieHandler,
+                         private val responseBuilder: UserResponseBuilder
+)
+    : AuthMainController() {
 
     @PostMapping(Uris.API.Web.V1_0.Auth.Logout.ENDPOINT)
     fun logout(request: HttpServletRequest): ResponseEntity<Any> {
-        val cookie = request.cookies.find { it.name == "Authorization" }!!
-        val headers = HttpHeaders()
+        val expectedCookie = request.cookies.find { it.name == "Authorization" }
         authService.logout(scope.getUser().userName)
-        headers.add("Set-Cookie", expireCookie(cookie))
+        val headers = HttpHeaders()
+        if(expectedCookie != null)
+            headers.add("Set-Cookie", cookie.expireCookie(expectedCookie))
         return ResponseEntity.ok().headers(headers).build()
     }
 
     @GetMapping(Uris.API.Web.V1_0.Auth.User.CheckUser.ENDPOINT)
     fun checkUserLoginStatus(request: HttpServletRequest): ResponseEntity<Any> {
-        val cookie = request.cookies.find { it.name == "Authorization" }!!
-        val doc = authService.checkUserLoginStatus(scope.getUser().userName, scope.getUser().loginToken!!)
-        val body = SirenModel(
-            clazz = listOf("Login"),
-            //properties = Acknowledge.TRUE,
-            properties = RequestLoginOutputModel(
-                userName = doc.userName,
-                displayName = doc.displayName,
-            ),
-            title = "Welcome ${doc.userName}"
-        )
+        val cookie = request.cookies.find { it.name == "Authorization" }!! //TODO: send problem+json
+        val user = authService.checkUserLoginStatus(scope.getUser().userName, scope.getUser().loginToken!!)
+        val body = responseBuilder.checkAuthStatus(user)
         return ResponseEntity.ok().body(body)
     }
 }

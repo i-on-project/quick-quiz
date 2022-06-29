@@ -124,7 +124,7 @@ data class AnswersOutputModel(
     val id: String,
     val answers: List<Answer> = emptyList()
 ) {
-    constructor(doc: AnswersDoc) : this(
+    constructor(doc: ParticipantDoc) : this(
         id = doc.id,
         answers = doc.answers.map { a -> Answer(a.quizId, a.answer, a.answerNumber) }
     )
