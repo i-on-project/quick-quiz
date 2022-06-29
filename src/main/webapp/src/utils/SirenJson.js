@@ -12,8 +12,8 @@ export const getLinksHref = (links, relName, title) => {
 
 
 export const getLinksFromEntity = (entity, relName) => {
-    const link = entity.links.find(l => l.rel.includes("self") && l.rel.includes(relName))
-    if (link) return link.href
+    const link = entity.links.find(l => l.rel.includes(relName))
+    if(link != null) return link.href
     else return null
 }
 

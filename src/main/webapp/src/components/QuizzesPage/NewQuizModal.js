@@ -13,6 +13,7 @@ export const NewQuizModal = (props) => {
         const s_func = () => {
             props.reload()
             props.onClose()
+            if(props.notify != null) props.notify()
         }
         const f_func = (problem) => {
             setProblem(problem)

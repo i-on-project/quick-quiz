@@ -12,7 +12,8 @@
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4",
     "react-router-dom": "^6.3.0",
-    "react-bootstrap": "^2.4.0"
+    "react-bootstrap": "^2.4.0",
+    "react-stomp": "^5.1.0"
   },
   "scripts": {
     "start": "react-scripts start",

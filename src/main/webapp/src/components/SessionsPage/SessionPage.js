@@ -10,6 +10,7 @@ import {ProblemJson} from "../../utils/ProblemJson";
 import {NewQuizModal} from "../QuizzesPage/NewQuizModal";
 import {EditableSession} from "./EditableSession";
 import {QuizCard} from "../QuizzesPage/QuizCard";
+import {SortQuizzesEntities} from "../../utils/QuizModel";
 
 const href_unknown_problem = new ProblemJson("InvalidRequest", "The uri to fetch the data is unknown")
 const uri = (id) => `/api/web/v1.0/auth/sessions/${id}`
@@ -71,8 +72,6 @@ export const Session = () => {
     const onCloseModalHandler = useCallback(() => setModal(false), [])
     const onClickModalHandler = useCallback(() => setModal(true), [])
 
-    const sortHandler = useCallback((a, b) => a.properties.order - b.properties.order, [])
-
     let modal_content = null
     if(modal) modal_content = <Modal show={modal}>
         <NewQuizModal reload={loadQuizzes} href={getActionHref(state_session.data.actions, "Add-Quiz")} onClose={onCloseModalHandler}/>
@@ -103,7 +102,7 @@ export const Session = () => {
             quizzes_content = <Container fluid="md">
                 <hr/>
                 <Row><Button variant="success" className="mb-3" onClick={onClickModalHandler}>Add new quiz</Button></Row>
-                <Row>{quizzes.sort(sortHandler).map((elem) => {
+                <Row>{quizzes.sort(SortQuizzesEntities).map((elem) => {
                     return <QuizCard key={elem.properties.id} quiz={elem.properties} href={elem.href} reload={loadQuizzes} />
                 })}</Row>
                 {modal_content}

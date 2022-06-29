@@ -4,6 +4,12 @@ export const questionTypeMapper = [
     {value: "Complex", key: "LONG"}
 ]
 
+export const quizStateMapper = [
+    {value: "Not started", key: "NOT_STARTED"},
+    {value: "Live", key: "STARTED"},
+    {value: "Closed", key: "CLOSED"}
+]
+
 export function validateInputModel(input_model) {
     const validation_errors = []
     if (input_model.question.trim() === '') {
@@ -56,4 +62,8 @@ export function buildInputModel(values) {
         choices: choices,
         questionType: values.questionType
     }
+}
+
+export function SortQuizzesEntities(e1, e2) {
+    return e1.properties.order - e2.properties.order
 }

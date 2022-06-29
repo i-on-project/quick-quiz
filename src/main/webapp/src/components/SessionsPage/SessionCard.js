@@ -16,7 +16,7 @@ export const SessionCard = (props) => {
     const [redirect, setRedirect] = useState(null)
 
     const onCloseHandler = useCallback(() => setProblem(null), [])
-    //const onClickOpenHandler = useCallback(() => setRedirect(session.id), [session.id])
+    //const onClickOpenHandler = useCallback(() => setRedirect(`/session/${session.id}`), [session.id])
 
     const onClickDeleteHandler = useCallback(() => {
         const s_func = () => reload()
@@ -26,7 +26,7 @@ export const SessionCard = (props) => {
     }, [reload, delete_href])
 
     const onClickStartHandler = useCallback(() => {
-        const s_func = () => setRedirect(session.id)
+        const s_func = () => setRedirect(`/live_session/${session.id}`)
         const f_func = (problem) => setProblem(problem)
         const func_obj = {success: s_func, failed: f_func}
         return request_no_content(start_href, {method: 'POST'}, func_obj).fetch
@@ -39,10 +39,7 @@ export const SessionCard = (props) => {
         return request_no_content(close_href, {method: 'POST'}, func_obj).fetch
     }, [reload, close_href])
 
-    if(redirect != null) {
-        if(session.status === 'STARTED') return <Navigate to={`/live_session/${redirect}`}/>
-        else return <Navigate to={`/session/${redirect}`}/>
-    }
+    if(redirect != null) return <Navigate to={redirect}/>
 
     let action_button = null
     if(session.status === 'NOT_STARTED') action_button = <ActionButton style={{width: '16rem'}} variant="secondary" className="mt-3" perform={onClickStartHandler} content="Start"/>

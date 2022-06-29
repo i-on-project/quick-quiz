@@ -7,9 +7,7 @@ import {Notification} from "../Notification";
 import {request_no_content} from "../../utils/Request";
 import {ActionButton} from "../ActionButon";
 
-export const QuizCard = (props) => {
-
-    const {quiz, reload, href} = props
+export const QuizCard = ({quiz, reload, href}) => {
 
     const [problem, setProblem] = useState(null)
     const [modal, setModal] = useState(false)
