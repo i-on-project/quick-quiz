@@ -1,4 +1,4 @@
-package pt.isel.ps.qq.data.docs
+package pt.isel.ps.qq.repositories.docs
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
@@ -22,7 +22,7 @@ data class SessionQuizDoc(
     val answerType: QuestionType,
     val answerChoices: List<MultipleChoice>? = null,
     val quizState: QqStatus, //launched or not
-    val numberOfAnswers: Int
+ //   val numberOfAnswers: Int
 ) {
 
     init {
@@ -73,7 +73,7 @@ data class SessionQuizDoc(
         answerType = doc.answerType,
         answerChoices = getMultipleChoices(input.choices), //changeChoices(doc, input.addChoices, input.removeChoices),
         quizState = doc.quizState, //launched or not
-        numberOfAnswers = doc.numberOfAnswers
+       // numberOfAnswers = doc.numberOfAnswers
     )
 
     constructor(doc: SessionQuizDoc, input: QqStatus) : this(
@@ -85,7 +85,7 @@ data class SessionQuizDoc(
         answerType = doc.answerType,
         answerChoices = doc.answerChoices,
         quizState = input, //launched or not
-        numberOfAnswers = doc.numberOfAnswers
+        //numberOfAnswers = doc.numberOfAnswers
     )
 
     constructor(quiz: QuizTemplate, owner: String, session: String) : this(
@@ -97,7 +97,7 @@ data class SessionQuizDoc(
         answerType = quiz.answerType,
         answerChoices = quiz.answerChoices,
         quizState = QqStatus.NOT_STARTED, //launched or not
-        numberOfAnswers = 0
+       // numberOfAnswers = 0
     )
 }
 
@@ -118,29 +118,6 @@ data class TemplateQuizDoc(
         if (answerType == QuestionType.MULTIPLE_CHOICE) {
             if (answerChoices == null || answerChoices.count() < 2) throw AtLeast2Choices()
             answerChoices.find { it.choiceRight } ?: throw AtLeast1CorrectChoice()
-        }
-    }
-
-    companion object {
-        private fun changeChoices(
-            doc: TemplateQuizDoc,
-            add: List<MultipleChoiceInputModel>?,
-            rem: List<String>?
-        ): List<MultipleChoice>? {
-            if (doc.answerType != QuestionType.MULTIPLE_CHOICE) return null
-            val toReturn = doc.answerChoices!!.toMutableList()
-            if (rem != null && rem.isNotEmpty()) {
-                rem.forEach { str ->
-                    val toDelete = toReturn.find { it.choiceAnswer == str }
-                    if (toDelete != null) toReturn.remove(toDelete)
-                }
-            }
-            if (add != null && add.isNotEmpty()) {
-                add.forEach {
-                    toReturn.add(MultipleChoice(it.choiceNumber ?: 0, it.choiceAnswer, it.choiceRight))
-                }
-            }
-            return toReturn
         }
     }
 

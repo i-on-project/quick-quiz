@@ -1,5 +1,7 @@
 package pt.isel.ps.qq.filters
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.core.annotation.Order
 import org.springframework.dao.DataAccessResourceFailureException
 import pt.isel.ps.qq.UserInfoScope
@@ -18,7 +20,13 @@ class UserFilter(
     private val userRepo: UserRepository, private val scope: UserInfoScope
 ): HttpFilter() {
 
+
+    companion object {
+        val logger: Logger = LoggerFactory.getLogger(LogFilter::class.java)
+    }
     override fun doFilter(request: HttpServletRequest, response: HttpServletResponse, chain: FilterChain) {
+
+        LogFilter.logger.info("User Filter: ${request.method} ${request.requestURI}")
         try {
 
             if(request.cookies == null) throw MissingCookieException()

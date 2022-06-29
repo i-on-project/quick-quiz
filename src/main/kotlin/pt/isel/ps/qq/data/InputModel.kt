@@ -1,7 +1,7 @@
 package pt.isel.ps.qq.data
 
-import pt.isel.ps.qq.data.docs.QqStatus
-import pt.isel.ps.qq.data.docs.QuestionType
+import pt.isel.ps.qq.repositories.docs.QqStatus
+import pt.isel.ps.qq.repositories.docs.QuestionType
 import java.util.*
 
 private val emailRegex = Regex("^[a-zA-Z0-9_!#\$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+\$")

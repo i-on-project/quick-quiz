@@ -1,10 +1,10 @@
-package pt.isel.ps.qq.data.docs
+package pt.isel.ps.qq.repositories.docs
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 
 @Document(collection  ="guest_sessions")
-data class AnswersDoc(
+data class ParticipantDoc(
     @Id
     val id: String,
     val sessionId: String,

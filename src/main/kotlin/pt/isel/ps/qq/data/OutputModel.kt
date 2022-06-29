@@ -1,6 +1,6 @@
 package pt.isel.ps.qq.data
 
-import pt.isel.ps.qq.data.docs.*
+import pt.isel.ps.qq.repositories.docs.*
 
 data class SessionSummaryOutputModel(
     val id: String,
@@ -125,7 +125,7 @@ data class AnswersOutputModel(
     val id: String,
     val answers: List<Answer> = emptyList()
 ) {
-    constructor(doc: AnswersDoc) : this(
+    constructor(doc: ParticipantDoc) : this(
         id = doc.id,
         answers = doc.answers.map { a -> Answer(a.quizId, a.answer, a.answerNumber) }
     )
