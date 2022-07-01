@@ -25,7 +25,7 @@ data class SessionOutputModel(
     val limitOfParticipants: Int,
     val geolocation: String?,
     val radius: Int?,
-    val quizzes: List<String>,
+    val tags: List<String> = emptyList()
 ) {
     constructor(session: SessionDoc) : this(
         name = session.name,
@@ -36,7 +36,7 @@ data class SessionOutputModel(
         limitOfParticipants = session.limitOfParticipants,
         geolocation = session.geolocation,
         radius = session.radius,
-        quizzes = session.quizzes
+        tags = session.tags
     )
 }
 

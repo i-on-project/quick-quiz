@@ -20,10 +20,8 @@ data class SessionDoc(
     val radius: Int? = null,
     val radiusUnit: String? = null,
     val liveDate: Long? = null,
-    val quizzes: List<String> = emptyList(), //TODO: Remove
     val status: QqStatus,
-    var numberOfParticipants: Int = 0
-
+    val tags: MutableList<String> = mutableListOf()
 ) {
     constructor(session: SessionDoc, input: EditSessionInputModel): this(
         id = session.id,
@@ -37,12 +35,12 @@ data class SessionDoc(
         radius = input.radius,
         radiusUnit = session.radiusUnit,
         liveDate = session.liveDate,
-        quizzes = session.quizzes,
         status = session.status,
-        numberOfParticipants = session.numberOfParticipants
+        tags = input.tags.toMutableList()
+
     )
 
-    constructor(template: TemplateDoc, id: String, input: SessionInputModel, quizzes: List<String>): this(
+    constructor(template: TemplateDoc, id: String, input: SessionInputModel): this(
         id = id,
         name = input.name,
         description = input.description,
@@ -50,8 +48,8 @@ data class SessionDoc(
         owner = template.owner,
         limitOfParticipants = input.limitOfParticipants ?: template.limitOfParticipants ?: 10,
         geolocation = input.geolocation ?: template.geolocation,
-        quizzes = quizzes,
         status = QqStatus.NOT_STARTED,
+
     )
 
     constructor(session: SessionDoc, status: QqStatus, guestCode: Int?): this(
@@ -62,9 +60,10 @@ data class SessionDoc(
         owner = session.owner,
         limitOfParticipants = session.limitOfParticipants,
         geolocation = session.geolocation ,
-        quizzes = session.quizzes,
         status = status,
-        guestCode = guestCode
+        guestCode = guestCode,
+        tags = session.tags
+
     )
 }
 

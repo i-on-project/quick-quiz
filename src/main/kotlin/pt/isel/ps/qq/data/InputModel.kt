@@ -12,7 +12,8 @@ data class SessionInputModel(
     val limitOfParticipants: Int?,
     val geolocation: String?,
     val radius: Int?,
-    val templateId: String? = null
+    val templateId: String? = null,
+    val tags: List<String> = emptyList()
 )
 
 data class RegisterInputModel(
@@ -47,7 +48,7 @@ data class JoinSessionInputModel(
     val sessionCode: Int
 )
 
-data class GetQuizInputModel(
+/*data class GetQuizInputModel(
     val guestId: String,
     val sessionId: String,
     val quizId: String
@@ -55,7 +56,7 @@ data class GetQuizInputModel(
 
 data class GetAllAnswersInputModel(
     val sessionId: String
-)
+)*/
 
 data class GiveAnswerInputModel(
     val guestId: String,
@@ -71,8 +72,8 @@ data class EditSessionInputModel(
     val geolocation: String?,
     val radius: Int?,
     val description: String?,
-    val status: QqStatus?
-    //TODO: Missing radius
+    val status: QqStatus?,
+    val tags: List<String> = emptyList()
 )
 
 data class MultipleChoiceInputModel(
@@ -92,10 +93,9 @@ data class EditQuizInputModel(
     val order: Int?,
     val question: String?,
     val choices: List<MultipleChoiceInputModel>?,
-    //val removeChoices: List<String>?
 )
 
-data class UpdateQuizStausInputModel(
+data class UpdateQuizStatusInputModel(
     val quizState: QqStatus
 )
 
@@ -104,7 +104,8 @@ data class CreateTemplateInputModel(
     val geolocation: String? = null,
     val radius: Double? = null,
     val radiusUnit: String? = null,
-    val quizzes: List<QuizTemplateInputModel> = emptyList()
+    val quizzes: List<QuizTemplateInputModel> = emptyList(),
+    val tags: List<String> = emptyList()
 )
 
 data class QuizTemplateInputModel(

@@ -7,7 +7,6 @@ import pt.isel.ps.qq.utils.Uris
 import javax.servlet.http.Cookie
 
 @RestController("AuthController")
-@RequestMapping(Uris.API.Web.V1_0.Auth.PATH)
 class AuthMainController ( ) {
     fun calculateLastPage(total: Long): Int {
         return ((total.toDouble() / MainDataService.PAGE_SIZE) + 0.5).toInt()

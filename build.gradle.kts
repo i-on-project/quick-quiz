@@ -23,9 +23,36 @@ repositories {
     }
 }
 
+sourceSets {
+    create("intTest") {
+        compileClasspath += sourceSets.main.get().output
+        runtimeClasspath += sourceSets.main.get().output
+    }
+}
+
+val intTestImplementation: Configuration by configurations.getting {
+    extendsFrom(configurations.implementation.get())
+}
+
+configurations["intTestRuntimeOnly"].extendsFrom(configurations.runtimeOnly.get())
+
+
+
+val integrationTest = task<Test>("integrationTest") {
+    description = "Runs integration tests."
+    group = "verification"
+
+    testClassesDirs = sourceSets["intTest"].output.classesDirs
+    classpath = sourceSets["intTest"].runtimeClasspath
+    shouldRunAfter("test")
+}
+
+tasks.check { dependsOn(integrationTest) }
+
+
+
 dependencies {
-    //implementation("org.unbroken-dome.siren:siren-core:0.2.0")
-    //implementation("com.sun.mail:javax.mail:1.6.2")
+
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb:2.7.0")
     implementation("org.springframework.boot:spring-boot-starter-websocket:2.6.7")
@@ -40,9 +67,12 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
 
+    implementation("org.springframework.boot:spring-boot-starter-test")
+    implementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo:3.4.6")
+
+    //implementation("junit:junit:4.13.2")
 
 
-    //testImplementation("org.springframework.boot:spring-boot-starter-test")
 
 }
 tasks.withType<KotlinCompile> {

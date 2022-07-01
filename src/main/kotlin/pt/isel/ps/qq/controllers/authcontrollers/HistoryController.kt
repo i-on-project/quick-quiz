@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest
  */
 
 @RestController("HistoryController")
+@RequestMapping(Uris.API.Web.V1_0.Auth.PATH)
 class HistoryController(
     private val service: HistoryService,
     private val scope: UserInfoScope,

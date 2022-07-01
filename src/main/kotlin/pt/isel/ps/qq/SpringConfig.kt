@@ -20,8 +20,6 @@ class MvcConfig(
     private val scope: UserInfoScope
 ) : WebMvcConfigurer {
 
-
-
     @Bean
     fun objectMapper(): ObjectMapper = ObjectMapper().registerKotlinModule()
 
@@ -63,4 +61,17 @@ class MvcConfig(
 
 
 }
+
+/*
+@Configuration
+class WebSecurityConfig : WebSecurityConfigurerAdapter() {
+    @Throws(Exception::class)
+    override fun configure(http: HttpSecurity) {
+        http.requiresChannel()
+            .requestMatchers(RequestMatcher { r -> r.getHeader("X-Forwarded-Proto") != null })
+            .requiresSecure()
+
+    }
+}
+*/
 

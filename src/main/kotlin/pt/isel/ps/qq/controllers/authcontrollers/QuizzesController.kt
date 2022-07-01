@@ -13,6 +13,7 @@ import pt.isel.ps.qq.utils.getBaseUrlHostFromRequest
 import javax.servlet.http.HttpServletRequest
 
 @RestController("QuizzesController")
+@RequestMapping(Uris.API.Web.V1_0.Auth.PATH)
 class QuizzesController(private val service: QuizService,
                         private val scope: UserInfoScope,
                         private val exHandler: ExceptionsResponseHandler,
@@ -87,7 +88,7 @@ class QuizzesController(private val service: QuizService,
     fun updateQuizStatus(
         request: HttpServletRequest,
         @PathVariable id: String,
-        @RequestBody input: UpdateQuizStausInputModel
+        @RequestBody input: UpdateQuizStatusInputModel
     ): ResponseEntity<Any> {
         return try {
             service.updateQuizStatus(scope.getUser().userName, id, input)

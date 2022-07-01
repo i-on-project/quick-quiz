@@ -1,7 +1,7 @@
 import {Card, Container, FormControl, InputGroup, Row} from "react-bootstrap";
 import React, {Fragment, useEffect, useState, useContext} from 'react'
 import Button from "react-bootstrap/Button";
-import {goPOST} from "../Services/FetchService";
+import {goGET, goPOST} from "../Services/FetchService";
 import {Navigate} from "react-router-dom";
 
 import {UserContext} from "./UserContextProvider";
@@ -14,15 +14,24 @@ export const HomeComponent = () => {
     const [error, setError] = useState(null);
     const [session, setSession] = useState(null);
     const [goToParticipantSession, setGoToParticipantSession] = useState(false)
+    const [inSession, setInSession] = useState(false)
 
     const sessionhangeHandler = (event) => {
         setSession(event.target.value);
     };
 
     useEffect(() => {
-        console.log('How is context?')
-        console.log(userContext.userName)
-        console.log(userContext.displayName)
+
+        const setError = (error) => {
+            setInSession(false)
+            console.log(error)
+        }
+
+        const thereIsCookie = (data) => {
+            setInSession(true)
+        }
+
+        goGET(`/api/web/v1.0/non_auth/is_in_session`, thereIsCookie, setError)
     }, [])
 
     function joinSessionAction () {

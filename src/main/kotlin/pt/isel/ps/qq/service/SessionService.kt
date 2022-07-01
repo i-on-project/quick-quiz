@@ -59,7 +59,7 @@ class SessionService(
                 quizRepo.save(quiz)
                 aux.add(quiz.id)
             }
-            val session = SessionDoc(template, sessionID, input, aux)
+            val session = SessionDoc(template, sessionID, input)
 
             return sessionRepo.save(session)
         }
@@ -75,7 +75,7 @@ class SessionService(
             geolocation = input.geolocation,
             radius = input.radius,
             status = QqStatus.NOT_STARTED,
-            numberOfParticipants = 0
+            tags = input.tags.toMutableList()
         )
         return sessionRepo.save(session)
     }

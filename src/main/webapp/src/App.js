@@ -15,18 +15,18 @@ import {InSession} from "./Components/Sessions/InSessionComponent";
 import {InSessionOrg} from "./Components/Sessions/InSessionOrg";
 
 
-
 function App() {
 
     //var stompClient = require('./Utils/websocket-listener')
     const userContext = useContext(UserContext)
 
-   // const isLoggedIn = () => userContext.userName !== null && userContext.isLoading === false
-        return (
+    // const isLoggedIn = () => userContext.userName !== null && userContext.isLoading === false
+    return (
+        <div>
             <UserContextProvider>
                 <Router>
                     <div>
-                        <NavBarComponent />
+                        <NavBarComponent/>
                         <Routes>
                             {/*{/!**No auth needed**!/}*/}
                             <Route path="/" element={<HomeComponent/>}/>
@@ -34,17 +34,18 @@ function App() {
                             <Route path="/login" element={<LoginUser/>}/>
                             <Route path="/logmein" element={<LogMeIn/>}/>
                             <Route path="/insession/:id" element={<InSession/>}/>
-                             {/*{/!**auth needed**!/}*/}
+                            {/*{/!**auth needed**!/}*/}
                             <Route path="/sessions" element={<Sessions/>}/>
                             <Route path="/sessions/:id" element={<Session/>}/>
                             <Route path="/owninsession/:id" element={<InSessionOrg/>}/>
                             <Route path="/templates" element={<Templates/>}/>
-                            <Route path="/history" element={<History />} />
+                            <Route path="/history" element={<History/>}/>
 
                         </Routes>
                     </div>
                 </Router>
             </UserContextProvider>
+        </div>
     );
 }
 

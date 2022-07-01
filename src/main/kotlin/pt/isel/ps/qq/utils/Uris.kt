@@ -50,13 +50,18 @@ object Uris {
                         const val PATH = "${NonAuth.PATH}$ENDPOINT"
                     }
 
+                    object IsInSession {
+                        const val ENDPOINT = "/is_in_session"
+                        const val PATH = "${NonAuth.PATH}$ENDPOINT"
+                    }
+
                     object GiveAnswer {
                         const val ENDPOINT = "/give_answer"
                         const val PATH = "${NonAuth.PATH}$ENDPOINT"
                     }
 
                     object GetAnswer {
-                        const val ENDPOINT = "/answer/{answerId}"
+                        const val ENDPOINT = "/answer/{participantId}"
                         const val PATH = "${NonAuth.PATH}${GiveAnswer.ENDPOINT}"
                     }
 
@@ -66,7 +71,7 @@ object Uris {
                         fun url(host: String) = "${host}${PATH}"
 
                         object SessionId {
-                            const val ENDPOINT = "/session/{answerId}"
+                            const val ENDPOINT = "/session/{participantId}"
                             const val PATH = "${Quiz.PATH}$ENDPOINT"
                             const val CONTROLLER_ENDPOINT = "${Quiz.ENDPOINT}${ENDPOINT}"
                             private val TEMPLATE = UriTemplate(PATH)
