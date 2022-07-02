@@ -55,7 +55,7 @@ class UserResponseBuilder {
                     title = "Login",
                     method = SirenSupportedMethods.POST,
                     href = Uris.API.Web.V1_0.NonAuth.Logmein.url(baseUrl),
-                    fields = listOf(
+                    fields = listOf( //TODO: remove
                         SirenField(
                             name = "userName",
                             value = user.userName
@@ -70,7 +70,7 @@ class UserResponseBuilder {
         )
     }
 
-    fun checkAuthStatus(user: UserDoc): SirenModel {
+    fun checkAuthStatus(user: UserDoc): SirenModel { //TODO: Add tags
         return SirenModel(
             clazz = listOf("Login"),
             //properties = Acknowledge.TRUE,

@@ -22,6 +22,7 @@ repositories {
         url = uri("https://jcenter.bintray.com/")
     }
 }
+/*
 
 sourceSets {
     create("intTest") {
@@ -49,6 +50,7 @@ val integrationTest = task<Test>("integrationTest") {
 
 tasks.check { dependsOn(integrationTest) }
 
+*/
 
 
 dependencies {

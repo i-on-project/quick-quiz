@@ -74,6 +74,5 @@ class ParticipantSessionController(
             null -> ResponseEntity.noContent().build()
             else -> ResponseEntity.ok().body(expectedCookie.value) //TODO: SirenMOdel Media Type
         }
-
     }
 }

@@ -51,7 +51,7 @@ class UserController(private val authenticationService: AuthenticationService,
         if(!user.userName.contains("test")) {
             emailService.sendEmail("$appHost/logmein?user=${user.userName}&token=${user.registrationToken}", user.userName)
         } //TODO: else Return error to contact admin
-        return ResponseEntity.ok().body(body)
+        return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }
 
     @PostMapping(Uris.API.Web.V1_0.NonAuth.Login.ENDPOINT)
@@ -73,6 +73,6 @@ class UserController(private val authenticationService: AuthenticationService,
         val headers = HttpHeaders()
         headers.add("Set-Cookie", cookie.createCookie("Authorization",base64,  Duration.ofDays(7).toSeconds()))
         val body = responseBuilder.loginUserResponse(user)
-        return ResponseEntity.ok().headers(headers).body(body)
+        return ResponseEntity.ok().headers(headers).contentType(SirenModel.MEDIA_TYPE).body(body)
     }
 }
