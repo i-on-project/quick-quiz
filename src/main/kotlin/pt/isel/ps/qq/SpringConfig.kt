@@ -62,16 +62,4 @@ class MvcConfig(
 
 }
 
-/*
-@Configuration
-class WebSecurityConfig : WebSecurityConfigurerAdapter() {
-    @Throws(Exception::class)
-    override fun configure(http: HttpSecurity) {
-        http.requiresChannel()
-            .requestMatchers(RequestMatcher { r -> r.getHeader("X-Forwarded-Proto") != null })
-            .requiresSecure()
-
-    }
-}
-*/
 

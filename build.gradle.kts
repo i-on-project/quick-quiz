@@ -66,11 +66,10 @@ dependencies {
     implementation("javax.validation:validation-api:2.0.1.Final")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo:3.4.6")
 
-    implementation("org.springframework.boot:spring-boot-starter-test")
-    implementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo:3.4.6")
-
-    //implementation("junit:junit:4.13.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
 
 
 

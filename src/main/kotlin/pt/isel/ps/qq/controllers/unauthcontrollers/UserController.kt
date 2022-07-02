@@ -4,6 +4,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import pt.isel.ps.qq.controllers.CookieHandler
 import pt.isel.ps.qq.controllers.responsebuilders.UserResponseBuilder
@@ -18,6 +19,7 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 @RestController("UserController")
+@RequestMapping(Uris.API.Web.V1_0.NonAuth.PATH)
 class UserController(private val authenticationService: AuthenticationService,
                      private val emailService: EmailService,
                      private val responseBuilder: UserResponseBuilder,
