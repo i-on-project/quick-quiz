@@ -9,7 +9,7 @@ import {getActionHref, getLinksFromEntity, getLinksHref} from "../../utils/Siren
 import {ProblemJson} from "../../utils/ProblemJson";
 import {Timer} from "../TickingTimer";
 import {NewQuizModal} from "../QuizzesPage/NewQuizModal";
-import {SortQuizzesEntities} from "../../utils/QuizModel";
+import {SortQuizzesEntities} from "../../utils/models/QuizModel";
 import {MutableQuizCard} from "../QuizzesPage/MutableQuizCard";
 
 const href_unknown_problem = new ProblemJson("InvalidRequest", "The uri to fetch the data is unknown")
@@ -19,10 +19,15 @@ const webSocketTopic = (id) => [`/queue/insession/${id}`]
 export const LiveSession = () => {
 
     const {id} = useParams()
-    const [webSocketClient, setWebSocketClient] = useState(null)
+
     const [session_state, setSessionState] = useState({data: null, loading: true, problem: null})
     const [quizzes_state, setQuizzesState] = useState({data: null, loading: true, problem: null})
     const [answers_state, setAnswersState] = useState({data: null, loading: true, problem: null})
+
+    const [messages, setMessages] = useState({lastTimeFetch: null, newMessages: false})
+    const [webSocketClient, setWebSocketClient] = useState(null)
+    const [webSocketConnected, setWebSocketConnected] = useState(false)
+
     const [modal, setModal] = useState(false)
 
     const loadSession = useCallback(() => {
@@ -85,18 +90,25 @@ export const LiveSession = () => {
         return request(href, {method: 'GET'}, func_quizzes)
     }, [session_state])
 
-    const onCloseSessionAlert = useCallback(() => {setSessionState(prev => {return{...prev, problem: null}})}, [])
-    const onCloseQuizzesAlert = useCallback(() => setQuizzesState((prev) => {return {...prev, problem: null}}), [])
+    const onCloseSessionAlert = useCallback(() => setSessionState(prev => {return {...prev, problem: null}}), [])
+    const onCloseQuizzesAlert = useCallback(() => setQuizzesState(prev => {return {...prev, problem: null}}), [])
+    const onCloseAnswersAlert = useCallback(() => setAnswersState(prev => {return {...prev, problem: null}}), [])
     const onClickModalHandler = useCallback(() => setModal(true), [])
     const onCloseModalHandler = useCallback(() => setModal(false), [])
+    const onConnectionHandler = useCallback(() => setWebSocketConnected(true), [])
 
-    const refWebSocket = useCallback((client) => setWebSocketClient(client))
+    const refWebSocket = useCallback((client) => setWebSocketClient(client), [])
     const notifyQuizChange = useCallback(() => {
         if(webSocketClient == null) return
+        if(webSocketConnected === false) return
         webSocketClient.sendMessage(`/topic/insession/${id}`, 'Q')
-    }, [webSocketClient])
+    }, [webSocketClient, webSocketConnected, id])
 
-    useEffect(() => loadSession().cancel, [loadSession])
+    const onMessageHandler = useCallback(() => {setMessages(prev => { return {...prev, newMessages: true}})}, [])
+
+    useEffect(() => {
+        return loadSession().cancel
+    }, [loadSession])
     useEffect(() => {
         if(session_state.data == null) return
         return loadQuizzes().cancel
@@ -104,8 +116,26 @@ export const LiveSession = () => {
     useEffect(() => {
         if(session_state.data == null) return
         if(quizzes_state.data == null) return
+        setMessages({lastTimeFetch: Date.now(), newMessages: false})
         return loadAnswers().cancel
     }, [session_state, quizzes_state, loadAnswers])
+
+    useEffect(() => {
+        if(messages.lastTimeFetch == null) return
+        if(messages.newMessages === true) {
+            const elapsedTime = Date.now() - messages.lastTimeFetch
+            if(elapsedTime >= 1000) {
+                setMessages({lastTimeFetch: Date.now(), newMessages: false})
+                loadAnswers()
+            } else {
+                return () => clearTimeout(setTimeout(() => {
+                    setMessages({lastTimeFetch: Date.now(), newMessages: false})
+                    loadAnswers()
+                }, 1000 - elapsedTime))
+            }
+        }
+    }, [messages, loadAnswers])
+
 
     const spinner = <div className="ms-3 text-center"><Spinner animation="border" style={{width: "3rem", height: "3rem"}}/></div>
 
@@ -132,7 +162,7 @@ export const LiveSession = () => {
                         <Col></Col>
                     </Card>
                 </Row>
-                <SockJsClient url={webSocketUri} topics={webSocketTopic(id)} onMessage={loadAnswers} ref={refWebSocket}/>
+                <SockJsClient url={webSocketUri} topics={webSocketTopic(id)} onConnect={onConnectionHandler} onMessage={onMessageHandler} ref={refWebSocket}/>
             </Container>
         }
         let quizzes_content = null
@@ -141,6 +171,12 @@ export const LiveSession = () => {
             const quizzes = quizzes_state.data.entities
             quizzes_content = <Container fluid="md">
                 <hr/>
+                {
+                    webSocketConnected === false ? <Fragment>
+                        <Row><h4>Connecting to participants...</h4><Spinner animation="border"/></Row>
+                        <hr/>
+                    </Fragment> : null
+                }
                 <Row><Button variant="success" className="mb-3" onClick={onClickModalHandler}>Add new quiz</Button></Row>
                 <Row>{quizzes.sort(SortQuizzesEntities).map((elem, idx) => {
                     return <MutableQuizCard
@@ -154,6 +190,7 @@ export const LiveSession = () => {
         if(session_content != null) main_content = <Fragment>
             {session_content}
             <Notification problem={quizzes_state.problem} onClose={onCloseQuizzesAlert}/>
+            <Notification problem={answers_state.problem} onClose={onCloseAnswersAlert}/>
             {quizzes_content}
         </Fragment>
     }

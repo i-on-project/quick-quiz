@@ -1,7 +1,7 @@
 import * as React from "react"
 import {Fragment, useCallback, useState} from "react";
 import {Button, Form, FormControl, InputGroup, Spinner} from "react-bootstrap";
-import {buildInputModel, questionTypeMapper, validateInputModel} from "../../utils/QuizModel";
+import {buildInputModel, questionTypeMapper, validateInputModel} from "../../utils/models/QuizModel";
 import {stringOnlyDigits} from "../../utils/StringUtils";
 
 function nullToEmptyStr(quiz) {
@@ -33,24 +33,21 @@ export const QuizForm = (props) => {
 
     const [button, setButton] = useState(button_initial_state)
 
-    const onSubmitHandler = useCallback((event) => {
+    const onSubmitHandler = useCallback(async (event) => {
         setButton({content: <Spinner animation="border"/>, disabled: true})
-        try {
-            const model = quiz.answerType != null ? {...state.quiz, questionType: quiz.answerType} : state.quiz
-            event.preventDefault();
-            const warnings = validateInputModel(model)
-            if (warnings.length !== 0) setState((prev) => {
-                prev.warnings = warnings;
-                return {...prev}
-            })
-            else {
-                if (perform == null) return
-                const input_model = buildInputModel(state.quiz)
-                perform(input_model)
-            }
-        } finally {
-            setButton(button_initial_state)
+        const model = quiz.answerType != null ? {...state.quiz, questionType: quiz.answerType} : state.quiz
+        event.preventDefault();
+        const warnings = validateInputModel(model)
+        if (warnings.length !== 0) setState((prev) => {
+            prev.warnings = warnings;
+            return {...prev}
+        })
+        else {
+            if (perform == null) return
+            const input_model = buildInputModel(state.quiz)
+            await perform(input_model).fetch
         }
+        setButton(button_initial_state)
     }, [state, quiz, perform, button_initial_state])
 
     const onChangeTypeHandler = useCallback((event) => {

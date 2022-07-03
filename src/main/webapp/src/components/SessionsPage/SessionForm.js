@@ -3,7 +3,7 @@ import {useCallback, useState} from "react";
 import {Button, Form, Spinner} from "react-bootstrap";
 import {getCurrentLocation} from "../../utils/LocationUtils";
 import {stringOnlyDigits} from "../../utils/StringUtils";
-import {buildInputModel, validateInputModel} from "../../utils/SessionModel";
+import {buildInputModel, validateInputModel} from "../../utils/models/SessionModel";
 
 function nullToEmptyStr(session) {
     return {

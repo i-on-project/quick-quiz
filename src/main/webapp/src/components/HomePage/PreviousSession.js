@@ -31,7 +31,7 @@ const InPreviousSession = ({participant_id}) => {
         }
         const func_obj = {success: s_func, failed: f_func}
         console.log(`${uri}/${participant_id}`)
-        return request(`${uri}${participant_id}`, {method: 'GET'}, func_obj)
+        return request(`${uri}${participant_id}`, {method: 'GET'}, func_obj).cancel
     }, [participant_id])
 
     if(state.loading) return

@@ -10,7 +10,7 @@ import {ProblemJson} from "../../utils/ProblemJson";
 import {NewQuizModal} from "../QuizzesPage/NewQuizModal";
 import {EditableSession} from "./EditableSession";
 import {QuizCard} from "../QuizzesPage/QuizCard";
-import {SortQuizzesEntities} from "../../utils/QuizModel";
+import {SortQuizzesEntities} from "../../utils/models/QuizModel";
 
 const href_unknown_problem = new ProblemJson("InvalidRequest", "The uri to fetch the data is unknown")
 const uri = (id) => `/api/web/v1.0/auth/sessions/${id}`

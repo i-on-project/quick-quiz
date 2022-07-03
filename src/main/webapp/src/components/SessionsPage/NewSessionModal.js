@@ -41,7 +41,7 @@ export const NewSessionModal = (props) => {
                     description: '',
                     limitOfParticipants: '',
                     geolocation: '',
-                    radius: '',
+                    radius: ''
                 }} button={{content: "Create"}}/>
             </Modal.Body>
         </Fragment>

@@ -19,7 +19,7 @@ export const EditQuizModal = (props) => {
             setProblem(problem)
         }
         const func_obj = {success: s_func, failed: f_func}
-        request_no_content(props.href, {method: 'PUT', ...parse_body(input_model)}, func_obj)
+        return request_no_content(props.href, {method: 'PUT', ...parse_body(input_model)}, func_obj)
     }, [props])
 
     const onCloseHandler = useCallback(() => {
