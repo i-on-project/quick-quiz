@@ -32,6 +32,4 @@ class HistoryController(
         val body = historyResponseBuilder.getAllHistoryResponse(idx, getBaseUrlHostFromRequest(request), total, calculateLastPage(total), history)
         return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }
-
-
 }

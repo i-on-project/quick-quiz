@@ -27,14 +27,14 @@ data class HistoryDoc(
             val aux = mutableListOf<HistoryAnswer>()
             participants.forEach { answers ->
                 val ans = answers.answers.find { quiz.id == it.quizId }
-                if(ans != null) aux.add(HistoryAnswer(ans.answer, ans.answerNumber))
+                if(ans != null) aux.add(HistoryAnswer(answers.id, ans.answer, ans.answerNumber))
             }
             HistoryQuiz(
                 question = quiz.question,
                 order = quiz.order,
                 answerType = quiz.answerType,
                 answerChoices = quiz.answerChoices ?: emptyList(),
-                numberOfAnswers = 0,//quiz.numberOfAnswers,
+                numberOfAnswers = aux.size,
                 answers = aux
             )
         },
@@ -43,6 +43,7 @@ data class HistoryDoc(
 }
 
 data class HistoryAnswer(
+    val participantId: String,
     val answer: String? = null,
     val choiceNumber: Int? = null
 )

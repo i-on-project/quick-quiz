@@ -7,10 +7,10 @@ import pt.isel.ps.qq.utils.Uris
 
 @Component
 class QuizzesresponseBuilder {
-    fun addQuizzResponse(host: String, sessionId: String, quizId: String): SirenModel{
+    fun addQuizzResponse(host: String, sessionId: String, quizId: String): SirenModel{ //TODO: Added id to property
         return SirenModel(
             clazz = listOf("Quiz"),
-            properties = Acknowledge.TRUE,
+            properties = mapOf("id" to quizId),
             entities = listOf(
                 SirenEntity(
                     rel = listOf("session"), links = listOf(

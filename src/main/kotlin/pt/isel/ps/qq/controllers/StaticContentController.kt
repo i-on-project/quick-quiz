@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 
 @Controller
 class StaticContentController {
-    @RequestMapping(value = ["/{path:[^\\.]*}"])
+   @RequestMapping(value = ["/{path:[^\\.]*}"])
     fun redirect(): String {
         return "forward:/index.html"
     }

@@ -11,6 +11,12 @@ import pt.isel.ps.qq.utils.Uris
 @Component
 class ParticipantResponseBuilder {
 
+    fun buildJoinSessionResponse(participantId: String): SirenModel { //TODO: New
+        return SirenModel(
+            clazz = listOf("participant", "id"),
+            properties = mapOf("participantId" to participantId) )
+    }
+
     fun buildGetAllQuizzesResponse(quizzes: List<SessionQuizDoc>): SirenModel { //TODO: New
         return SirenModel(
             clazz = listOf("list", "quiz"),

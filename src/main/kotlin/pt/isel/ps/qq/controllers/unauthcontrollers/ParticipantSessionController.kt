@@ -33,14 +33,16 @@ class ParticipantSessionController(
             "Set-Cookie",
             cookie.createCookie("InSession", participantDoc.id, Duration.ofDays(7).toSeconds()) //TODO: Change time for this cookie
         )
-        return ResponseEntity.ok().headers(headers).body(ParticipantOutputModel(participantDoc.id))
+        return ResponseEntity.ok().headers(headers)
+            .contentType(SirenModel.MEDIA_TYPE)
+            .body(responseBuilder.buildJoinSessionResponse(participantDoc.id))
     }
 
     @PostMapping(Uris.API.Web.V1_0.NonAuth.GiveAnswer.ENDPOINT)
     fun giveAnswer(request: HttpServletRequest, @RequestBody input: GiveAnswerInputModel): ResponseEntity<Any> {
         val participantDoc = participantService.giveAnswer(input)
         val body = responseBuilder.buildGetParticipantResponse(participantDoc)
-        return ResponseEntity.ok().body(body)
+        return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }
 
     @GetMapping(Uris.API.Web.V1_0.NonAuth.GetAnswer.ENDPOINT)
@@ -57,7 +59,7 @@ class ParticipantSessionController(
                 .body("Session Not Found")
         }
         val body = responseBuilder.buildGetParticipantResponse(participantDoc)
-        return ResponseEntity.ok().body(body)
+        return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }
 
     @GetMapping(Uris.API.Web.V1_0.NonAuth.Quiz.SessionId.CONTROLLER_ENDPOINT)
@@ -72,7 +74,7 @@ class ParticipantSessionController(
     fun checkInSessionStatus(request: HttpServletRequest): ResponseEntity<Any> {
         return when(val expectedCookie = request.cookies?.find { it.name == "InSession" }){
             null -> ResponseEntity.noContent().build()
-            else -> ResponseEntity.ok().body(expectedCookie.value) //TODO: SirenMOdel Media Type
+            else -> ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(expectedCookie.value) //TODO: SirenMOdel Media Type
         }
     }
 }

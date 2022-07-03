@@ -2,12 +2,12 @@ package pt.isel.ps.qq.service
 
 import org.springframework.stereotype.Service
 import pt.isel.ps.qq.data.GiveAnswerInputModel
-import pt.isel.ps.qq.repositories.AnswersRepository
+import pt.isel.ps.qq.repositories.ParticipantRepository
 import pt.isel.ps.qq.repositories.docs.Answer
 import pt.isel.ps.qq.repositories.docs.ParticipantDoc
 
 @Service
-class AnswersService(private val answerRepo: AnswersRepository,) {
+class AnswersService(private val answerRepo: ParticipantRepository,) {
 
     fun giveAnswer(input: GiveAnswerInputModel): ParticipantDoc {
 
