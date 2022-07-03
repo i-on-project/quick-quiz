@@ -4,10 +4,9 @@ import {parse_body, request_no_content} from "../../utils/Request";
 import {Button, Col, Collapse, Container, Form, ListGroup, Modal, Row, Spinner} from "react-bootstrap";
 import {EditQuizModal} from "./EditQuizModal";
 import {Notification} from "../Notification";
-import {questionTypeMapper, quizStateMapper} from "../../utils/QuizModel";
+import {questionTypeMapper, quizStateMapper} from "../../utils/models/QuizModel";
 import {ActionButton} from "../ActionButon";
-import {QuizCard} from "./QuizCard";
-import {QuizAnswers} from "./QuizAnswers";
+import {QuizAnswersList} from "./QuizAnswersList";
 
 export const MutableQuizCard = ({quiz, answers, reload, href, notify}) => {
 
@@ -20,7 +19,7 @@ export const MutableQuizCard = ({quiz, answers, reload, href, notify}) => {
     const onOpenModalHandler = useCallback(() => setModal(true), [])
     const onCloseModalHandler = useCallback(() => setModal(false), [])
     const onCloseHandler = useCallback(() => setProblem(null), [])
-    const onCollapseHandler = useCallback(() => setCollapse((prev) => !prev))
+    const onCollapseHandler = useCallback(() => setCollapse((prev) => !prev), [])
 
     const onChangeTypeHandler = useCallback(async (event) => {
         const body = {quizState: event.target.value}
@@ -55,7 +54,7 @@ export const MutableQuizCard = ({quiz, answers, reload, href, notify}) => {
 
     let collapse_content = null
     if(collapse) collapse_content = <Collapse in={collapse}>
-        <QuizAnswers quiz={quiz} answers={answers} />
+        <QuizAnswersList quiz={quiz} answers={answers} />
     </Collapse>
 
     return (

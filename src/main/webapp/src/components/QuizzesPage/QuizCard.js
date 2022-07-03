@@ -1,7 +1,7 @@
 import * as React from "react";
 import {Fragment, useCallback, useState} from "react";
 import {Button, Col, Container, ListGroup, Modal, Row} from "react-bootstrap";
-import {questionTypeMapper} from "../../utils/QuizModel";
+import {questionTypeMapper} from "../../utils/models/QuizModel";
 import {EditQuizModal} from "./EditQuizModal";
 import {Notification} from "../Notification";
 import {request_no_content} from "../../utils/Request";

@@ -1,7 +1,7 @@
 import * as React from "react";
 import {ListGroup, ProgressBar} from "react-bootstrap";
 
-export const QuizAnswers = ({quiz, answers}) => {
+export const QuizAnswersList = ({quiz, answers}) => {
 
     if(answers == null || answers.length === 0) return <h5 className="mb-3">No answers available</h5>
 
@@ -11,7 +11,7 @@ export const QuizAnswers = ({quiz, answers}) => {
         answers.forEach(e => {
             const answer = e.properties.answers.find(elem => elem.quizId === quiz.id)
             if(answer != null) {
-                stats[answer.choiceNumber] += 1
+                stats[answer.answerNumber] += 1
                 ++ans_counter
             }
         })

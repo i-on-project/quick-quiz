@@ -1,12 +1,40 @@
 import * as React from "react";
-import {Fragment, useContext} from 'react'
+import {Fragment, useCallback, useContext, useEffect, useState} from 'react'
 import {Container, Navbar, Button, Spinner} from "react-bootstrap";
 import {UserContext} from "./UserContext";
-import {Link} from "react-router-dom";
+import {Link, Navigate} from "react-router-dom";
+import {request_no_content} from "../utils/Request";
 
+const uri = '/api/web/v1.0/auth/logout'
 export const NavigationBar = () => {
 
-    const [context] = useContext(UserContext)
+    const [context, setContext] = useContext(UserContext)
+    const [redirect, setRedirect] = useState(false)
+
+    const onClickHandler = useCallback(() => {
+        const success_f = () => {
+            setRedirect(true)
+            setContext({
+                username: null,
+                display_name: null,
+                loading: false,
+                logged_in: false,
+                problem: null
+            })
+        }
+        const failed_f = (problem) => {
+            alert(`Logout failed: ${problem.description == null ? problem.title : problem.description}`)
+        }
+        const functions_object = {success: success_f, failed: failed_f}
+        request_no_content(uri, {method: 'POST'}, functions_object)
+    }, [setContext])
+
+    useEffect(() => {
+        if(redirect === true) setRedirect(false)
+    }, [redirect])
+
+    const location = window.location.pathname
+    if(location !== '/' && redirect === true) return <Navigate to="/"/>
 
     if(context.loading) return(
         <Navbar bg="light" expand="lg">
@@ -27,7 +55,7 @@ export const NavigationBar = () => {
         <Navbar.Brand><Link to="/templates">Templates</Link></Navbar.Brand>
         <Navbar.Brand><Link to="/history">History</Link></Navbar.Brand>
         <Navbar.Text>Welcome {context.display_name}</Navbar.Text>
-        <Button variant="success" type="button" onClick={() => {}}>Logout</Button>
+        <Button variant="success" type="button" onClick={onClickHandler}>Logout</Button>
     </Fragment>
     else content = <Fragment>
         <Navbar.Brand><Link to="/register">Register</Link></Navbar.Brand>

@@ -46,15 +46,3 @@ export const UserProvider = ({children}) => {
         </UserContext.Provider>
     )
 }
-
-/*export function Logout() {
-    const [,setContext] = UserContext
-    setContext((prev) => {
-        return {...prev,
-            username: null,
-            display_name: null,
-            loading: false,
-            logged_in: false
-        }
-    })
-}*/
