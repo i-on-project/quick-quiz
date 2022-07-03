@@ -6,25 +6,42 @@ import pt.isel.ps.qq.data.SirenEntity
 import pt.isel.ps.qq.data.SirenModel
 import pt.isel.ps.qq.repositories.docs.ParticipantDoc
 import pt.isel.ps.qq.repositories.docs.SessionQuizDoc
+import pt.isel.ps.qq.utils.Uris
 
 @Component
 class ParticipantResponseBuilder {
 
-    fun buildGetAllQuizzesResponse(quizzes: List<SessionQuizDoc>): SirenModel {
+    fun buildJoinSessionResponse(participantId: String): SirenModel { //TODO: New
         return SirenModel(
-            clazz = listOf("Quiz"),
+            clazz = listOf("participant", "id"),
+            properties = mapOf("participantId" to participantId) )
+    }
+
+    fun buildGetAllQuizzesResponse(quizzes: List<SessionQuizDoc>): SirenModel { //TODO: New
+        return SirenModel(
+            clazz = listOf("list", "quiz"),
             properties = ListInfo(size = quizzes.size, total = quizzes.size), //TODO: Output model required
             entities = quizzes.map {
                 SirenEntity(
-                    clazz = listOf("quizzes"),
-                    rel = listOf("self"),
+                    clazz = listOf("quiz"),
+                    rel = listOf("item"),
                     properties = it
                 )
             }
         )
     }
 
-    fun buildGetParticipantResponse(participant: ParticipantDoc): ParticipantDoc { //TODO: build siren model
-        return participant
+    fun buildGetParticipantResponse(participant: ParticipantDoc): SirenModel { //TODO: New
+        return SirenModel(
+            clazz = listOf("participant"),
+            properties = participant,
+            entities = listOf(
+                SirenEntity(
+                    clazz = listOf("session"),
+                    rel = listOf("related"),
+                    href = Uris.API.Web.V1_0.NonAuth.PATH.toString() //TODO: Output model required
+                )
+            )
+        )
     }
 }

@@ -4,6 +4,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import pt.isel.ps.qq.controllers.CookieHandler
 import pt.isel.ps.qq.controllers.responsebuilders.UserResponseBuilder
@@ -18,6 +19,7 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 @RestController("UserController")
+@RequestMapping(Uris.API.Web.V1_0.NonAuth.PATH)
 class UserController(private val authenticationService: AuthenticationService,
                      private val emailService: EmailService,
                      private val responseBuilder: UserResponseBuilder,
@@ -49,7 +51,7 @@ class UserController(private val authenticationService: AuthenticationService,
         if(!user.userName.contains("test")) {
             emailService.sendEmail("$appHost/logmein?user=${user.userName}&token=${user.registrationToken}", user.userName)
         } //TODO: else Return error to contact admin
-        return ResponseEntity.ok().body(body)
+        return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }
 
     @PostMapping(Uris.API.Web.V1_0.NonAuth.Login.ENDPOINT)
@@ -71,6 +73,6 @@ class UserController(private val authenticationService: AuthenticationService,
         val headers = HttpHeaders()
         headers.add("Set-Cookie", cookie.createCookie("Authorization",base64,  Duration.ofDays(7).toSeconds()))
         val body = responseBuilder.loginUserResponse(user)
-        return ResponseEntity.ok().headers(headers).body(body)
+        return ResponseEntity.ok().headers(headers).contentType(SirenModel.MEDIA_TYPE).body(body)
     }
 }

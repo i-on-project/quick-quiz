@@ -6,6 +6,6 @@ import pt.isel.ps.qq.repositories.docs.ParticipantDoc
 
 
 @Repository
-interface AnswersRepository: MongoRepository<ParticipantDoc, String> {
+interface ParticipantRepository: MongoRepository<ParticipantDoc, String> {
     fun findAnswersDocsBySessionId(sessionId: String): List<ParticipantDoc>
 }

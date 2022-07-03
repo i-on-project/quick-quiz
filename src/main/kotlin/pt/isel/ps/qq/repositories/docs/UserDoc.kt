@@ -20,6 +20,7 @@ data class UserDoc(
     val requestExpireDate: Long? = null,
     val loginToken: String? = null,
     val loginExpireDate: Long? = null,
+    val tags: MutableList<String> = mutableListOf()
 ) {
     companion object {
         fun userRegister(user: UserDoc, token: String, date: Long) = UserDoc(

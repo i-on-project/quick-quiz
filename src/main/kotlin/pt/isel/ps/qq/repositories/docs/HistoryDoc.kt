@@ -16,7 +16,7 @@ data class HistoryDoc(
     val quizzes: List<HistoryQuiz>,
     var numberOfParticipants: Int
 ) {
-    constructor(session: SessionDoc, quizzes: List<SessionQuizDoc>, answers: List<ParticipantDoc>): this(
+    constructor(session: SessionDoc, quizzes: List<SessionQuizDoc>, participants: List<ParticipantDoc>): this(
         id = session.id,
         name = session.name,
         description = session.description,
@@ -25,24 +25,25 @@ data class HistoryDoc(
         liveDate = session.liveDate!!,
         quizzes = quizzes.map { quiz ->
             val aux = mutableListOf<HistoryAnswer>()
-            answers.forEach { answers ->
+            participants.forEach { answers ->
                 val ans = answers.answers.find { quiz.id == it.quizId }
-                if(ans != null) aux.add(HistoryAnswer(ans.answer, ans.answerNumber))
+                if(ans != null) aux.add(HistoryAnswer(answers.id, ans.answer, ans.answerNumber))
             }
             HistoryQuiz(
                 question = quiz.question,
                 order = quiz.order,
                 answerType = quiz.answerType,
                 answerChoices = quiz.answerChoices ?: emptyList(),
-                numberOfAnswers = 0,//quiz.numberOfAnswers,
+                numberOfAnswers = aux.size,
                 answers = aux
             )
         },
-        numberOfParticipants = session.numberOfParticipants
+        numberOfParticipants = participants.size
     )
 }
 
 data class HistoryAnswer(
+    val participantId: String,
     val answer: String? = null,
     val choiceNumber: Int? = null
 )

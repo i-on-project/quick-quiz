@@ -12,6 +12,7 @@ import pt.isel.ps.qq.utils.getBaseUrlHostFromRequest
 import javax.servlet.http.HttpServletRequest
 
 @RestController("TemplatesController")
+@RequestMapping(Uris.API.Web.V1_0.Auth.PATH)
 class TemplatesController (private val service: TemplateService,
                            private val scope: UserInfoScope,
                            private val exHandler: ExceptionsResponseHandler,

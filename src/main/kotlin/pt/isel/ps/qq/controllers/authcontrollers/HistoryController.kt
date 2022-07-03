@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest
  */
 
 @RestController("HistoryController")
+@RequestMapping(Uris.API.Web.V1_0.Auth.PATH)
 class HistoryController(
     private val service: HistoryService,
     private val scope: UserInfoScope,
@@ -31,6 +32,4 @@ class HistoryController(
         val body = historyResponseBuilder.getAllHistoryResponse(idx, getBaseUrlHostFromRequest(request), total, calculateLastPage(total), history)
         return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }
-
-
 }

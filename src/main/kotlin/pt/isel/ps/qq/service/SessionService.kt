@@ -13,7 +13,7 @@ import java.util.*
 @Service
 class SessionService(
     private val sessionRepo: SessionRepository,
-    private val answerRepo: AnswersRepository,
+    private val participantRepo: ParticipantRepository,
     private val quizRepo: QuizRepository,
     private val templateRepo: TemplateRepository,
     private val historyRepo: HistoryRepository,
@@ -27,7 +27,7 @@ class SessionService(
         if (session.status != QqStatus.STARTED) throw Exception("Can join only in started sessions")
         val guestUuid = UUID.randomUUID().toString()
         val guestSession = ParticipantDoc(id = guestUuid, sessionId = session.id)
-        answerRepo.save(guestSession)
+        participantRepo.save(guestSession)
         return guestSession
     }
 
@@ -45,7 +45,7 @@ class SessionService(
 
     fun getAllAnswersForSession(owner: String, id: String): List<ParticipantDoc> {
         getSessionValidatingTheOwner(owner, id)
-        return answerRepo.findAnswersDocsBySessionId(id)
+        return participantRepo.findAnswersDocsBySessionId(id)
     }
 
     fun createSession(owner: String, input: SessionInputModel): SessionDoc {
@@ -59,7 +59,7 @@ class SessionService(
                 quizRepo.save(quiz)
                 aux.add(quiz.id)
             }
-            val session = SessionDoc(template, sessionID, input, aux)
+            val session = SessionDoc(template, sessionID, input)
 
             return sessionRepo.save(session)
         }
@@ -75,7 +75,7 @@ class SessionService(
             geolocation = input.geolocation,
             radius = input.radius,
             status = QqStatus.NOT_STARTED,
-            numberOfParticipants = 0
+            tags = input.tags.toMutableList()
         )
         return sessionRepo.save(session)
     }
@@ -117,8 +117,8 @@ class SessionService(
         )
         updateSessionStatus(session, QqStatus.CLOSED, session.guestCode)
         val quizList = quizRepo.findQuizDocsBySessionId(session.id)
-
-        val history = HistoryDoc(session, quizList, emptyList()) //TODO: put the answers
+        val participants = participantRepo.findAnswersDocsBySessionId(session.id)
+        val history = HistoryDoc(session, quizList, participants)
         val toReturn = historyRepo.save(history)
 
         sessionRepo.deleteById(session.id)

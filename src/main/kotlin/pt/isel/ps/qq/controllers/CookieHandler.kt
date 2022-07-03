@@ -1,9 +1,9 @@
 package pt.isel.ps.qq.controllers
 
-import org.springframework.stereotype.Controller
+import org.springframework.stereotype.Component
 import javax.servlet.http.Cookie
 
-@Controller
+@Component
 class CookieHandler {
     fun expireCookie(cookie: Cookie): String {
         val builder = StringBuilder("${cookie.name}=;")

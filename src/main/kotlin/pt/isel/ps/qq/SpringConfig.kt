@@ -20,8 +20,6 @@ class MvcConfig(
     private val scope: UserInfoScope
 ) : WebMvcConfigurer {
 
-
-
     @Bean
     fun objectMapper(): ObjectMapper = ObjectMapper().registerKotlinModule()
 
@@ -63,4 +61,5 @@ class MvcConfig(
 
 
 }
+
 

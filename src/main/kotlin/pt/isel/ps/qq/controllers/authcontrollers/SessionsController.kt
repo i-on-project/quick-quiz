@@ -7,16 +7,20 @@ import pt.isel.ps.qq.controllers.ExceptionsResponseHandler
 import pt.isel.ps.qq.controllers.responsebuilders.SessionsResponseBuilder
 import pt.isel.ps.qq.data.*
 import pt.isel.ps.qq.exceptions.*
+import pt.isel.ps.qq.repositories.UserRepository
 import pt.isel.ps.qq.service.SessionService
 import pt.isel.ps.qq.utils.Uris
 import pt.isel.ps.qq.utils.getBaseUrlHostFromRequest
 import javax.servlet.http.HttpServletRequest
 
 @RestController("SessionsController")
-class SessionsController(private val service: SessionService,
-                         private val scope: UserInfoScope,
-                         private val exHandler: ExceptionsResponseHandler,
-                         private val sessionResponse: SessionsResponseBuilder
+@RequestMapping(Uris.API.Web.V1_0.Auth.PATH)
+class SessionsController(
+    private val service: SessionService,
+    private val scope: UserInfoScope,
+    private val userRepository: UserRepository,
+    private val exHandler: ExceptionsResponseHandler,
+    private val sessionResponse: SessionsResponseBuilder
 ) : AuthMainController() {
 
     /**
@@ -69,10 +73,24 @@ class SessionsController(private val service: SessionService,
     @PostMapping(Uris.API.Web.V1_0.Auth.Session.ENDPOINT)
     fun createSession(request: HttpServletRequest, @RequestBody input: SessionInputModel): ResponseEntity<SirenModel> {
         val session = service.createSession(scope.getUser().userName, input)
+        if (session.tags.isNotEmpty())
+            updateUserTags(scope.getUser().userName, session.tags)
         val body = sessionResponse.createSessionResponse(session)
         return ResponseEntity.created(Uris.API.Web.V1_0.Auth.Session.Id.make(session.id))
             .contentType(SirenModel.MEDIA_TYPE)
             .body(body)
+    }
+
+    private fun updateUserTags(userName: String, tags: List<String>) {
+        val user = userRepository.findById(userName).get()
+        var tagsAdded = false;
+        tags.forEach { t ->
+            if (!user.tags.contains(t)) {
+                user.tags.add(t)
+                tagsAdded = true
+            }
+        }
+        if(tagsAdded) userRepository.save(user)
     }
 
 
@@ -153,6 +171,8 @@ class SessionsController(private val service: SessionService,
     ): ResponseEntity<Any> {
         return try {
             val session = service.editSession(scope.getUser().userName, id, input)
+            if (session.tags.isNotEmpty())
+                updateUserTags(scope.getUser().userName, session.tags)
             val body = sessionResponse.editSessionResponse(getBaseUrlHostFromRequest(request), session.id)
             ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
         } catch (ex: SessionNotFoundException) {
@@ -228,11 +248,9 @@ class SessionsController(private val service: SessionService,
     @GetMapping(Uris.API.Web.V1_0.Auth.Session.Id.Answers.CONTROLLER_ENDPOINT)
     fun getAllAnswers(request: HttpServletRequest, @PathVariable id: String): ResponseEntity<Any> {
         val participantsAndAnswers = service.getAllAnswersForSession(scope.getUser().userName, id)
-
         val body = sessionResponse.getAllAnswersResponse(participantsAndAnswers)
         return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }
-
 
 
 }

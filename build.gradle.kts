@@ -22,10 +22,39 @@ repositories {
         url = uri("https://jcenter.bintray.com/")
     }
 }
+/*
+
+sourceSets {
+    create("intTest") {
+        compileClasspath += sourceSets.main.get().output
+        runtimeClasspath += sourceSets.main.get().output
+    }
+}
+
+val intTestImplementation: Configuration by configurations.getting {
+    extendsFrom(configurations.implementation.get())
+}
+
+configurations["intTestRuntimeOnly"].extendsFrom(configurations.runtimeOnly.get())
+
+
+
+val integrationTest = task<Test>("integrationTest") {
+    description = "Runs integration tests."
+    group = "verification"
+
+    testClassesDirs = sourceSets["intTest"].output.classesDirs
+    classpath = sourceSets["intTest"].runtimeClasspath
+    shouldRunAfter("test")
+}
+
+tasks.check { dependsOn(integrationTest) }
+
+*/
+
 
 dependencies {
-    //implementation("org.unbroken-dome.siren:siren-core:0.2.0")
-    //implementation("com.sun.mail:javax.mail:1.6.2")
+
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb:2.7.0")
     implementation("org.springframework.boot:spring-boot-starter-websocket:2.6.7")
@@ -39,10 +68,12 @@ dependencies {
     implementation("javax.validation:validation-api:2.0.1.Final")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo:3.4.6")
+
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
 
 
-
-    //testImplementation("org.springframework.boot:spring-boot-starter-test")
 
 }
 tasks.withType<KotlinCompile> {
