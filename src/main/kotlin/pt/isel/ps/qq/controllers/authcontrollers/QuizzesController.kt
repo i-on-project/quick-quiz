@@ -121,8 +121,8 @@ class QuizzesController(private val service: QuizService,
 
     /*TODO: Make Pageable*/
     @GetMapping(Uris.API.Web.V1_0.Auth.Quiz.SessionId.CONTROLLER_ENDPOINT)
-    fun getAllQuizzesForSession(@PathVariable sessionid: String): ResponseEntity<Any> {
-        val quizzes = service.getAllSessionQuizzes(sessionid)
+    fun getAllQuizzesForSession(@PathVariable sessionId: String): ResponseEntity<Any> {
+        val quizzes = service.getAllSessionQuizzes(sessionId)
         val body = quizzesresponseBuilder.getAllQuizzesForSessionResponse(quizzes)
         return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }
