@@ -15,6 +15,7 @@ import {LoginVerifier} from "./components/LoginVerifier";
 import {PageNotFound} from "./components/PageNotFound";
 import {History} from "./components/HistoryPage/HistoryPage";
 import {Templates} from "./components/TemplatesPage/TemplatesPage";
+import {Template} from "./components/TemplatesPage/TemplatePage";
 
 function App() {
   return(
@@ -34,7 +35,7 @@ function App() {
                     <Route path="/live_session/:id" element={<LoginVerifier><LiveSession/></LoginVerifier>}/>
                     <Route path="/history" element={<LoginVerifier><History/></LoginVerifier>}/>
                     <Route path="/templates" element={<LoginVerifier><Templates/></LoginVerifier>}/>
-                    {/*<Route path="/template/:id" element={<LoginVerifier><Template/></LoginVerifier>}/>*/}
+                    <Route path="/template/:id" element={<LoginVerifier><Template/></LoginVerifier>}/>
 
                     <Route path="*" element={<PageNotFound/>}/>
                 </Routes>

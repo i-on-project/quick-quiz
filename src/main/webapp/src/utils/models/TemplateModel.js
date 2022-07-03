@@ -1,5 +1,6 @@
 export function validateInputModel(input_model) {
     const validation_errors = []
+    if(input_model.name.trim() === '') validation_errors.push({value: 'name', message: 'Name cannot be empty'})
     const participants_limit = parseInt(input_model.limitOfParticipants)
     if (!isNaN(participants_limit)) {
         if (participants_limit === 0) validation_errors.push({
@@ -26,6 +27,7 @@ export function validateInputModel(input_model) {
         }
     }
     input_model.quizzes.forEach((elem, idx) => {
+        if(elem.question.trim() === '') validation_errors.push({value: 'question', idx: idx, message: 'Question cannot be empty'})
         switch(elem.answerType.trim()) {
             case 'SHORT': break
             case 'MULTIPLE_CHOICE': {
@@ -47,10 +49,10 @@ export function validateInputModel(input_model) {
             }
             case 'LONG': break
             case '': {
-                validation_errors.push({value: 'questionType', message: 'You need to specify a type of answer'})
+                validation_errors.push({value: 'questionType', idx: idx, message: 'You need to specify a type of answer'})
                 break
             }
-            default: validation_errors.push({value: 'questionType', message: `${input_model.questionType} is not a valid type`})
+            default: validation_errors.push({value: 'questionType', idx: idx, message: `${input_model.questionType} is not a valid type`})
         }
     })
     return validation_errors
@@ -66,9 +68,24 @@ export function buildInputModel(values) {
         geolocation = `${split[0]},${split[1]}`
     }
     return {
+        name: values.name,
         limitOfParticipants: isNaN(participants_limit) ? null : participants_limit,
         geolocation: geolocation,
         radius: radius,
-        quizzes: values.quizzes
+        quizzes: values.quizzes.map((elem, idx) => {
+            const order = idx >= 99 ? 99 : idx
+            return {
+                order: order,
+                question: elem.question.trim(),
+                answerType: elem.answerType,
+                answerChoices: elem.answerType !== 'MULTIPLE_CHOICE' ? null : elem.answerChoices.map((elem, idx) => {
+                    return {
+                        choiceNumber: idx,
+                        choiceAnswer: elem.choiceAnswer,
+                        choiceRight: elem.choiceRight
+                    }
+                })
+            }
+        })
     }
 }

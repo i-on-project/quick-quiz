@@ -66,6 +66,8 @@ data class LiveSession(
 )
 
 data class TemplateOutputModel(
+    val id: String,
+    val name: String,
     val limitOfParticipants: Int,
     val geolocation: String? = null,
     val radius: Double? = null,
@@ -73,6 +75,8 @@ data class TemplateOutputModel(
     val quizzes: List<QuizTemplateOutputModel>
 ) {
     constructor(template: TemplateDoc) : this(
+        id = template.id,
+        name = template.name,
         limitOfParticipants = template.limitOfParticipants,
         geolocation = template.geolocation,
         radius = template.radius,

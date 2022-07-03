@@ -1,6 +1,6 @@
 import * as React from "react"
 import {Fragment, useCallback, useState} from "react";
-import {Button, Collapse, ListGroup} from "react-bootstrap";
+import {Button, ListGroup} from "react-bootstrap";
 import {millisToTime} from "../../utils/TimeUtils";
 import {HistoryQuiz} from "./HistoryQuiz";
 

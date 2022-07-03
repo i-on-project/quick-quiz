@@ -26,6 +26,7 @@ export const NewTemplateModal = ({href, reload, onClose}) => {
             </Modal.Header>
             <Modal.Body>
                 <TemplateForm perform={createTemplate} template={{
+                    name: '',
                     limitOfParticipants: '',
                     geolocation: '',
                     radius: '',

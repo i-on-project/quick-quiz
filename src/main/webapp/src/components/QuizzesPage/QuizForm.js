@@ -162,7 +162,7 @@ export const QuizForm = (props) => {
                 {question_warnings}
             </Form.Group>}
             {choices_form}
-            <Button variant={button.variant} type='submit' disabled={button.disabled} onClick={onSubmitHandler} className={button.className}>{button.content}</Button>
+            <Button variant={button.variant} type='submit' disabled={button.disabled} className={button.className}>{button.content}</Button>
         </Form>
     )
 }

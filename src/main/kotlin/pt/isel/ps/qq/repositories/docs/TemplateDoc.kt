@@ -11,6 +11,7 @@ import java.util.*
 @Document(collection  = "templates")
 data class TemplateDoc(
     @Id val id: String,
+    val name: String,
     val owner: String,
     val limitOfParticipants: Int = 10,
     val geolocation: String? = null,
@@ -20,6 +21,7 @@ data class TemplateDoc(
 ) {
     constructor(owner: String, input: CreateTemplateInputModel): this(
         id = UUID.randomUUID().toString(),
+        name = input.name,
         owner = owner,
         limitOfParticipants = input.limitOfParticipants ?: 10,
         geolocation = input.geolocation,
