@@ -16,6 +16,7 @@ interface SessionRepository: MongoRepository<SessionDoc, String> {
   fun findSessionDocsByOwnerOrderById(owner: String, page: Pageable): List<SessionDoc>
   fun findSessionDocsByGuestCodeAndStatus(guestCode: Int, status: QqStatus): List<SessionDoc>
   fun countSessionDocByOwnerAndStatus(owner: String, status: QqStatus): Long
+  fun countSessionDocByOwner(owner: String): Long
   fun countSessionDocByIdAndStatus(id: String, status: QqStatus): Long
 
 

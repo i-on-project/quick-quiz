@@ -45,7 +45,7 @@ class SessionsController(
     fun getAllSessions(request: HttpServletRequest, @RequestParam page: Int?): ResponseEntity<SirenModel> {
         val idx = page ?: 0
         val sessions = service.getAllSessions(scope.getUser().userName, idx)
-        val total = service.sessionDocumentsCount()
+        val total = service.sessionDocumentsCount(scope.getUser().userName)
         val body = sessionResponse.allSessionsResponse(
             getBaseUrlHostFromRequest(request),
             total.toInt(),

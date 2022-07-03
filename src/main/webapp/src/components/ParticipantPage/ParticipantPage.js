@@ -41,7 +41,7 @@ export const ParticipantPage = () => {
     const notifyAnswerChange = useCallback(() => {
         if(webSocketClient == null) return
         if(answers.data == null) return
-        webSocketClient.sendMessage(`/queue/insession/${answers.data.sessionId}`, 'A')
+        webSocketClient.sendMessage(`/queue/insession/${answers.data.properties.sessionId}`, 'A')
     }, [webSocketClient, answers])
 
     useEffect(() => {
@@ -58,12 +58,12 @@ export const ParticipantPage = () => {
         {quizzes.data.entities.map((elem) => {
             const answer = {
                 loading: answers.loading,
-                answer: answers.data == null ? null : answers.data.answers.find(e => e.quizId === elem.properties.id),
-                sessionId: answers.data == null ? null : answers.data.sessionId}
+                answer: answers.data == null ? null : answers.data.properties.answers.find(e => e.quizId === elem.properties.id),
+                sessionId: answers.data == null ? null : answers.data.properties.sessionId}
             return <Row key={elem.properties.id}><AnswerQuizCard quiz={elem.properties} answer={answer} reload={loadAnswers} notify={notifyAnswerChange}/></Row>
         })}
         {answers.data == null ? null :
-            <SockJsClient url={webSocketUri} topics={webSocketTopic(answers.data.sessionId)} onConnect={onConnectionHandler} onMessage={loadQuizzes} ref={refWebSocket} />
+            <SockJsClient url={webSocketUri} topics={webSocketTopic(answers.data.properties.sessionId)} onConnect={onConnectionHandler} onMessage={loadQuizzes} ref={refWebSocket} />
         }
     </Container>
 

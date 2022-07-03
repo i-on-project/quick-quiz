@@ -136,6 +136,7 @@ export const LiveSession = () => {
         }
     }, [messages, loadAnswers])
 
+    console.log(webSocketConnected)
 
     const spinner = <div className="ms-3 text-center"><Spinner animation="border" style={{width: "3rem", height: "3rem"}}/></div>
 

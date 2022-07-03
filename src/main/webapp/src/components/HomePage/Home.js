@@ -25,7 +25,7 @@ export const Home = () => {
         const value = parseInt(event.target.code.value)
 
         const success_func = (data) => {
-            setState((prev) => { return {...prev, loading: false, redirect: data.participantId}})
+            setState((prev) => { return {...prev, loading: false, redirect: data.properties.participantId}})
             setContext((prev) => { return {...prev, participant_id: data.participantId}})
         }
 

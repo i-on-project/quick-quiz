@@ -152,8 +152,8 @@ class SessionService(
      * Returns the number of documents present on the data repository 'sessions'.
      * @return Returns the number of documents present on the data repository 'sessions'
      */
-    fun sessionDocumentsCount(): Long {
-        return sessionRepo.count()
+    fun sessionDocumentsCount(userName: String): Long {
+        return sessionRepo.countSessionDocByOwner(userName)
     }
 
 
