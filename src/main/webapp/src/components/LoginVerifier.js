@@ -17,18 +17,15 @@ export const LoginVerifier = (props) => {
 
 const uri = '/api/web/v1.0/auth/checkuser'
 const CheckUser = (props) => {
-    console.log("Login Verifier")
+
     const [context, setContext] = useContext(UserContext)
 
     useEffect(() => {
-        console.log("Login Verifier UseEffect")
         if(context.logged_in) return
         setContext(prev => { return {...prev, loading: true}})
         request(uri, {method: 'GET'}, {
             success: data => setContext(prev => {
-                console.log("Login Verifier UseEffect Success")
-
-                 return {...prev,
+                return {...prev,
                     username: data.properties.userName,
                     display_name: data.properties.displayName,
                     loading: false,
@@ -43,7 +40,7 @@ const CheckUser = (props) => {
                 }
             })
         })
-    }, [context])
+    }, [context, setContext])
 
     return props.children
 }
