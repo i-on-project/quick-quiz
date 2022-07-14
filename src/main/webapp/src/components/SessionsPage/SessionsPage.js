@@ -10,12 +10,14 @@ import {getActionHref, getLinksFromEntity} from "../../utils/SirenJson";
 const page_size = 10
 const uri = '/api/web/v1.0/auth/sessions?page='
 export const Sessions = () => {
+    console.log("in Sessions")
 
     const [state, setState] = useState({data: null, loading: true, problem: null})
     const [pages, setPages] = useState({page: 0, totalPages: 1})
     const [modal, setModal] = useState(false)
 
     const loadPage = useCallback(() => {
+        console.log("loadpage")
         setState((prev) => { return {...prev, loading: true}})
         const s_func = (data) => {
             setState((prev) => { return {...prev,
@@ -38,6 +40,7 @@ export const Sessions = () => {
     }, [pages.page])
 
     useEffect(() => {
+        console.log("useEffect")
         return loadPage()
     }, [loadPage])
 
