@@ -12,20 +12,20 @@ export const LoginVerifier = (props) => {
     if(context.loading) return <Container className="mt-3"><h4>Verifying user...</h4><Spinner animation="border"/></Container>
     if(context.logged_in === false) return <Navigate to="/login"/>
 
-    return <CheckUser>{props.children}</CheckUser>
+    return <CheckUser children={props.children}/>
 }
 
 const uri = '/api/web/v1.0/auth/checkuser'
-const CheckUser = () => {
+const CheckUser = (props) => {
 
-    const [, setContext] = useContext(UserContext)
+    const [context, setContext] = useContext(UserContext)
 
     useEffect(() => {
+        if(context.logged_in) return
         setContext(prev => { return {...prev, loading: true}})
         request(uri, {method: 'GET'}, {
             success: data => setContext(prev => {
-                if(prev.logged_in) return prev
-                else return {...prev,
+                return {...prev,
                     username: data.properties.userName,
                     display_name: data.properties.displayName,
                     loading: false,
@@ -39,5 +39,7 @@ const CheckUser = () => {
                 }
             })
         })
-    }, [])
+    }, [context, setContext])
+
+    return props.children
 }
