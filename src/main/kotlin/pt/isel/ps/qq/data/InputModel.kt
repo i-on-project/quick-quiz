@@ -96,7 +96,7 @@ data class EditQuizInputModel(
 )
 
 data class UpdateQuizStatusInputModel(
-    val quizState: QqStatus
+    val quizStatus: QqStatus
 )
 
 data class CreateTemplateInputModel(

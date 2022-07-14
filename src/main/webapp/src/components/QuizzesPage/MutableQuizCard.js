@@ -10,7 +10,7 @@ import {QuizAnswersList} from "./QuizAnswersList";
 
 export const MutableQuizCard = ({quiz, answers, reload, href, notify}) => {
 
-    const [state, setState] = useState(quiz.quizState)
+    const [state, setState] = useState(quiz.quizStatus)
     const [select, setSelect] = useState(true)
     const [problem, setProblem] = useState(null)
     const [modal, setModal] = useState(false)
@@ -22,10 +22,10 @@ export const MutableQuizCard = ({quiz, answers, reload, href, notify}) => {
     const onCollapseHandler = useCallback(() => setCollapse((prev) => !prev), [])
 
     const onChangeStateHandler = useCallback(event => {
-        const body = {quizState: event.target.value}
+        const body = {quizStatus: event.target.value}
         setSelect(false)
         const success_func = () => {
-            setState(body.quizState)
+            setState(body.quizStatus)
             setSelect(true)
             if(notify != null) notify()
         }

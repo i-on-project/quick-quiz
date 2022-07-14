@@ -53,7 +53,7 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
             title = "Data os missing from request",
             status = 400,
             instance = request.contextPath,
-            values = mapOf("user" to scope.getUser().userName, "message" to ex.message)
+            values = mapOf("user" to scope.getUser().userName)
         )
     }
     /**Catch All**/
@@ -67,7 +67,7 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
             title = "An Unknown error occurred",
             status = 500,
             instance = request.contextPath,
-            values = mapOf("user" to scope.getUser().userName, "message" to ex.message)
+            values = mapOf("user" to scope.getUser().userName)
         )
     }
 
@@ -82,7 +82,7 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
             title = "Data os missing from request",
             status = 400,
             instance = request.contextPath,
-            values = mapOf("user" to scope.getUser().userName, "message" to ex.message)
+            values = mapOf("user" to scope.getUser().userName)
         )
     }
 

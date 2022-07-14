@@ -39,7 +39,7 @@ export const AnswerQuizCard = ({quiz, answer, reload, notify}) => {
 
     return(
         <Card>
-            <Card.Title>State: {quizStateMapper.find(elem => elem.key === quiz.quizState).value}</Card.Title>
+            <Card.Title>State: {quizStateMapper.find(elem => elem.key === quiz.quizStatus).value}</Card.Title>
             <Card.Title>Question: {quiz.question}</Card.Title>
             <Card.Body>Answer: {card_body}</Card.Body>
             {button_content}

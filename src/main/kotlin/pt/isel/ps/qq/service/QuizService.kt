@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service
 import pt.isel.ps.qq.data.AddQuizToSessionInputModel
 import pt.isel.ps.qq.data.EditQuizInputModel
 import pt.isel.ps.qq.data.UpdateQuizStatusInputModel
-import pt.isel.ps.qq.exceptions.AtLeast2Choices
 import pt.isel.ps.qq.exceptions.QuizAuthorizationException
 import pt.isel.ps.qq.exceptions.QuizNotFoundException
 import pt.isel.ps.qq.repositories.QuizRepository
@@ -67,7 +66,7 @@ class QuizService(
     fun updateQuizStatus(owner: String, id: String, input: UpdateQuizStatusInputModel): SessionQuizDoc {
         val quizDoc = getQuizValidatingOwner(owner, id)
         val session = getSessionValidatingTheOwner(owner, quizDoc.sessionId)
-        val newQuizDoc = SessionQuizDoc(quizDoc, input.quizState)
+        val newQuizDoc = SessionQuizDoc(quizDoc, input.quizStatus)
         return quizRepo.save(newQuizDoc)
     }
 
