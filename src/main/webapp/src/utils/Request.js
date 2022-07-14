@@ -15,15 +15,18 @@ export function parse_body(body) {
     return {headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)}
 }
 
-export const invalid_response = new ProblemJson('InvalidResponse', 'The API response was not valid')
+export const invalid_response = new ProblemJson('InvalidResponse', 'The server response was not valid')
+const unexpected_response = new ProblemJson('InvalidResponse', 'The server responded with error')
+
 export function request(uri, opts, {success, failed}) {
     const fetch_obj = cancellable_fetch(uri, opts)
     const promise = fetch_obj.fetch.then((response) => {
-        if(fetch_obj.signal.aborted) return
+        if(opts.method === 'GET' && fetch_obj.signal.aborted) return
+        if(response.status >= 500 || response.status >= 599) failed(unexpected_response)
         const content_type = response.headers.get('Content-Type')
         if(content_type == null || !content_type.includes('json')) { failed(invalid_response); return }
         response.json().then((data) => {
-            if(fetch_obj.signal.aborted) return
+            if(opts.method === 'GET' && fetch_obj.signal.aborted) return
             if(response.ok) success(data)
             else failed(data)
         })
@@ -34,13 +37,13 @@ export function request(uri, opts, {success, failed}) {
 export function request_no_content(uri, opts, {success, failed}) {
     const fetch_obj = cancellable_fetch(uri, opts)
     const promise = fetch_obj.fetch.then((response) => {
-        if(fetch_obj.signal.aborted) return
+        if(response.status >= 500 || response.status >= 599) failed(unexpected_response)
         if(response.ok) success()
-        else response.json().then((data) => {
-            if(fetch_obj.signal.aborted) return
-            if(response.ok) success(data)
-            else failed(data)
-        })
+        else {
+            const content_type = response.headers.get('Content-Type')
+            if(content_type == null || !content_type.includes('json')) { failed(invalid_response); return }
+            response.json().then(data => failed(data))
+        }
     }).catch(e => process_error(e, failed))
     return {cancel: fetch_obj.cancel, fetch: promise, signal: fetch_obj.signal}
 }

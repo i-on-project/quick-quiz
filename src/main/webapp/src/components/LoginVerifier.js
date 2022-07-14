@@ -1,8 +1,9 @@
 import * as React from "react"
-import {useContext} from "react";
+import {useContext, useEffect} from "react";
 import {Navigate} from "react-router-dom";
 import {UserContext} from "./UserContext";
 import {Container, Spinner} from "react-bootstrap";
+import {request} from "../utils/Request";
 
 export const LoginVerifier = (props) => {
 
@@ -11,5 +12,32 @@ export const LoginVerifier = (props) => {
     if(context.loading) return <Container className="mt-3"><h4>Verifying user...</h4><Spinner animation="border"/></Container>
     if(context.logged_in === false) return <Navigate to="/login"/>
 
-    return props.children
+    return <CheckUser>{props.children}</CheckUser>
+}
+
+const uri = '/api/web/v1.0/auth/checkuser'
+const CheckUser = () => {
+
+    const [, setContext] = useContext(UserContext)
+
+    useEffect(() => {
+        setContext(prev => { return {...prev, loading: true}})
+        request(uri, {method: 'GET'}, {
+            success: data => setContext(prev => {
+                if(prev.logged_in) return prev
+                else return {...prev,
+                    username: data.properties.userName,
+                    display_name: data.properties.displayName,
+                    loading: false,
+                    logged_in: true
+                }
+            }),
+            failed: problem => setContext(prev => {
+                return {...prev,
+                    loading: false,
+                    error: problem
+                }
+            })
+        })
+    }, [])
 }

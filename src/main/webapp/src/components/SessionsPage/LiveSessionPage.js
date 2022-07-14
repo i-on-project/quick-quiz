@@ -86,8 +86,8 @@ export const LiveSession = () => {
             return {...prev}
         })
 
-        const func_quizzes = {success: s_func_quizzes, failed: failed_func}
-        return request(href, {method: 'GET'}, func_quizzes)
+        const func_answers = {success: s_func_quizzes, failed: failed_func}
+        return request(href, {method: 'GET'}, func_answers)
     }, [session_state])
 
     const onCloseSessionAlert = useCallback(() => setSessionState(prev => {return {...prev, problem: null}}), [])

@@ -21,7 +21,7 @@ export const MutableQuizCard = ({quiz, answers, reload, href, notify}) => {
     const onCloseHandler = useCallback(() => setProblem(null), [])
     const onCollapseHandler = useCallback(() => setCollapse((prev) => !prev), [])
 
-    const onChangeTypeHandler = useCallback(async (event) => {
+    const onChangeStateHandler = useCallback(event => {
         const body = {quizState: event.target.value}
         setSelect(false)
         const success_func = () => {
@@ -45,7 +45,7 @@ export const MutableQuizCard = ({quiz, answers, reload, href, notify}) => {
         const f_func = (problem) => { setProblem(problem) }
         const func_obj = {success: s_func, failed: f_func}
         return request_no_content(href.self, {method: 'DELETE'}, func_obj).fetch
-    }, [reload, href, notify])
+    }, [reload, href.self, notify])
 
     let modal_content = null
     if(modal) modal_content = <Modal show={modal}>
@@ -66,7 +66,7 @@ export const MutableQuizCard = ({quiz, answers, reload, href, notify}) => {
                 <ListGroup.Item className="col-2">
                     {select === false ?
                         <Spinner animation="border" /> :
-                        <Form><Form.Select onChange={onChangeTypeHandler} defaultValue={state}>
+                        <Form><Form.Select onChange={onChangeStateHandler} defaultValue={state}>
                             {quizStateMapper.map((elem, idx) => {
                                 return <option key={idx} value={elem.key}>{elem.value}</option>
                             })}
