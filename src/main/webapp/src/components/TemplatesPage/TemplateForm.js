@@ -8,6 +8,7 @@ import {questionTypeMapper} from "../../utils/models/QuizModel";
 
 function nullToEmptyStr(template) {
     return {
+        name: template.name == null ? '' : template.name,
         limitOfParticipants: template.limitOfParticipants.toString(),
         geolocation: template.geolocation == null ? '' : template.geolocation,
         radius: template.radius == null ? '' : template.radius.toString(),
@@ -51,8 +52,8 @@ export const TemplateForm = (props) => {
         else {
             setButton({content: <Spinner animation="border"/>, disabled: true})
             if(perform == null) return
-            //const input_model = buildInputModel(state.template)
-            //perform(input_model)
+            const input_model = buildInputModel(state.template)
+            perform(input_model)
             setButton({content: 'Submit', disabled: false})
         }
     }, [state.template, perform])
@@ -76,6 +77,14 @@ export const TemplateForm = (props) => {
     const onClickRemoveLocation = useCallback(() => {
         setState((prev) => {
             prev.template.geolocation = ''
+            return {...prev}
+        })
+    }, [])
+
+    const onChangeNameHandler = useCallback((event) => {
+        if(event.target.value.length > 50) return
+        setState((prev) => {
+            prev.template.name = event.target.value
             return {...prev}
         })
     }, [])
@@ -104,6 +113,7 @@ export const TemplateForm = (props) => {
     const onClickRemoveQuiz = useCallback((idx) => {
         setState((prev) => {
             prev.template.quizzes.splice(idx, 1)
+            if(prev.warnings != null) prev.warnings = null
             return {...prev}
         })
     }, [])
@@ -136,7 +146,6 @@ export const TemplateForm = (props) => {
     const onChoiceClickHandler = useCallback((event, quiz_idx, answer_idx) => {
         setState((prev) => {
             prev.template.quizzes[quiz_idx].answerChoices[answer_idx].choiceRight = event.target.checked
-            console.log(prev.template.quizzes[quiz_idx].answerChoices)
             return {...prev}
         })
     }, [])
@@ -155,22 +164,33 @@ export const TemplateForm = (props) => {
         })
     }, [])
 
+    let name_warnings = []
     let limit_participants_warnings = []
     let radius_warnings = []
+    let question_warnings = null
     let answerChoices_warnings = null
     if(state.warnings != null) {
-        answerChoices_warnings = Array(state.template.quizzes.length).fill([])
+        answerChoices_warnings = Array(state.template.quizzes.length).fill(null)
+        question_warnings = Array(state.template.quizzes.length).fill(null)
         state.warnings.forEach((elem, idx) => {
             switch (elem.value) {
+                case 'name': name_warnings.push(<Form.Text key={idx} className="text-danger">{elem.message}</Form.Text>); break
                 case 'limitOfParticipants': limit_participants_warnings.push(<Form.Text key={idx} className="text-danger">{elem.message}</Form.Text>); break;
                 case 'radius': radius_warnings.push(<Form.Text key={idx} className="text-danger">{elem.message}</Form.Text>); break;
-                case 'answerChoices': answerChoices_warnings[elem.idx].push(<Form.Text key={idx} className="text-danger">{elem.message}</Form.Text>); break;
+                case 'question': {
+                    if(question_warnings[elem.idx] == null) question_warnings[elem.idx] = []
+                    question_warnings[elem.idx].push(<Form.Text key={idx} className="text-danger">{elem.message}</Form.Text>);
+                    break;
+                }
+                case 'answerChoices': {
+                    if(answerChoices_warnings[elem.idx] == null) answerChoices_warnings[elem.idx] = []
+                    answerChoices_warnings[elem.idx].push(<Form.Text key={idx} className="text-danger">{elem.message}<br/></Form.Text>)
+                    break
+                }
                 default: break;
             }
         })
     }
-
-    console.log(answerChoices_warnings)
 
     let radius_form = null
     if(state.template.geolocation !== '') radius_form = <Form.Group>
@@ -181,6 +201,11 @@ export const TemplateForm = (props) => {
 
     return (
         <Form onSubmit={onSubmitHandler}>
+            {template.name == null ? null : <Form.Group>
+                <Form.Label>Name:</Form.Label>
+                <Form.Control placeholder="Name" type="text" value={state.template.name} onChange={onChangeNameHandler}/>
+                {name_warnings}
+            </Form.Group>}
             {template.limitOfParticipants == null ? null : <Form.Group>
                 <Form.Label>Limit of Participants:</Form.Label>
                 <Form.Control placeholder="Limit of Participants" type="text" maxLength="3"
@@ -198,10 +223,11 @@ export const TemplateForm = (props) => {
             {radius_form}
             {template.quizzes == null ? null : <Form.Group>
                 <Form.Label className="mt-3">Quizzes:</Form.Label>
-                {state.template.quizzes.length === 0 ? null : state.template.quizzes.map((elem, idx) =>
-                    <Fragment key={idx}>
+                {state.template.quizzes.length === 0 ? null : state.template.quizzes.map((elem, idx) => {
+                    return <Fragment key={idx}>
                         <InputGroup className="mt-3">
-                            <FormSelect value={elem.answerType} className="w-10" onChange={e => onChangeQuizType(e, idx)}>
+                            <FormSelect value={elem.answerType} className="w-10"
+                                        onChange={e => onChangeQuizType(e, idx)}>
                                 {questionTypeMapper.map((elem, idx) => {
                                     return <option key={idx} value={elem.key}>{elem.value}</option>
                                 })}
@@ -209,24 +235,31 @@ export const TemplateForm = (props) => {
                             <Button variant='danger' onClick={() => onClickRemoveQuiz(idx)}>X</Button>
                         </InputGroup>
                         <InputGroup>
-                            <FormControl placeholder="Question?" type="text" value={elem.question} onChange={e => onChangeQuizQuestion(e, idx)}/>
+                            <FormControl placeholder="Question?" type="text" value={elem.question}
+                                         onChange={e => onChangeQuizQuestion(e, idx)}/>
                             {elem.answerType !== 'MULTIPLE_CHOICE' ? null :
                                 <Button variant="secondary" onClick={() => onClickAddAnswer(idx)}>+</Button>
                             }
                         </InputGroup>
+                        {elem.answerType === 'MULTIPLE_CHOICE' ? null : question_warnings == null ? null : question_warnings[idx]}
                         {elem.answerType !== 'MULTIPLE_CHOICE' ? null : elem.answerChoices.map((elem, index) =>
                             <InputGroup key={index}>
-                                <FormControl placeholder="Answer" type="text" value={elem.choiceAnswer} onChange={(event) => onChangeChoiceHandler(event, idx, index)} />
-                                <InputGroup.Checkbox checked={elem.choiceRight} onChange={(event) => onChoiceClickHandler(event, idx, index)} />
+                                <FormControl placeholder="Answer" type="text" value={elem.choiceAnswer}
+                                             onChange={(event) => onChangeChoiceHandler(event, idx, index)}/>
+                                <InputGroup.Checkbox checked={elem.choiceRight}
+                                                     onChange={(event) => onChoiceClickHandler(event, idx, index)}/>
                                 {
                                     state.template.quizzes[idx].answerChoices.length <= 2 ? null :
-                                        <Button variant="danger" onClick={() => {onClickRemoveChoice(idx, index)}}>-</Button>
+                                        <Button variant="danger" onClick={() => {
+                                            onClickRemoveChoice(idx, index)
+                                        }}>-</Button>
                                 }
                             </InputGroup>
                         )}
-                        {/*answerChoices_warnings[idx]*/}
+                        {answerChoices_warnings == null ? null : answerChoices_warnings[idx]}
+                        {elem.answerType !== 'MULTIPLE_CHOICE' ? null : question_warnings == null ? null : question_warnings[idx]}
                     </Fragment>
-                )}
+                })}
                 <br/>
                 <Button variant="secondary" onClick={onClickAddQuiz}>Add Quiz</Button>
             </Form.Group>}

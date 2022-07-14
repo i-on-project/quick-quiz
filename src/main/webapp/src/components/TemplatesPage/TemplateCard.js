@@ -26,7 +26,7 @@ export const TemplateCard = ({template, reload}) => {
             {/*<Card style={{width: '20rem'}} className="mb-3">*/}
             <Card className="mb-3">
                 <Card.Body><Container><Row>
-                    <Col className="col-11"><h3><Link to={`/template/${template.id}`}>{template.id}</Link></h3></Col>
+                    <Col className="col-11"><h4><Link to={`/template/${template.id}`}>{template.name}</Link></h4></Col>
                     <Col className="col-1"><ActionButton variant="danger" perform={onClickDeleteHandler} content="Delete"/></Col>
                 </Row></Container></Card.Body>
             </Card>
