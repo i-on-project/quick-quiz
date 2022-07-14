@@ -8,5 +8,5 @@ import pt.isel.ps.qq.repositories.docs.SessionQuizDoc
 @Repository
 interface QuizRepository: MongoRepository<SessionQuizDoc, String> {
     fun findQuizDocsBySessionId(sessionId: String): List<SessionQuizDoc>
-    fun findSessionQuizDocsBySessionIdAndQuizStateNot(sessionId: String, qqStatus: QqStatus): List<SessionQuizDoc>
+    fun findSessionQuizDocsBySessionIdAndQuizStatusNot(sessionId: String, qqStatus: QqStatus): List<SessionQuizDoc>
 }

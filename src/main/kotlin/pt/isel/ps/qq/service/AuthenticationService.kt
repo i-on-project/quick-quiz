@@ -2,6 +2,7 @@ package pt.isel.ps.qq.service
 
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import pt.isel.ps.qq.UserInfoScope
 import pt.isel.ps.qq.data.LoginInputModel
 import pt.isel.ps.qq.data.LoginMeInputModel
 import pt.isel.ps.qq.data.RegisterInputModel
@@ -12,11 +13,10 @@ import pt.isel.ps.qq.repositories.UserRepository
 import pt.isel.ps.qq.utils.getCurrentTimeSeconds
 import java.util.*
 
-//TODO: elastic time triggers ?! -> status management
-
 @Service
 class AuthenticationService(
-    private val userRepo: UserRepository
+    private val userRepo: UserRepository,
+    private val scope: UserInfoScope
 ) {
 
     companion object {
@@ -30,7 +30,7 @@ class AuthenticationService(
     fun register(input: RegisterInputModel): UserDoc {
         val registeredUser = userRepo.findById(input.userName)
 
-        if(!registeredUser.isEmpty) {
+        if (!registeredUser.isEmpty) {
 
             /*
             If user exists but the registration token has already expired without a single login,
@@ -38,9 +38,8 @@ class AuthenticationService(
              */
 
             val user = registeredUser.get()
-            if(user.status == UserStatus.PENDING_REGISTRATION && user.registrationExpireDate != null) {
-                if(getCurrentTimeSeconds() < user.registrationExpireDate){
-                    // send email
+            if (user.status == UserStatus.PENDING_REGISTRATION && user.registrationExpireDate != null) {
+                if (getCurrentTimeSeconds() < user.registrationExpireDate) {
                     return user
                 }
             } else {
@@ -57,28 +56,8 @@ class AuthenticationService(
             registrationExpireDate = getRegistrationTimeout()
         )
 
-        //send email
         return userRepo.save(user)
     }
-
-/*    private fun sendEmail(to: String) {
-        val inetAdr = InternetAddress(to)
-        try {
-            val msg = MimeMessage(mailSession)
-            msg.setFrom(InternetAddress("quick.quiz@localhost.com"))
-            msg.addRecipient(Message.RecipientType.TO, inetAdr)
-            msg.subject = "Quick Quiz App verify registration"
-            msg.setText("Experimental")
-            Transport.send(msg)
-        } catch(ex: SendFailedException) {
-            val instance = ErrorInstance(Uris.API.Web.V1_0.NonAuth.Register.make(), to)
-            val email = ex.invalidAddresses.find { it == inetAdr }
-            if(email != null) throw InvalidMailException(to, instance)
-            else throw ServerMailException(to, instance)
-        } catch(ex: MessagingException) {
-            throw ServerMailException(to, ErrorInstance(Uris.API.Web.V1_0.NonAuth.Register.make(), to))
-        }
-    }*/
 
     fun requestLogin(userName: LoginInputModel): UserDoc {
         val user = getUser(userName.userName)
@@ -95,9 +74,9 @@ class AuthenticationService(
         val user = getUser(input.userName)
         validateUserStatusIsNotDisabled(user)
 
-        if(user.status == UserStatus.PENDING_REGISTRATION) {
+        if (user.status == UserStatus.PENDING_REGISTRATION) {
             // First Time login
-            if(user.registrationExpireDate == null || getCurrentTimeSeconds() > user.registrationExpireDate) {
+            if (user.registrationExpireDate == null || getCurrentTimeSeconds() > user.registrationExpireDate) {
                 userRepo.deleteById(user.userName)
                 throw TokenExpiredException()
             }
@@ -127,15 +106,24 @@ class AuthenticationService(
         userRepo.save(UserDoc(doc.userName, doc.displayName, doc.status))
     }
 
+    fun validateAuthStatus(auth: String): Boolean {
+        val userAndToken = auth.split(',')
+        if(userAndToken.size != 2) return false
+        val user = userRepo.findById(userAndToken[0]).get()
+        if (userAndToken[1] != user.loginToken) return false
+        scope.setUser(user)
+        return true
+    }
+
 
     private fun getUser(user: String): UserDoc {
         val opt = userRepo.findById(user.lowercase())
-        if(opt.isEmpty) throw UserNotFoundException()
+        if (opt.isEmpty) throw UserNotFoundException()
         return opt.get()
     }
 
     private fun validateToken(userToken: String?, inputToken: String) {
-        if(userToken == null || userToken != inputToken) throw InvalidTokenException()
+        if (userToken == null || userToken != inputToken) throw InvalidTokenException()
     }
 
     private fun validExpireDate(date: Long?): Boolean {
@@ -143,19 +131,20 @@ class AuthenticationService(
     }
 
     private fun validateUserStatusIsNotDisabled(user: UserDoc) {
-        if(user.status == UserStatus.DISABLED) throw UserDisabledException("Your email was disabled")
+        if (user.status == UserStatus.DISABLED) throw UserDisabledException("Your email was disabled")
     }
 
     private fun validateUserStatusIsNotPending(user: UserDoc) {
-        if(user.status == UserStatus.PENDING_REGISTRATION) throw PendingValidationException("Your email is pending")
+        if (user.status == UserStatus.PENDING_REGISTRATION) throw PendingValidationException("Your email is pending")
     }
 
     private fun getTokenTimeout(): Long = getCurrentTimeSeconds() + TOKEN_TIMEOUT
     private fun getRegistrationTimeout(): Long = getCurrentTimeSeconds() + REGISTRATION_TOKEN_TIMEOUT
+
     @Transactional(readOnly = true)
     fun checkUserLoginStatus(userName: String, token: String): UserDoc {
         val user = getUser(userName)
-        if(user.loginToken != token) throw UserDisabledException() //TODO: create User Login Expired
+        if (user.loginToken != token) throw UserDisabledException() //TODO: create User Login Expired
         return user
     }
 

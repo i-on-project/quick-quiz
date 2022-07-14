@@ -21,11 +21,12 @@ data class SessionQuizDoc(
     val question: String,
     val answerType: QuestionType,
     val answerChoices: List<MultipleChoice>? = null,
-    val quizState: QqStatus, //launched or not
+    val quizStatus: QqStatus, //launched or not
  //   val numberOfAnswers: Int
 ) {
 
     init {
+
         if (answerType == QuestionType.MULTIPLE_CHOICE) {
             if (answerChoices == null || answerChoices.count() < 2) throw AtLeast2Choices()
             answerChoices.find { it.choiceRight } ?: throw AtLeast1CorrectChoice()
@@ -72,7 +73,7 @@ data class SessionQuizDoc(
         question = input.question ?: doc.question,
         answerType = doc.answerType,
         answerChoices = getMultipleChoices(input.choices), //changeChoices(doc, input.addChoices, input.removeChoices),
-        quizState = doc.quizState, //launched or not
+        quizStatus = doc.quizStatus, //launched or not
        // numberOfAnswers = doc.numberOfAnswers
     )
 
@@ -84,7 +85,7 @@ data class SessionQuizDoc(
         question = doc.question,
         answerType = doc.answerType,
         answerChoices = doc.answerChoices,
-        quizState = input, //launched or not
+        quizStatus = input, //launched or not
         //numberOfAnswers = doc.numberOfAnswers
     )
 
@@ -96,7 +97,7 @@ data class SessionQuizDoc(
         question = quiz.question,
         answerType = quiz.answerType,
         answerChoices = quiz.answerChoices,
-        quizState = QqStatus.NOT_STARTED, //launched or not
+        quizStatus = QqStatus.NOT_STARTED, //launched or not
        // numberOfAnswers = 0
     )
 }

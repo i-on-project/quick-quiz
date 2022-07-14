@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import pt.isel.ps.qq.data.ProblemJson
 import pt.isel.ps.qq.data.SirenModel
 import pt.isel.ps.qq.repositories.docs.QqStatus
 import pt.isel.ps.qq.repositories.docs.QuestionType
@@ -108,7 +109,7 @@ class ApiIntegrationTest() {
 
     @Order(99)
     @Test
-    @Throws(Exception::class)
+
     fun isNotInSessionAndBodyIsEmpty() {
         val path = Uris.API.Web.V1_0.NonAuth.IsInSession.PATH
 
@@ -120,7 +121,6 @@ class ApiIntegrationTest() {
 
     @Order(100)
     @Test
-    @Throws(Exception::class)
     fun isInSessionAndReceivesSessionId() {
         val path = Uris.API.Web.V1_0.NonAuth.IsInSession.PATH
 
@@ -134,7 +134,6 @@ class ApiIntegrationTest() {
 
     @Order(1)
     @Test
-    @Throws(Exception::class)
     fun isAbleToRegisterUser() {
         val path = Uris.API.Web.V1_0.NonAuth.Register.PATH
         val body: MutableMap<String, Any?> = HashMap()
@@ -159,7 +158,6 @@ class ApiIntegrationTest() {
 
     @Order(2)
     @Test
-    @Throws(Exception::class)
     fun isAbleToConfirmRegistration() {
         val path = Uris.API.Web.V1_0.NonAuth.Logmein.PATH
         val body: MutableMap<String, Any?> = HashMap()
@@ -179,7 +177,6 @@ class ApiIntegrationTest() {
 
     @Order(3)
     @Test
-    @Throws(Exception::class)
     fun getSessionsNoSessions() {
         val path = Uris.API.Web.V1_0.Auth.Session.PATH
         expectSirenMediaType(getRequestWithCookie(path, testUser?.userCookie))
@@ -191,7 +188,6 @@ class ApiIntegrationTest() {
 
     @Order(4)
     @Test
-    @Throws(Exception::class)
     fun createSession() {
         val path = Uris.API.Web.V1_0.Auth.Session.PATH
         val body: MutableMap<String, Any?> = HashMap()
@@ -217,7 +213,6 @@ class ApiIntegrationTest() {
 
     @Order(5)
     @Test
-    @Throws(Exception::class)
     fun getSessionsOneSession() {
         val path = Uris.API.Web.V1_0.Auth.Session.PATH
         expectSirenMediaType(getRequestWithCookie(path, testUser?.userCookie))
@@ -227,7 +222,6 @@ class ApiIntegrationTest() {
 
     @Order(6)
     @Test
-    @Throws(Exception::class)
     fun createShortAnswerQuizForSession() {
         val path = "/api/web/v1.0/auth/sessions/${testUser?.sessionId}/quiz"
         val body: MutableMap<String, Any?> = HashMap()
@@ -247,7 +241,6 @@ class ApiIntegrationTest() {
 
     @Order(7)
     @Test
-    @Throws(Exception::class)
     fun createLongAnswerQuizForSession() {
         val path = "/api/web/v1.0/auth/sessions/${testUser?.sessionId}/quiz"
         val body: MutableMap<String, Any?> = HashMap()
@@ -267,7 +260,6 @@ class ApiIntegrationTest() {
 
     @Order(8)
     @Test
-    @Throws(Exception::class)
     fun createMultiAnswerQuizForSession() {
         val path = "/api/web/v1.0/auth/sessions/${testUser?.sessionId}/quiz"
         val body: MutableMap<String, Any?> = HashMap()
@@ -291,7 +283,6 @@ class ApiIntegrationTest() {
 
     @Order(9)
     @Test
-    @Throws(Exception::class)
     fun getAllQuizzesForSession() {
         val path = "/api/web/v1.0/auth/quiz/session/${testUser?.sessionId}"
         expectSirenMediaType(getRequestWithCookie(path, testUser?.userCookie))
@@ -302,7 +293,6 @@ class ApiIntegrationTest() {
 
     @Order(10)
     @Test
-    @Throws(Exception::class)
     fun editShortQuiz() {
         val path = "/api/web/v1.0/auth/quiz/${testUser?.shortQuizId}"
         val body: MutableMap<String, Any?> = HashMap()
@@ -316,7 +306,6 @@ class ApiIntegrationTest() {
 
     @Order(11)
     @Test
-    @Throws(Exception::class)
     fun removeLongQuiz() {
         val path = "/api/web/v1.0/auth/quiz/${testUser?.longQuizId}"
 
@@ -329,7 +318,6 @@ class ApiIntegrationTest() {
 
     @Order(12)
     @Test
-    @Throws(Exception::class)
     fun updateRemainingQuizzesStatus() {
         var path = "/api/web/v1.0/auth/quiz/${testUser?.shortQuizId}/updatestatus"
         val body: MutableMap<String, Any?> = HashMap()
@@ -347,7 +335,6 @@ class ApiIntegrationTest() {
 
     @Order(13)
     @Test
-    @Throws(Exception::class)
     fun getShortQuizDetails() {
         val path = "/api/web/v1.0/auth/quiz/${testUser?.shortQuizId}"
 
@@ -358,7 +345,6 @@ class ApiIntegrationTest() {
 
     @Order(14)
     @Test
-    @Throws(Exception::class)
     fun updateSessionStatus() {
         var path = "/api/web/v1.0/auth/sessions/${testUser?.sessionId}/live"
         val body: MutableMap<String, Any?> = HashMap()
@@ -374,7 +360,6 @@ class ApiIntegrationTest() {
 
     @Order(15)
     @Test
-    @Throws(Exception::class)
     fun editSessionDetails() {
         val path = "/api/web/v1.0/auth/sessions/${testUser?.sessionId}"
         val body: MutableMap<String, Any?> = HashMap()
@@ -389,7 +374,6 @@ class ApiIntegrationTest() {
     }
     @Order(16)
     @Test
-    @Throws(Exception::class)
     fun getSessionDetails() {
         val path =  "/api/web/v1.0/auth/sessions/${testUser?.sessionId}"
 
@@ -400,7 +384,6 @@ class ApiIntegrationTest() {
 
     @Order(17)
     @Test
-    @Throws(Exception::class)
     fun `get all participants and its answers`() {
         val path =  "/api/web/v1.0/auth/sessions/${testUser?.sessionId}/answers"
 
@@ -413,7 +396,6 @@ class ApiIntegrationTest() {
 
     @Order(18)
     @Test
-    @Throws(Exception::class)
     fun participantJoinsSession() {
         val path = Uris.API.Web.V1_0.NonAuth.JoinSession.PATH
         val body: MutableMap<String, Any?> = HashMap()
@@ -430,7 +412,6 @@ class ApiIntegrationTest() {
 
     @Order(19)
     @Test
-    @Throws(Exception::class)
     fun getParticipantDetails() {
         val path =  "/api/web/v1.0/non_auth/answer/${testUser?.participantId}"
 
@@ -441,7 +422,6 @@ class ApiIntegrationTest() {
 
     @Order(20)
     @Test
-    @Throws(Exception::class)
     fun getQuizzesForParticipantSession() {
         val path =  "/api/web/v1.0/non_auth/quiz/session/${testUser?.participantId}"
 
@@ -452,7 +432,6 @@ class ApiIntegrationTest() {
 
     @Order(21)
     @Test
-    @Throws(Exception::class)
     fun isAbleToAnswerQuizzes() {
         val path = Uris.API.Web.V1_0.NonAuth.GiveAnswer.PATH
         val body: MutableMap<String, Any?> = HashMap()
@@ -478,7 +457,6 @@ class ApiIntegrationTest() {
 
     @Order(22)
     @Test
-    @Throws(Exception::class)
     fun getAllAnswersForSessionWithParticipant() {
         val path =  "/api/web/v1.0/auth/sessions/${testUser?.sessionId}/answers"
 
@@ -491,7 +469,6 @@ class ApiIntegrationTest() {
 
     @Order(23)
     @Test
-    @Throws(Exception::class)
     fun isAbleToCloseSession() {
         val path =  "/api/web/v1.0/auth/sessions/${testUser?.sessionId}/close"
         val body: MutableMap<String, Any?> = HashMap()
@@ -501,6 +478,51 @@ class ApiIntegrationTest() {
             .andReturn()
     }
 
+    @Order(44)
+    @Test
+    fun isAbleToCreateTemplate() {
+        val path = Uris.API.Web.V1_0.Auth.Template.PATH
+        val body: MutableMap<String, Any?> = HashMap()
+        body["name"] = " Test Template"
+        body["limitOfParticipants"] = 99
+        body["geolocation"] = "38.752303,-9.198869,156"
+        body["radius"] = 55
+        body["tags"] = arrayOf("test_template")
+
+        expectSirenMediaType(postRequestWithCookie(path, body, testUser?.userCookie))
+            .andExpect(status().isCreated)
+            .andReturn()
+    }
+
+    @Order(45)
+    @Test
+    fun createMultiAnswerQuizForSessionAndFail() {
+        val path = "/api/web/v1.0/auth/sessions/${testUser?.sessionId}/quiz"
+        val body: MutableMap<String, Any?> = HashMap()
+        body["order"] = "1231"
+        body["questionType"] = QuestionType.MULTIPLE_CHOICE.toString()
+        body["choices"] = listOf(
+            mapOf( "choiceNumber" to "1", "choiceAnswer" to "yes", "choiceRight" to "true"),
+            mapOf( "choiceNumber" to "2", "choiceAnswer" to "no", "choiceRight" to "false"),
+        )
+
+/*
+        val result = postRequestWithCookie(path, body, testUser?.userCookie)
+            .andExpect(status().isBadRequest)
+            .andExpect(content().contentType(ProblemJson.MEDIA_TYPE))
+            .andReturn()
+*/
+
+    }
+    @Order(46)
+    @Test
+    fun getSessionsNoSessionsFail() {
+        val path = Uris.API.Web.V1_0.Auth.Session.PATH
+        getRequestNoCookie(path)
+            .andExpect(status().isForbidden)
+            .andExpect(content().contentType(ProblemJson.MEDIA_TYPE))
+
+    }
 
 }
 

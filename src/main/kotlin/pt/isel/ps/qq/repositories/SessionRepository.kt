@@ -9,12 +9,9 @@ import pt.isel.ps.qq.repositories.docs.SessionDoc
 
 @Repository
 interface SessionRepository: MongoRepository<SessionDoc, String> {
-  fun findSessionDocByIdAndOwner(id: String, owner: String): SessionDoc
-  fun findSessionDocsByOwnerAndStatus(owner: String, status: QqStatus): List<SessionDoc>
+
   fun findSessionDocByGuestCode(guestCode: Int): SessionDoc?
-  fun findSessionDocByGuestCodeAndStatusNot(guestCode: Int, status: QqStatus): SessionDoc?
   fun findSessionDocsByOwnerOrderById(owner: String, page: Pageable): List<SessionDoc>
-  fun findSessionDocsByGuestCodeAndStatus(guestCode: Int, status: QqStatus): List<SessionDoc>
   fun countSessionDocByOwnerAndStatus(owner: String, status: QqStatus): Long
   fun countSessionDocByOwner(owner: String): Long
   fun countSessionDocByIdAndStatus(id: String, status: QqStatus): Long

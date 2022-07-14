@@ -10,5 +10,4 @@ class StaticContentController {
     fun redirect(): String {
         return "forward:/index.html"
     }
-
 }

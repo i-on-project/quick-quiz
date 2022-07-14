@@ -1,6 +1,7 @@
 package pt.isel.ps.qq.controllers.authcontrollers
 
 import org.springframework.http.ResponseEntity
+import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import pt.isel.ps.qq.UserInfoScope
 import pt.isel.ps.qq.controllers.ExceptionsResponseHandler
@@ -8,16 +9,17 @@ import pt.isel.ps.qq.controllers.responsebuilders.TemplatesResponseBuilder
 import pt.isel.ps.qq.data.*
 import pt.isel.ps.qq.service.TemplateService
 import pt.isel.ps.qq.utils.Uris
+import pt.isel.ps.qq.utils.calculateLastPage
 import pt.isel.ps.qq.utils.getBaseUrlHostFromRequest
 import javax.servlet.http.HttpServletRequest
 
-@RestController("TemplatesController")
+@Controller("TemplatesController")
 @RequestMapping(Uris.API.Web.V1_0.Auth.PATH)
 class TemplatesController (private val service: TemplateService,
                            private val scope: UserInfoScope,
                            private val exHandler: ExceptionsResponseHandler,
                            private val templatesResponseBuilder: TemplatesResponseBuilder
-) : AuthMainController()  {
+) {
 
 
     @GetMapping(Uris.API.Web.V1_0.Auth.Template.ENDPOINT)

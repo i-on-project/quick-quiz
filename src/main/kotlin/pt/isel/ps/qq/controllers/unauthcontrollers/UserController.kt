@@ -2,31 +2,35 @@ package pt.isel.ps.qq.controllers.unauthcontrollers
 
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
+import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
 import pt.isel.ps.qq.controllers.CookieHandler
 import pt.isel.ps.qq.controllers.responsebuilders.UserResponseBuilder
-import pt.isel.ps.qq.data.*
+import pt.isel.ps.qq.data.LoginInputModel
+import pt.isel.ps.qq.data.LoginMeInputModel
+import pt.isel.ps.qq.data.RegisterInputModel
+import pt.isel.ps.qq.data.SirenModel
 import pt.isel.ps.qq.service.AuthenticationService
 import pt.isel.ps.qq.service.EmailService
 import pt.isel.ps.qq.utils.Uris
+import pt.isel.ps.qq.utils.getAppHost
 import pt.isel.ps.qq.utils.getBaseUrlHostFromRequest
 import java.time.Duration
 import java.util.*
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-@RestController("UserController")
+@Controller("UserController")
 @RequestMapping(Uris.API.Web.V1_0.NonAuth.PATH)
 class UserController(private val authenticationService: AuthenticationService,
                      private val emailService: EmailService,
                      private val responseBuilder: UserResponseBuilder,
                      private val cookie: CookieHandler
 
-) : UnauthMainController() {
 
+) {
     /**
      * POST /api/web/v1.0/non_auth/register
      *
@@ -47,10 +51,9 @@ class UserController(private val authenticationService: AuthenticationService,
     fun registerUser(request: HttpServletRequest, @RequestBody input: RegisterInputModel): ResponseEntity<Any> {
         val user = authenticationService.register(input)
         val body = responseBuilder.registerUserResponse(user, getBaseUrlHostFromRequest(request))
-
         if(!user.userName.contains("test")) {
-            emailService.sendEmail("$appHost/logmein?user=${user.userName}&token=${user.registrationToken}", user.userName)
-        } //TODO: else Return error to contact admin
+            emailService.sendEmail("${getAppHost()}/logmein?user=${user.userName}&token=${user.registrationToken}", user.userName)
+        }
         return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }
 
@@ -60,8 +63,8 @@ class UserController(private val authenticationService: AuthenticationService,
         val body = responseBuilder.requestLoginResponse(user, getBaseUrlHostFromRequest(request))
 
         if(!user.userName.contains("test")) {
-            emailService.sendEmail("$appHost/logmein?user=${user.userName}&token=${user.requestToken}", user.userName)
-        } //TODO: else Return error to contact admin
+            emailService.sendEmail("${getAppHost()}/logmein?user=${user.userName}&token=${user.requestToken}", user.userName)
+        }
         return ResponseEntity.ok().body(body)
     }
 

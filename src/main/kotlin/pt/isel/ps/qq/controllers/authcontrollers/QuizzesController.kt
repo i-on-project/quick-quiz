@@ -1,24 +1,26 @@
 package pt.isel.ps.qq.controllers.authcontrollers
 
 import org.springframework.http.ResponseEntity
+import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import pt.isel.ps.qq.UserInfoScope
 import pt.isel.ps.qq.controllers.ExceptionsResponseHandler
 import pt.isel.ps.qq.controllers.responsebuilders.QuizzesresponseBuilder
 import pt.isel.ps.qq.data.*
-import pt.isel.ps.qq.exceptions.*
 import pt.isel.ps.qq.service.QuizService
 import pt.isel.ps.qq.utils.Uris
 import pt.isel.ps.qq.utils.getBaseUrlHostFromRequest
 import javax.servlet.http.HttpServletRequest
+import javax.validation.Valid
 
-@RestController("QuizzesController")
+@Controller("QuizzesController")
 @RequestMapping(Uris.API.Web.V1_0.Auth.PATH)
-class QuizzesController(private val service: QuizService,
-                        private val scope: UserInfoScope,
-                        private val exHandler: ExceptionsResponseHandler,
-                        private val quizzesresponseBuilder: QuizzesresponseBuilder
-) : AuthMainController()  {
+class QuizzesController(
+    private val service: QuizService,
+    private val scope: UserInfoScope,
+    private val exHandler: ExceptionsResponseHandler,
+    private val quizzesResponseBuilder: QuizzesresponseBuilder
+) {
 
     /**
      * DELETE /api/web/v1.0/auth/quiz/{id}
@@ -33,17 +35,17 @@ class QuizzesController(private val service: QuizService,
      */
     @DeleteMapping(Uris.API.Web.V1_0.Auth.Quiz.Id.CONTROLLER_ENDPOINT)
     fun removeQuizFromSession(request: HttpServletRequest, @PathVariable id: String): ResponseEntity<Any> {
-        return try {
-            service.removeQuizFromSession(scope.getUser().userName, id)
-            val body = quizzesresponseBuilder.removeQuizResponse()
-            ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
-        } catch (ex: SessionIllegalStatusOperationException) {
+        //return try {
+        service.removeQuizFromSession(scope.getUser().userName, id)
+        val body = quizzesResponseBuilder.removeQuizResponse()
+        return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
+/*        } catch (ex: SessionIllegalStatusOperationException) {
             exHandler.exceptionHandle(request, id, ex)
         } catch (ex: QuizNotFoundException) {
             exHandler.exceptionHandle(request, id, ex)
         } catch (ex: QuizAuthorizationException) {
             exHandler.exceptionHandle(request, id, ex)
-        }
+        }*/
     }
 
     /**
@@ -62,25 +64,11 @@ class QuizzesController(private val service: QuizService,
         @PathVariable id: String,
         @RequestBody input: EditQuizInputModel
     ): ResponseEntity<Any> {
-        return try {
-            service.editQuiz(scope.getUser().userName, id, input)
-            val body = quizzesresponseBuilder.editQuizResponse()
-            ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
-        } catch (ex: SessionNotFoundException) {
-            exHandler.exceptionHandle(request, id, ex)
-        } catch (ex: SessionAuthorizationException) {
-            exHandler.exceptionHandle(request, id, ex)
-        } catch (ex: SessionIllegalStatusOperationException) {
-            exHandler.exceptionHandle(request, id, ex)
-        } catch (ex: QuizNotFoundException) {
-            exHandler.exceptionHandle(request, id, ex)
-        } catch (ex: QuizAuthorizationException) {
-            exHandler.exceptionHandle(request, id, ex)
-        } catch (ex: AtLeast2Choices) {
-            exHandler.exceptionHandle(request, id, ex)
-        } catch (ex: AtLeast1CorrectChoice) {
-            exHandler.exceptionHandle(request, id, ex)
-        }
+        // return try {
+        service.editQuiz(scope.getUser().userName, id, input)
+        val body = quizzesResponseBuilder.editQuizResponse()
+        return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
+
     }
 
 
@@ -90,32 +78,14 @@ class QuizzesController(private val service: QuizService,
         @PathVariable id: String,
         @RequestBody input: UpdateQuizStatusInputModel
     ): ResponseEntity<Any> {
-        return try {
-            service.updateQuizStatus(scope.getUser().userName, id, input)
-            val body = quizzesresponseBuilder.updateQuizStatusResponse()
-            ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
-
-        } catch (ex: SessionNotFoundException) {
-            exHandler.exceptionHandle(request, id, ex)
-        } catch (ex: SessionAuthorizationException) {
-            exHandler.exceptionHandle(request, id, ex)
-        } catch (ex: SessionIllegalStatusOperationException) {
-            exHandler.exceptionHandle(request, id, ex)
-        } catch (ex: QuizNotFoundException) {
-            exHandler.exceptionHandle(request, id, ex)
-        } catch (ex: QuizAuthorizationException) {
-            exHandler.exceptionHandle(request, id, ex)
-        } catch (ex: AtLeast2Choices) {
-            exHandler.exceptionHandle(request, id, ex)
-        } catch (ex: AtLeast1CorrectChoice) {
-            exHandler.exceptionHandle(request, id, ex)
-        }
+        service.updateQuizStatus(scope.getUser().userName, id, input)
+        val body = quizzesResponseBuilder.updateQuizStatusResponse()
+        return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }
-
     @GetMapping(Uris.API.Web.V1_0.Auth.Quiz.Id.CONTROLLER_ENDPOINT)
     fun getQuizFullInformation(request: HttpServletRequest, @PathVariable id: String): ResponseEntity<Any> {
         val quiz = service.getQuizValidatingOwner(scope.getUser().userName, id)
-        val body = quizzesresponseBuilder.getQuizResponse(quiz)
+        val body = quizzesResponseBuilder.getQuizResponse(quiz)
         return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }
 
@@ -123,7 +93,7 @@ class QuizzesController(private val service: QuizService,
     @GetMapping(Uris.API.Web.V1_0.Auth.Quiz.SessionId.CONTROLLER_ENDPOINT)
     fun getAllQuizzesForSession(@PathVariable sessionId: String): ResponseEntity<Any> {
         val quizzes = service.getAllSessionQuizzes(sessionId)
-        val body = quizzesresponseBuilder.getAllQuizzesForSessionResponse(quizzes)
+        val body = quizzesResponseBuilder.getAllQuizzesForSessionResponse(quizzes)
         return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }
 
@@ -142,24 +112,24 @@ class QuizzesController(private val service: QuizService,
     fun addQuizToSession(
         request: HttpServletRequest,
         @PathVariable id: String,
-        @RequestBody input: AddQuizToSessionInputModel
+        @Valid @RequestBody input: AddQuizToSessionInputModel
     ): ResponseEntity<Any> {
-        return try {
-            val quiz = service.addQuizToSession(scope.getUser().userName, id, input)
-            val body = quizzesresponseBuilder.addQuizzResponse(getBaseUrlHostFromRequest(request), quiz.sessionId, quiz.id)
-            ResponseEntity.created(Uris.API.Web.V1_0.Auth.Quiz.Id.make(quiz.id)).contentType(SirenModel.MEDIA_TYPE)
-                .body(body)
-        } catch (ex: SessionNotFoundException) {
-            exHandler.exceptionHandle(request, id, ex)
-        } catch (ex: SessionAuthorizationException) {
-            exHandler.exceptionHandle(request, id, ex)
-        } catch (ex: SessionIllegalStatusOperationException) {
-            exHandler.exceptionHandle(request, id, ex)
-        } catch (ex: AtLeast2Choices) {
-            exHandler.exceptionHandle(request, id, ex)
-        } catch (ex: AtLeast1CorrectChoice) {
-            exHandler.exceptionHandle(request, id, ex)
-        }
+        // return try {
+        val quiz = service.addQuizToSession(scope.getUser().userName, id, input)
+        val body = quizzesResponseBuilder.addQuizzResponse(getBaseUrlHostFromRequest(request), quiz.sessionId, quiz.id)
+        return ResponseEntity.created(Uris.API.Web.V1_0.Auth.Quiz.Id.make(quiz.id)).contentType(SirenModel.MEDIA_TYPE)
+            .body(body)
+        /* } catch (ex: SessionNotFoundException) {
+             exHandler.exceptionHandle(request, id, ex)
+         } catch (ex: SessionAuthorizationException) {
+             exHandler.exceptionHandle(request, id, ex)
+         } catch (ex: SessionIllegalStatusOperationException) {
+             exHandler.exceptionHandle(request, id, ex)
+         } catch (ex: AtLeast2Choices) {
+             exHandler.exceptionHandle(request, id, ex)
+         } catch (ex: AtLeast1CorrectChoice) {
+             exHandler.exceptionHandle(request, id, ex)
+         }*/
     }
 
 }

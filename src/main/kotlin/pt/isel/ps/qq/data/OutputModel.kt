@@ -76,7 +76,6 @@ data class TemplateOutputModel(
         limitOfParticipants = template.limitOfParticipants,
         geolocation = template.geolocation,
         radius = template.radius,
-        radiusUnit = template.radiusUnit,
         quizzes = template.quizzes.sortedBy { it.order }.map { QuizTemplateOutputModel(it) }
     )
 }

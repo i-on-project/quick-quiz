@@ -3,12 +3,10 @@ package pt.isel.ps.qq.filters
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.core.annotation.Order
-import org.springframework.dao.DataAccessResourceFailureException
 import pt.isel.ps.qq.UserInfoScope
 import pt.isel.ps.qq.data.ProblemJson
-import pt.isel.ps.qq.exceptions.InvalidCredentialsException
-import pt.isel.ps.qq.exceptions.MissingCookieException
 import pt.isel.ps.qq.repositories.UserRepository
+import pt.isel.ps.qq.service.AuthenticationService
 import java.util.*
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpFilter
@@ -17,84 +15,64 @@ import javax.servlet.http.HttpServletResponse
 
 @Order(1)
 class UserFilter(
-    private val userRepo: UserRepository, private val scope: UserInfoScope
-): HttpFilter() {
-
+    private val authService: AuthenticationService
+) : HttpFilter() {
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(LogFilter::class.java)
     }
+
     override fun doFilter(request: HttpServletRequest, response: HttpServletResponse, chain: FilterChain) {
 
         LogFilter.logger.info("User Filter: ${request.method} ${request.requestURI}")
-        try {
 
-            if(request.cookies == null) throw MissingCookieException()
-            val cookie = request.cookies.find { it.name == "Authorization" } ?: throw MissingCookieException() //TODO: 401 required
-            val bytes = Base64.getDecoder().decode(cookie.value)
-            val auth = String(bytes)
-            if(!validateAuthorization(auth)) {
-                throw InvalidCredentialsException(auth, )
-            }
-        } catch(ex: MissingCookieException) {
-            val problem = ProblemJson(
-                type = "MissingCookieException",
-                title = "You are not logged in",
-                status = 403,
-                instance = request.requestURI,
-                values = mapOf("message" to ex.message)
-            )
-            response.status = problem.status
-            response.contentType = ProblemJson.MEDIA_TYPE.toString()
-            response.writer?.write(problem.toString())
-            return
-        } catch(ex: InvalidCredentialsException) {
-            val problem = ProblemJson(
-                type = "InvalidCredentialsException",
-                title = "Your credentials are invalid",
-                status = 403,
-                instance = request.requestURI,
-                values = mapOf("credentials" to ex.credentials, "message" to ex.message)
-            )
-            response.status = problem.status
-            response.contentType = ProblemJson.MEDIA_TYPE.toString()
-            response.writer?.write(problem.toString())
-            return
-        } catch(ex: DataAccessResourceFailureException) {
-            val problem = ProblemJson(
-                type = "DataAccessResourceFailureException",
-                title = "One of the services is currently unavailable",
-                status = 502,
-                instance = request.requestURI,
-                values = mapOf("message" to ex.message)
-            )
-            response.status = problem.status
-            response.contentType = ProblemJson.MEDIA_TYPE.toString()
-            response.writer?.write(problem.toString())
-            return
-        } catch(ex: Exception) {
-            val problem = ProblemJson(
-                type = "Exception",
-                title = "Unknown error",
-                status = 500,
-                instance = request.requestURI,
-                values = mapOf("message" to ex.message)
-            )
-            response.status = problem.status
-            response.contentType = ProblemJson.MEDIA_TYPE.toString()
-            response.writer?.write(problem.toString())
+        val cookie = request.cookies?.find { it.name == "Authorization" }
+        if (cookie == null) {
+            missingCookie(request, response)
             return
         }
+        val bytes = Base64.getDecoder().decode(cookie.value)
+        val auth = String(bytes)
+        if (!validateAuthorization(auth)) {
+            invalidCredentials(request, response)
+            return
+        }
+
         chain.doFilter(request, response)
     }
 
+
     private fun validateAuthorization(auth: String?): Boolean {
-        if(auth == null) return false
-        val userAndToken = auth.split(',')
-        val user = userRepo.findById(userAndToken[0]).get()
-        if(userAndToken[1] != user.loginToken) return false
-        scope.setUser(user)
-        return true
+        if (auth == null) return false
+        return authService.validateAuthStatus(auth)
+    }
+
+    private fun invalidCredentials(request: HttpServletRequest, response: HttpServletResponse) {
+        val problem = ProblemJson(
+            type = "InvalidCredentialsException",
+            title = "Your credentials are invalid",
+            status = 403,
+            instance = request.requestURI,
+            values = mapOf("message" to "credentials are invalid")
+        )
+        setErrorResponse(response, problem)
+    }
+
+    private fun missingCookie(request: HttpServletRequest, response: HttpServletResponse) {
+        val problem = ProblemJson(
+            type = "MissingCookieException",
+            title = "You are not logged in",
+            status = 403,
+            instance = request.requestURI,
+            values = mapOf("message" to "Authorization cookie is missing")
+        )
+        setErrorResponse(response, problem)
+    }
+
+    private fun setErrorResponse(response: HttpServletResponse, problem: ProblemJson) {
+        response.status = problem.status
+        response.contentType = ProblemJson.MEDIA_TYPE.toString()
+        response.writer?.write(problem.toString())
     }
 }
 

@@ -3,6 +3,7 @@ package pt.isel.ps.qq.controllers.unauthcontrollers
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import pt.isel.ps.qq.controllers.CookieHandler
 import pt.isel.ps.qq.controllers.responsebuilders.ParticipantResponseBuilder
@@ -15,7 +16,7 @@ import java.time.Duration
 import javax.servlet.http.HttpServletRequest
 
 
-@RestController("ParticipantSessionController")
+@Controller("ParticipantSessionController")
 @RequestMapping(Uris.API.Web.V1_0.NonAuth.PATH)
 class ParticipantSessionController(
     private val participantService: AnswersService,
@@ -23,7 +24,7 @@ class ParticipantSessionController(
     private val quizService: QuizService,
     private val responseBuilder: ParticipantResponseBuilder,
     private val cookie: CookieHandler
-) : UnauthMainController() {
+) {
 
     @PostMapping(Uris.API.Web.V1_0.NonAuth.JoinSession.ENDPOINT)
     fun joinSession(@RequestBody input: JoinSessionInputModel): ResponseEntity<Any> {

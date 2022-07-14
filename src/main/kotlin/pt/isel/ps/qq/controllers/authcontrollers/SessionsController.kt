@@ -1,6 +1,7 @@
 package pt.isel.ps.qq.controllers.authcontrollers
 
 import org.springframework.http.ResponseEntity
+import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import pt.isel.ps.qq.UserInfoScope
 import pt.isel.ps.qq.controllers.ExceptionsResponseHandler
@@ -10,6 +11,7 @@ import pt.isel.ps.qq.exceptions.*
 import pt.isel.ps.qq.repositories.UserRepository
 import pt.isel.ps.qq.service.SessionService
 import pt.isel.ps.qq.utils.Uris
+import pt.isel.ps.qq.utils.calculateLastPage
 import pt.isel.ps.qq.utils.getBaseUrlHostFromRequest
 import javax.servlet.http.HttpServletRequest
 
@@ -19,9 +21,8 @@ class SessionsController(
     private val service: SessionService,
     private val scope: UserInfoScope,
     private val userRepository: UserRepository,
-    private val exHandler: ExceptionsResponseHandler,
     private val sessionResponse: SessionsResponseBuilder
-) : AuthMainController() {
+) {
 
     /**
      * GET /api/web/v1.0/auth/session
@@ -111,15 +112,15 @@ class SessionsController(
     @DeleteMapping(Uris.API.Web.V1_0.Auth.Session.Id.CONTROLLER_ENDPOINT)
     fun deleteSessionById(request: HttpServletRequest, @PathVariable id: String): ResponseEntity<Any> {
         //val language = request.locale ?: Locale.ENGLISH
-        return try {
+        //return try {
             service.deleteSession(scope.getUser().userName, id)
             val body = sessionResponse.deleteSessionResponse()
-            ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
-        } catch (ex: SessionNotFoundException) {
+        return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
+     /*   } catch (ex: SessionNotFoundException) {
             exHandler.exceptionHandle(request, id, ex)
         } catch (ex: SessionAuthorizationException) {
             exHandler.exceptionHandle(request, id, ex)
-        }
+        }*/
     }
 
     /**
@@ -138,15 +139,15 @@ class SessionsController(
      */
     @GetMapping(Uris.API.Web.V1_0.Auth.Session.Id.CONTROLLER_ENDPOINT)
     fun getSessionById(request: HttpServletRequest, @PathVariable id: String): ResponseEntity<Any> {
-        return try {
+        //return try {
             val session = service.getSessionValidatingTheOwner(scope.getUser().userName, id)
             val body = sessionResponse.getSessionResponse(id, session)
             return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
-        } catch (ex: SessionNotFoundException) {
+/*        } catch (ex: SessionNotFoundException) {
             exHandler.exceptionHandle(request, id, ex)
         } catch (ex: SessionAuthorizationException) {
             exHandler.exceptionHandle(request, id, ex)
-        }
+        }*/
     }
 
     /**
@@ -169,17 +170,17 @@ class SessionsController(
         @PathVariable id: String,
         @RequestBody input: EditSessionInputModel
     ): ResponseEntity<Any> {
-        return try {
+        //return try {
             val session = service.editSession(scope.getUser().userName, id, input)
             if (session.tags.isNotEmpty())
                 updateUserTags(scope.getUser().userName, session.tags)
             val body = sessionResponse.editSessionResponse(getBaseUrlHostFromRequest(request), session.id)
-            ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
-        } catch (ex: SessionNotFoundException) {
+            return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
+/*        } catch (ex: SessionNotFoundException) {
             exHandler.exceptionHandle(request, id, ex)
         } catch (ex: SessionAuthorizationException) {
             exHandler.exceptionHandle(request, id, ex)
-        }
+        }*/
     }
 
     /**
@@ -198,11 +199,11 @@ class SessionsController(
      */
     @PostMapping(Uris.API.Web.V1_0.Auth.Session.Id.Live.CONTROLLER_ENDPOINT)
     fun startSession(request: HttpServletRequest, @PathVariable id: String): ResponseEntity<Any> {
-        return try {
+        //return try {
             val code = service.makeSessionLive(scope.getUser().userName, id)
             val body = sessionResponse.startSessionResponse(code)
-            ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
-        } catch (ex: SessionNotFoundException) {
+        return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
+      /*  } catch (ex: SessionNotFoundException) {
             exHandler.exceptionHandle(request, id, ex)
         } catch (ex: SessionAuthorizationException) {
             exHandler.exceptionHandle(request, id, ex)
@@ -212,7 +213,7 @@ class SessionsController(
             exHandler.exceptionHandle(request, id, ex)
         } catch (ex: LiveSessionAlreadyExists) {
             exHandler.exceptionHandle(request, id, ex)
-        }
+        }*/
     }
 
     /**
@@ -232,17 +233,17 @@ class SessionsController(
      */
     @PostMapping(Uris.API.Web.V1_0.Auth.Session.Id.Close.CONTROLLER_ENDPOINT)
     fun closeSession(request: HttpServletRequest, @PathVariable id: String): ResponseEntity<Any> {
-        return try {
+       // return try {
             service.shutdownSession(scope.getUser().userName, id)
             val body = sessionResponse.closeSessionResponse()
-            ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
-        } catch (ex: SessionNotFoundException) {
+        return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
+/*        } catch (ex: SessionNotFoundException) {
             exHandler.exceptionHandle(request, id, ex)
         } catch (ex: SessionAuthorizationException) {
             exHandler.exceptionHandle(request, id, ex)
         } catch (ex: SessionIllegalStatusOperationException) {
             exHandler.exceptionHandle(request, id, ex)
-        }
+        }*/
     }
 
     @GetMapping(Uris.API.Web.V1_0.Auth.Session.Id.Answers.CONTROLLER_ENDPOINT)

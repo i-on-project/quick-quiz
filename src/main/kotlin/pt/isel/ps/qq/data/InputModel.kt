@@ -100,10 +100,10 @@ data class UpdateQuizStatusInputModel(
 )
 
 data class CreateTemplateInputModel(
+    val name: String,
     val limitOfParticipants: Int?,
     val geolocation: String? = null,
     val radius: Double? = null,
-    val radiusUnit: String? = null,
     val quizzes: List<QuizTemplateInputModel> = emptyList(),
     val tags: List<String> = emptyList()
 )

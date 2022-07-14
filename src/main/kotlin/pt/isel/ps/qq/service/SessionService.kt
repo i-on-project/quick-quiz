@@ -31,11 +31,7 @@ class SessionService(
         return guestSession
     }
 
-    //SessionNotFoundException
-//SessionAuthorizationException
 
-    //SessionNotFoundException
-//SessionAuthorizationException
     fun editSession(owner: String, id: String, input: EditSessionInputModel): SessionDoc {
         val doc = getSessionValidatingTheOwner(owner, id)
         //if(doc.status != QqStatus.NOT_STARTED) throw SessionIllegalStatusOperationException(doc.status, "To perform this operation the session status can only be NOT_STARTED")
@@ -85,13 +81,8 @@ class SessionService(
     }
 
 
-    //SessionIllegalStatusOperationException
-    //ImpossibleGenerationException
-    //SessionNotFoundException
-    //SessionAuthorizationException
-    //LiveSessionAlreadyExists
     fun makeSessionLive(username: String, id: String): Int {
-        //TODO: put time trigger in elastic to close after 3h
+
         var generated = id.hashCode()
         generated = if (generated < 0) generated * -1 else generated
 
@@ -106,7 +97,7 @@ class SessionService(
         updateSessionStatus(session, QqStatus.STARTED, generated)
 
         return generated
-        // open a websocket
+
     }
 
     fun shutdownSession(owner: String, id: String): HistoryDoc {
@@ -123,8 +114,6 @@ class SessionService(
 
         sessionRepo.deleteById(session.id)
         quizList.forEach { quizRepo.deleteById(it.id) }
-
-        // close the websocket
         return toReturn
     }
 
@@ -135,8 +124,6 @@ class SessionService(
 
     }
 
-    //SessionAuthorizationException
-    //SessionNotFoundException
     fun deleteSession(user: String, id: String) {
         getSessionValidatingTheOwner(user, id)
         sessionRepo.deleteById(id)
@@ -146,11 +133,9 @@ class SessionService(
         return sessionRepo.findSessionDocsByOwnerOrderById(user, PageRequest.of(page, PAGE_SIZE))
     }
 
-
-
     /**
-     * Returns the number of documents present on the data repository 'sessions'.
-     * @return Returns the number of documents present on the data repository 'sessions'
+     * Returns the number of documents present on the data repository 'sessions' for a given user.
+     * @return Returns the number of documents present on the data repository 'sessions' for a given user
      */
     fun sessionDocumentsCount(userName: String): Long {
         return sessionRepo.countSessionDocByOwner(userName)

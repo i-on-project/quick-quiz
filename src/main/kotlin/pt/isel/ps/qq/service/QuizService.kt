@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service
 import pt.isel.ps.qq.data.AddQuizToSessionInputModel
 import pt.isel.ps.qq.data.EditQuizInputModel
 import pt.isel.ps.qq.data.UpdateQuizStatusInputModel
+import pt.isel.ps.qq.exceptions.AtLeast2Choices
 import pt.isel.ps.qq.exceptions.QuizAuthorizationException
 import pt.isel.ps.qq.exceptions.QuizNotFoundException
 import pt.isel.ps.qq.repositories.QuizRepository
@@ -21,42 +22,28 @@ class QuizService(
     private val quizRepo: QuizRepository,
 ) : MainDataService(sessionRepo, templateRepo) {
 
-    //SessionNotFoundException
-    //SessionAuthorizationException
-    //SessionIllegalStatusOperationException
-    //AtLeast1CorrectChoice
-    //AtLeast2Choices
     fun addQuizToSession(owner: String, sessionId: String, input: AddQuizToSessionInputModel): SessionQuizDoc {
-        val quiz = SessionQuizDoc(
-            id = UUID.randomUUID().toString(),
-            sessionId = sessionId,
-            userOwner = owner,
-            order = input.order ?: 0,
-            question = input.question,
-            answerType = input.questionType,
-            answerChoices = input.choices?.map {
-                MultipleChoice(
-                    it.choiceNumber ?: 0,
-                    it.choiceAnswer,
-                    it.choiceRight
-                )
-            },
-            quizState = QqStatus.NOT_STARTED,
-            //numberOfAnswers = 0
-        )
+         val quiz = SessionQuizDoc(
 
+             id = UUID.randomUUID().toString(),
+             sessionId = sessionId,
+             userOwner = owner,
+             order = input.order ?: 0,
+             question = input.question,
+             answerType = input.questionType,
+             answerChoices = input.choices?.map {
+                 MultipleChoice(
+                     it.choiceNumber ?: 0,
+                     it.choiceAnswer,
+                     it.choiceRight
+                 )
+             },
+             quizStatus = QqStatus.NOT_STARTED,
 
-/* try {
-     sessionRepo.updateSessionQuizzes(sessionId, owner, quiz.id ,CustomRequestUpdateQuizAction.ADD)
- } catch(ex: Exception) {
-     quizRepo.deleteById(quiz.id)
-     throw ex
- }*/
-        return quizRepo.save(quiz)
+         )
+         return quizRepo.save(quiz)
     }
 
-    //QuizNotFoundException
-//QuizAuthorizationException
     fun getQuizValidatingOwner(owner: String, id: String): SessionQuizDoc {
         val opt = quizRepo.findById(id)
         if (opt.isEmpty) throw QuizNotFoundException()
@@ -65,25 +52,14 @@ class QuizService(
         return doc
     }
 
-    //QuizNotFoundException
-    //QuizAuthorizationException
-    //SessionIllegalStatusOperationException
     fun removeQuizFromSession(owner: String, id: String) {
         val quizDoc = getQuizValidatingOwner(owner, id)
         quizRepo.deleteById(quizDoc.id)
     }
 
-    //QuizNotFoundException
-    //QuizAuthorizationException
-    //AtLeast1CorrectChoice
-    //AtLeast2Choices
-    //SessionNotFoundException
-    //SessionAuthorizationException
-    //SessionIllegalStatusOperationException
     fun editQuiz(owner: String, id: String, input: EditQuizInputModel): SessionQuizDoc {
         val quizDoc = getQuizValidatingOwner(owner, id)
         val session = getSessionValidatingTheOwner(owner, quizDoc.sessionId)
-        //if(session.status != QqStatus.NOT_STARTED) throw SessionIllegalStatusOperationException(session.status) // conflict 409
         val newQuizDoc = SessionQuizDoc(quizDoc, input)
         return quizRepo.save(newQuizDoc)
     }
@@ -100,6 +76,6 @@ class QuizService(
     }
 
     fun getAllSessionAnswersQuizzes(sessionId: String): List<SessionQuizDoc> {
-        return quizRepo.findSessionQuizDocsBySessionIdAndQuizStateNot(sessionId, QqStatus.NOT_STARTED)
+        return quizRepo.findSessionQuizDocsBySessionIdAndQuizStatusNot(sessionId, QqStatus.NOT_STARTED)
     }
 }
