@@ -1,0 +1,206 @@
+openapi: 3.0.3
+info:
+  title: QuickQuiz
+  description: QuickQuiz HTTP API
+  version: 1.0.0
+servers:
+  - url: 'https://localhost:8080/api/web/V1.0'
+
+tags:
+  - name: non_auth
+    description: authentication no required end points
+  - name: auth
+    description: authentication required end points
+
+paths:
+  /non_auth/register:
+    post:
+      tags:
+        - non_auth
+      summary: Registers a new user.
+      description: Creates a new user based on the json object received in request payload.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterInputModel'
+      responses:
+        200:
+          description: Successfully registered the new user.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/SirenModel'
+        400:
+          description: Bad request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+
+
+components:
+  schemas:
+    RegisterInputModel:
+      type: object
+      required:
+        - userName
+        - displayName
+      properties:
+        userName:
+          type: string
+        displayName:
+          type: string
+
+    SirenLink:
+      type: object
+      required:
+        - rel
+        - href
+      properties:
+        class:
+          type: array
+          items:
+            type: string
+        title:
+          type: string
+          default: null
+        rel:
+          type: array
+          items:
+            type: string
+        href:
+          type: string
+          format: uri
+        type:
+          type: string
+          default: null
+
+    SirenField:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: ['hidden', 'text', 'search', 'tel', 'url', 'email', 'password', 'datetime', 'date', 'month', 'week', 'time', 'datetime-local', 'number', 'range', 'color', 'checkbox', 'radio', 'file']
+          default: 'text'
+        title:
+          type: string
+          default: null
+        value:
+          oneOf:
+            - type: string
+            - type: integer
+            - type: object
+            - type: array
+          default: null
+
+    SirenEntity:
+      type: object
+      required:
+        - rel
+      properties:
+        class:
+          type: array
+          items:
+            type: string
+        rel:
+          type: array
+          items:
+            type: string
+        href:
+          type: string
+          format: uri
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/SirenLink'
+        title:
+          type: string
+          default: null
+        properties:
+          type: object
+
+
+    SirenAction:
+      type: object
+      required:
+        - name
+        - href
+        - method
+      properties:
+        class:
+          type: array
+          items:
+            type: string
+        name:
+          type: string
+        method:
+          type: string
+          enum: [ 'GET', 'POST', 'PUT', 'DELETE', 'PATCH' ]
+          default: 'GET'
+        href:
+          type: string
+          format: uri
+        title:
+          type: string
+          default: null
+        type:
+          type: string
+          default: 'application/x-www-form-urlencoded'
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/SirenField'
+
+    SirenModel:
+      type: object
+      properties:
+        class:
+          type: array
+          items:
+            type: string
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SirenAction'
+        properties:
+          type: object
+        entities:
+          type: array
+          items:
+            $ref: '#/components/schemas/SirenEntity'
+        title:
+          type: string
+          default: null
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/SirenLink'
+
+    ProblemJson:
+      type: object
+      required:
+        - status
+        - type
+        - title
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+          minimum: 100
+          maximum: 599
+        detail:
+          type: string
+          default: null
+        instance:
+          type: string
+          format: uri
