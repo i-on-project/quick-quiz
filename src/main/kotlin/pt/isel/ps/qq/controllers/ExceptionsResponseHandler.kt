@@ -50,7 +50,7 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
     ): ResponseEntity<Any> {
         return exceptionHandling(
             type = "BadRequest",
-            title = "Data os missing from request",
+            title = "Data is missing from request",
             status = 400,
             instance = request.contextPath,
             values = mapOf("user" to scope.getUser().userName)
@@ -79,7 +79,7 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
     ): ResponseEntity<Any> {
         return exceptionHandling(
             type = "BadRequest",
-            title = "Data os missing from request",
+            title = "Data is missing from request",
             status = 400,
             instance = request.contextPath,
             values = mapOf("user" to scope.getUser().userName)
@@ -233,5 +233,59 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
         )
     }
 
+    @ExceptionHandler(value = [UserAlreadyExistsException::class])
+    fun exceptionHandle(
+        ex: UserAlreadyExistsException,
+        request: WebRequest
+    ): ResponseEntity<Any> {
+        return exceptionHandling(
+            type = "UserAlreadyExists",
+            title = "A user with this email already exists",
+            status = 409,
+            instance = request.contextPath,
+            values = values("error", ex.message)
+        )
+    }
 
+    @ExceptionHandler(value = [PendingValidationException::class])
+    fun exceptionHandle(
+        ex: PendingValidationException,
+        request: WebRequest
+    ): ResponseEntity<Any> {
+        return exceptionHandling(
+            type = "PendingValidation",
+            title = "Please check your email to validate your user",
+            status = 409,
+            instance = request.contextPath,
+            values = values("error", ex.message)
+        )
+    }
+
+    @ExceptionHandler(value = [UserNotFoundException::class])
+    fun exceptionHandle(
+        ex: UserNotFoundException,
+        request: WebRequest
+    ): ResponseEntity<Any> {
+        return exceptionHandling(
+            type = "UserNotFound",
+            title = "The email is not registered.",
+            status = 404,
+            instance = request.contextPath,
+            values = values("error", ex.message)
+        )
+    }
+
+    @ExceptionHandler(value = [TokenExpiredException::class])
+    fun exceptionHandle(
+        ex: TokenExpiredException,
+        request: WebRequest
+    ): ResponseEntity<Any> {
+        return exceptionHandling(
+            type = "TokenExpired",
+            title = "The token is invalid, request a new email to be sent",
+            status = 400,
+            instance = request.contextPath,
+            values = values("error", ex.message)
+        )
+    }
 }
