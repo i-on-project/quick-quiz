@@ -15,16 +15,15 @@ class SessionService(
     private val sessionRepo: SessionRepository,
     private val participantRepo: ParticipantRepository,
     private val quizRepo: QuizRepository,
-    private val templateRepo: TemplateRepository,
+    templateRepo: TemplateRepository,
     private val historyRepo: HistoryRepository,
-): MainDataService(sessionRepo, templateRepo) {
+) : MainDataService(sessionRepo, templateRepo) {
 
 
     fun joinSession(input: JoinSessionInputModel): ParticipantDoc {
-        //sessionRepo.updateNumberOfParticipants(input.sessionCode)
-        val session = sessionRepo.findSessionDocByGuestCode(input.sessionCode)
-            ?: throw Exception("There was no session with that guest code")
-        if (session.status != QqStatus.STARTED) throw Exception("Can join only in started sessions")
+
+        val session = sessionRepo.findSessionDocByGuestCodeAndStatus(input.sessionCode, QqStatus.STARTED)
+            ?: throw Exception("There was no started session with that guest code")
         val guestUuid = UUID.randomUUID().toString()
         val guestSession = ParticipantDoc(id = guestUuid, sessionId = session.id)
         participantRepo.save(guestSession)
@@ -34,7 +33,10 @@ class SessionService(
 
     fun editSession(owner: String, id: String, input: EditSessionInputModel): SessionDoc {
         val doc = getSessionValidatingTheOwner(owner, id)
-        //if(doc.status != QqStatus.NOT_STARTED) throw SessionIllegalStatusOperationException(doc.status, "To perform this operation the session status can only be NOT_STARTED")
+        if (doc.status != QqStatus.NOT_STARTED) throw SessionIllegalStatusOperationException(
+            doc.status,
+            "To perform this operation the session status can only be NOT_STARTED"
+        )
         val newDoc = SessionDoc(doc, input)
         return sessionRepo.save(newDoc)
     }

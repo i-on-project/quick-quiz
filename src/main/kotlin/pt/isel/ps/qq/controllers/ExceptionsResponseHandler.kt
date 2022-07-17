@@ -86,7 +86,19 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
         )
     }
 
-
+    @ExceptionHandler(value = [Exception::class])
+    fun exceptionHandle(
+        ex: Exception,
+        request: WebRequest
+    ): ResponseEntity<Any> {
+        return exceptionHandling(
+            type = "InternalError",
+            title = "An Unknown error occurred",
+            status = 500,
+            instance = request.contextPath,
+            values = mapOf("user" to scope.getUser().userName)
+        )
+    }
     private fun values(id: String?, message: String?) =
         mapOf<String, Any?>("user" to scope.getUser().userName, "id" to id, "message" to message)
 

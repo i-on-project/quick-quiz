@@ -103,13 +103,16 @@ class ApiIntegrationTest() {
         return mockMvc.perform(get(path).cookie(cookie))
     }
 
-    fun expectSirenMediaType(resultActions: ResultActions): ResultActions{
-        return resultActions.andExpect(content().contentType(SirenModel.MEDIA_TYPE))
+    fun ResultActions.andExpectSirenMediaType() : ResultActions{
+        return this.andExpect(content().contentType(SirenModel.MEDIA_TYPE))
+    }
+
+    fun ResultActions.andExpectProblemJsonMediaType() : ResultActions{
+        return this.andExpect(content().contentType(ProblemJson.MEDIA_TYPE))
     }
 
     @Order(99)
     @Test
-
     fun isNotInSessionAndBodyIsEmpty() {
         val path = Uris.API.Web.V1_0.NonAuth.IsInSession.PATH
 
@@ -142,8 +145,9 @@ class ApiIntegrationTest() {
 
         mongo.db.drop()
 
-        val result = expectSirenMediaType(postRequestNoCookie(path, body))
+        val result = postRequestNoCookie(path, body)
             .andExpect(status().isOk)
+            .andExpectSirenMediaType()
             .andExpect(jsonPath("$.class[0]").value("Register"))
             .andExpect(jsonPath("$.title").value("Check your email"))
             .andExpect(jsonPath("$.actions[0].name").value("Logmein"))
@@ -164,8 +168,9 @@ class ApiIntegrationTest() {
         body["userName"] = testUser?.user.toString()
         body["loginToken"] = testUser?.registrationToken.toString()
 
-        val result = expectSirenMediaType(postRequestNoCookie(path, body))
+        val result = postRequestNoCookie(path, body)
             .andExpect(status().isOk)
+            .andExpectSirenMediaType()
             .andExpect(cookie().exists("Authorization"))
             .andReturn()
 
@@ -179,8 +184,9 @@ class ApiIntegrationTest() {
     @Test
     fun getSessionsNoSessions() {
         val path = Uris.API.Web.V1_0.Auth.Session.PATH
-        expectSirenMediaType(getRequestWithCookie(path, testUser?.userCookie))
+        getRequestWithCookie(path, testUser?.userCookie)
             .andExpect(status().isOk)
+            .andExpectSirenMediaType()
             .andExpect(jsonPath("$.properties.size").value("0"))
 
     }
@@ -196,8 +202,9 @@ class ApiIntegrationTest() {
         body["limitOfParticipants"] = "100"
         body["tags"] = arrayOf("session1_tags")
 
-        val result = expectSirenMediaType(postRequestWithCookie(path, body, testUser?.userCookie))
+        val result = postRequestWithCookie(path, body, testUser?.userCookie)
             .andExpect(status().isCreated)
+            .andExpectSirenMediaType()
             .andExpect(jsonPath("$.class[0]").value("CreateSession"))
             .andExpect(jsonPath("$.properties.name").value(body["name"]))
             .andExpect(jsonPath("$.properties.description").value(body["description"]))
@@ -215,8 +222,9 @@ class ApiIntegrationTest() {
     @Test
     fun getSessionsOneSession() {
         val path = Uris.API.Web.V1_0.Auth.Session.PATH
-        expectSirenMediaType(getRequestWithCookie(path, testUser?.userCookie))
+        getRequestWithCookie(path, testUser?.userCookie)
             .andExpect(status().isOk)
+            .andExpectSirenMediaType()
             .andExpect(jsonPath("$.properties.size").value("1"))
     }
 
@@ -230,8 +238,9 @@ class ApiIntegrationTest() {
         body["questionType"] = QuestionType.SHORT.toString()
 
 
-        val result = expectSirenMediaType(postRequestWithCookie(path, body, testUser?.userCookie))
+        val result = postRequestWithCookie(path, body, testUser?.userCookie)
             .andExpect(status().isCreated)
+            .andExpectSirenMediaType()
             .andReturn()
 
         val responseObj = objectMapper.readValue(result.response.contentAsByteArray, SirenModel::class.java)
@@ -249,8 +258,9 @@ class ApiIntegrationTest() {
         body["questionType"] = QuestionType.LONG.toString()
 
 
-        val result = expectSirenMediaType(postRequestWithCookie(path, body, testUser?.userCookie))
+        val result = postRequestWithCookie(path, body, testUser?.userCookie)
             .andExpect(status().isCreated)
+            .andExpectSirenMediaType()
             .andReturn()
 
         val responseObj = objectMapper.readValue(result.response.contentAsByteArray, SirenModel::class.java)
@@ -272,8 +282,9 @@ class ApiIntegrationTest() {
         )
 
 
-        val result = expectSirenMediaType(postRequestWithCookie(path, body, testUser?.userCookie))
+        val result = postRequestWithCookie(path, body, testUser?.userCookie)
             .andExpect(status().isCreated)
+            .andExpectSirenMediaType()
             .andReturn()
 
         val responseObj = objectMapper.readValue(result.response.contentAsByteArray, SirenModel::class.java)
@@ -285,8 +296,9 @@ class ApiIntegrationTest() {
     @Test
     fun getAllQuizzesForSession() {
         val path = "/api/web/v1.0/auth/quiz/session/${testUser?.sessionId}"
-        expectSirenMediaType(getRequestWithCookie(path, testUser?.userCookie))
+        getRequestWithCookie(path, testUser?.userCookie)
             .andExpect(status().isOk)
+            .andExpectSirenMediaType()
             .andExpect(jsonPath("$.properties.total").value("3"))
 
     }
@@ -299,8 +311,9 @@ class ApiIntegrationTest() {
         body["order"] = "4"
         body["question"] = "Short answer question edited?"
 
-        val result = expectSirenMediaType(putRequestWithCookie(path, body, testUser?.userCookie))
+        putRequestWithCookie(path, body, testUser?.userCookie)
             .andExpect(status().isOk)
+            .andExpectSirenMediaType()
             .andReturn()
     }
 
@@ -309,8 +322,9 @@ class ApiIntegrationTest() {
     fun removeLongQuiz() {
         val path = "/api/web/v1.0/auth/quiz/${testUser?.longQuizId}"
 
-        val result = expectSirenMediaType(deleteRequestWithCookie(path,  testUser?.userCookie))
+        deleteRequestWithCookie(path,  testUser?.userCookie)
             .andExpect(status().isOk)
+            .andExpectSirenMediaType()
             .andReturn()
 
         testUser?.longQuizId = null
@@ -321,15 +335,17 @@ class ApiIntegrationTest() {
     fun updateRemainingQuizzesStatus() {
         var path = "/api/web/v1.0/auth/quiz/${testUser?.shortQuizId}/updatestatus"
         val body: MutableMap<String, Any?> = HashMap()
-        body["quizState"] = QqStatus.STARTED.toString()
+        body["quizStatus"] = QqStatus.STARTED.toString()
 
-        expectSirenMediaType(putRequestWithCookie(path, body, testUser?.userCookie))
+        putRequestWithCookie(path, body, testUser?.userCookie)
             .andExpect(status().isOk)
+            .andExpectSirenMediaType()
             .andReturn()
 
         path = "/api/web/v1.0/auth/quiz/${testUser?.multiQuizId}/updatestatus"
-        expectSirenMediaType(putRequestWithCookie(path, body, testUser?.userCookie))
+        putRequestWithCookie(path, body, testUser?.userCookie)
             .andExpect(status().isOk)
+            .andExpectSirenMediaType()
             .andReturn()
     }
 
@@ -338,27 +354,12 @@ class ApiIntegrationTest() {
     fun getShortQuizDetails() {
         val path = "/api/web/v1.0/auth/quiz/${testUser?.shortQuizId}"
 
-        val result = expectSirenMediaType(getRequestWithCookie(path,  testUser?.userCookie))
+        getRequestWithCookie(path,  testUser?.userCookie)
             .andExpect(status().isOk)
+            .andExpectSirenMediaType()
             .andReturn()
     }
-
     @Order(14)
-    @Test
-    fun updateSessionStatus() {
-        var path = "/api/web/v1.0/auth/sessions/${testUser?.sessionId}/live"
-        val body: MutableMap<String, Any?> = HashMap()
-
-        val result = expectSirenMediaType(postRequestWithCookie(path, body, testUser?.userCookie))
-            .andExpect(status().isOk)
-            .andReturn()
-
-        val responseObj = objectMapper.readValue(result.response.contentAsByteArray, SirenModel::class.java)
-        val properties = responseObj.properties as Map<String, String>
-        testUser?.guestCode = properties["guestCode"]
-    }
-
-    @Order(15)
     @Test
     fun editSessionDetails() {
         val path = "/api/web/v1.0/auth/sessions/${testUser?.sessionId}"
@@ -368,17 +369,36 @@ class ApiIntegrationTest() {
         body["limitOfParticipants"] = "99"
         body["tags"] = arrayOf("session1_tags", "One_More_Tag")
 
-        expectSirenMediaType(putRequestWithCookie(path, body, testUser?.userCookie))
+        putRequestWithCookie(path, body, testUser?.userCookie)
             .andExpect(status().isOk)
+            .andExpectSirenMediaType()
             .andReturn()
     }
+    @Order(15)
+    @Test
+    fun updateSessionStatus() {
+        var path = "/api/web/v1.0/auth/sessions/${testUser?.sessionId}/live"
+        val body: MutableMap<String, Any?> = HashMap()
+
+        val result = postRequestWithCookie(path, body, testUser?.userCookie)
+            .andExpect(status().isOk)
+            .andExpectSirenMediaType()
+            .andReturn()
+
+        val responseObj = objectMapper.readValue(result.response.contentAsByteArray, SirenModel::class.java)
+        val properties = responseObj.properties as Map<String, String>
+        testUser?.guestCode = properties["guestCode"]
+    }
+
+
     @Order(16)
     @Test
     fun getSessionDetails() {
         val path =  "/api/web/v1.0/auth/sessions/${testUser?.sessionId}"
 
-        val result = expectSirenMediaType(getRequestWithCookie(path,  testUser?.userCookie))
+        getRequestWithCookie(path,  testUser?.userCookie)
             .andExpect(status().isOk)
+            .andExpectSirenMediaType()
             .andReturn()
     }
 
@@ -387,8 +407,9 @@ class ApiIntegrationTest() {
     fun `get all participants and its answers`() {
         val path =  "/api/web/v1.0/auth/sessions/${testUser?.sessionId}/answers"
 
-        expectSirenMediaType(getRequestWithCookie(path,  testUser?.userCookie))
+        getRequestWithCookie(path,  testUser?.userCookie)
             .andExpect(status().isOk)
+            .andExpectSirenMediaType()
             .andExpect(jsonPath("$.properties.total").value("0"))
             .andReturn()
 
@@ -400,8 +421,9 @@ class ApiIntegrationTest() {
         val path = Uris.API.Web.V1_0.NonAuth.JoinSession.PATH
         val body: MutableMap<String, Any?> = HashMap()
         body["sessionCode"] = testUser?.guestCode
-        val result = expectSirenMediaType(postRequestNoCookie(path, body))
+        val result = postRequestNoCookie(path, body)
             .andExpect(status().isOk)
+            .andExpectSirenMediaType()
             .andExpect(cookie().exists("InSession"))
             .andReturn()
 
@@ -415,8 +437,9 @@ class ApiIntegrationTest() {
     fun getParticipantDetails() {
         val path =  "/api/web/v1.0/non_auth/answer/${testUser?.participantId}"
 
-        val result = expectSirenMediaType(getRequestNoCookie(path))
+        getRequestNoCookie(path)
             .andExpect(status().isOk)
+            .andExpectSirenMediaType()
             .andReturn()
     }
 
@@ -425,8 +448,9 @@ class ApiIntegrationTest() {
     fun getQuizzesForParticipantSession() {
         val path =  "/api/web/v1.0/non_auth/quiz/session/${testUser?.participantId}"
 
-        val result = expectSirenMediaType(getRequestNoCookie(path))
+        getRequestNoCookie(path)
             .andExpect(status().isOk)
+            .andExpectSirenMediaType()
             .andReturn()
     }
 
@@ -440,8 +464,9 @@ class ApiIntegrationTest() {
         body["quizId"] = testUser?.shortQuizId
         body["answer"] = "A short answer"
 
-        expectSirenMediaType(postRequestNoCookie(path, body))
+        postRequestNoCookie(path, body)
             .andExpect(status().isOk)
+            .andExpectSirenMediaType()
             .andReturn()
 
         body["guestId"] = testUser?.participantId
@@ -450,8 +475,9 @@ class ApiIntegrationTest() {
         body["answer"] = null
         body["answerChoice"] = "1"
 
-        expectSirenMediaType(postRequestNoCookie(path, body))
+        postRequestNoCookie(path, body)
             .andExpect(status().isOk)
+            .andExpectSirenMediaType()
             .andReturn()
     }
 
@@ -460,8 +486,9 @@ class ApiIntegrationTest() {
     fun getAllAnswersForSessionWithParticipant() {
         val path =  "/api/web/v1.0/auth/sessions/${testUser?.sessionId}/answers"
 
-        val result = expectSirenMediaType(getRequestWithCookie(path,  testUser?.userCookie))
+        getRequestWithCookie(path,  testUser?.userCookie)
             .andExpect(status().isOk)
+            .andExpectSirenMediaType()
             .andExpect(jsonPath("$.properties.total").value("1"))
             .andExpect(jsonPath("$.entities[0].properties.answers").isArray )
             .andReturn()
@@ -473,8 +500,9 @@ class ApiIntegrationTest() {
         val path =  "/api/web/v1.0/auth/sessions/${testUser?.sessionId}/close"
         val body: MutableMap<String, Any?> = HashMap()
 
-        val result = expectSirenMediaType(postRequestWithCookie(path, body ,testUser?.userCookie))
+        postRequestWithCookie(path, body ,testUser?.userCookie)
             .andExpect(status().isOk)
+            .andExpectSirenMediaType()
             .andReturn()
     }
 
@@ -489,8 +517,9 @@ class ApiIntegrationTest() {
         body["radius"] = 55
         body["tags"] = arrayOf("test_template")
 
-        expectSirenMediaType(postRequestWithCookie(path, body, testUser?.userCookie))
+        postRequestWithCookie(path, body, testUser?.userCookie)
             .andExpect(status().isCreated)
+            .andExpectSirenMediaType()
             .andReturn()
     }
 
@@ -506,12 +535,12 @@ class ApiIntegrationTest() {
             mapOf( "choiceNumber" to "2", "choiceAnswer" to "no", "choiceRight" to "false"),
         )
 
-/*
+
         val result = postRequestWithCookie(path, body, testUser?.userCookie)
             .andExpect(status().isBadRequest)
-            .andExpect(content().contentType(ProblemJson.MEDIA_TYPE))
+            .andExpectProblemJsonMediaType()
             .andReturn()
-*/
+
 
     }
     @Order(46)
@@ -520,7 +549,7 @@ class ApiIntegrationTest() {
         val path = Uris.API.Web.V1_0.Auth.Session.PATH
         getRequestNoCookie(path)
             .andExpect(status().isForbidden)
-            .andExpect(content().contentType(ProblemJson.MEDIA_TYPE))
+            .andExpectProblemJsonMediaType()
 
     }
 

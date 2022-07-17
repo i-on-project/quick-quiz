@@ -57,7 +57,6 @@ class SessionsResponseBuilder {
                             type = SirenSupportedMethods.POST.toString(),
                             href = Uris.API.Web.V1_0.Auth.Session.Id.Close.make(it.id).toString()
                         )
-
                     )
                 )
             },

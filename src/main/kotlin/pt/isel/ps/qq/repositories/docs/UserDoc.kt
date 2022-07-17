@@ -23,13 +23,6 @@ data class UserDoc(
     val tags: MutableList<String> = mutableListOf()
 ) {
     companion object {
-        fun userRegister(user: UserDoc, token: String, date: Long) = UserDoc(
-            userName = user.userName,
-            displayName = user.displayName,
-            status = user.status,
-            registrationToken = token,
-            registrationExpireDate = date
-        )
         fun userRequest(user: UserDoc, token: String, date: Long) = UserDoc(
             userName = user.userName,
             displayName = user.displayName,

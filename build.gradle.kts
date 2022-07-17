@@ -83,9 +83,9 @@ tasks.withType<KotlinCompile> {
     }
 }
 
-/*tasks.withType<Test> {
+tasks.withType<Test> {
     useJUnitPlatform()
-}*/
+}
 
 node {
     version.set("16.13.1")

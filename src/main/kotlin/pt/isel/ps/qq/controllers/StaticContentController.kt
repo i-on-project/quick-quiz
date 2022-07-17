@@ -7,12 +7,6 @@ import org.springframework.web.bind.annotation.RestController
 
 @Controller
 class StaticContentController {
-
-    @GetMapping("/")
-    fun redirectToWebApp(): String? {
-        return "index.html"
-    }
-
     @GetMapping(
         "/{path:[^.]*}",
         "/{path:[^.]*}/{path:[^.]*}",
@@ -20,7 +14,7 @@ class StaticContentController {
         "/{path:[^.]*}/{path:[^.]*}/{path:[^.]*}/{path:[^.]*}"
     )
     fun redirect(): String {
-        return "forward:/"
+        return "forward:/index.html"
     }
 
 }
