@@ -1,0 +1,458 @@
+openapi: 3.0.3
+info:
+  title: QuickQuiz
+  description: QuickQuiz HTTP API
+  version: 1.0.0
+servers:
+  - url: 'https://localhost:8080/api'
+
+tags:
+  - name: authentication
+    description: authentication related end points
+
+paths:
+  /web/V1.0/non_auth/register:
+    post:
+      tags:
+        - authentication
+      summary: Registers a new user.
+      description: Creates a new user based on the json object received in request payload.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userName
+                - displayName
+              properties:
+                userName:
+                  type: string
+                  format: email
+                  nullable: false
+                displayName:
+                  type: string
+                  maxLength: 50
+                  nullable: false
+      responses:
+        200:
+          description: Successfully registered the new user.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationOutputModel'
+        400:
+          description: Bad request.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'BadRequest'
+                      status:
+                        default: 400
+        409:
+          description: User alredy exists.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'UserAlreadyExists'
+                      status:
+                        default: 409
+
+  /web/V1.0/non_auth/login:
+    post:
+      tags:
+        - authentication
+      summary: Requests a new login for the user.
+      description: Validates the user existance and sends an email with the challenge to efectively login.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userName:
+                  type: string
+                  format: email
+                  nullable: false
+      responses:
+        200:
+          description: Successfully requested a new login and sent the email.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationOutputModel'
+        400:
+          description: Bad request.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'BadRequest'
+                      status:
+                        default: 400
+        404:
+          description: User not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'UserNotFound'
+                      status:
+                        default: 404
+        409:
+          description: Email validation pending.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'PendingValidation'
+                      status:
+                        default: 409
+
+  /web/V1.0/non_auth/logmein:
+    post:
+      tags:
+        - authentication
+      summary: Authenticates the user.
+      description: Validates the user credentials and efectively makes the login, creating the cookie Authorization.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userName
+                - loginToken
+              properties:
+                userName:
+                  type: string
+                  format: email
+                  nullable: false
+                loginToken:
+                  type: string
+                  format: uuid
+                  nullable: false
+      responses:
+        200:
+          description: Successfully authenticated the user and created the cookie.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: Authorization=ZGV2LnRpYWdvY2FydmFsaG9AZ21haWwuY29tLDA5MGQ2NjBmLWJhM2MtNDgwYi1hNWFlLTY2ZDMwMjFjNmQzMw==; Max-Age=604800; Path=/; Secure; HttpOnly; SameSite=Strict
+              description: This cookie contains the necessary data to verify the authentication state of the user and it's available for 7 days.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/LogmeinOutputModel'
+        400:
+          description: Bad request.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'BadRequest'
+                      status:
+                        default: 400
+        404:
+          description: User not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'UserNotFound'
+                      status:
+                        default: 404
+
+  /web/V1.0/auth/logout:
+    post:
+      tags:
+        - authentication
+      summary: Unauthenticates the user.
+      description: Validates the user credentials and efectively unauthenticates the user expiring the cookie Authorization.
+      security:
+        - cookieAuth: []
+      responses:
+        200:
+          description: Successfully requested a new login and sent the email.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: Authorization=; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Path=/; Secure; HttpOnly;
+              description: This is the way to expire the cookie.
+        400:
+          description: Bad request.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'BadRequest'
+                      status:
+                        default: 400
+        404:
+          description: User not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'UserNotFound'
+                      status:
+                        default: 404
+
+  /web/v1.0/auth/checkuser:
+    get:
+      tags:
+        - authentication
+      summary: todo.
+      description: todo
+      security:
+        - cookieAuth: []
+      responses:
+        200:
+          description: todo
+        400:
+          description: Bad request.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'BadRequest'
+                      status:
+                        default: 400
+        404:
+          description: User not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'UserNotFound'
+                      status:
+                        default: 404
+
+
+components:
+
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: Authorization
+
+  schemas:
+    AuthenticationOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              type: object
+              properties:
+                userName:
+                  type: string
+                  format: email
+                displayName:
+                  type: string
+                  maxLength: 50
+                token:
+                  type: string
+                  format: uuid
+                timeout:
+                  type: integer
+                  format: int64
+            actions:
+              type: array
+              items:
+                $ref: '#/components/schemas/SirenAction'
+            title:
+              type: string
+
+    LogmeinOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            class:
+              type: array
+              items:
+                type: string
+            properties:
+              type: object
+              properties:
+                userName:
+                  type: string
+                  format: email
+                displayName:
+                  type: string
+                  maxLength: 50
+            title:
+              type: string
+
+    ProblemJson:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+          format: http status code
+          minimum: 100
+          maximum: 599
+        detail:
+          type: string
+          default: null
+        instance:
+          type: string
+          format: uri
+
+    SirenLink:
+      type: object
+      properties:
+        class:
+          type: array
+          items:
+            type: string
+        title:
+          type: string
+          default: null
+        rel:
+          type: array
+          items:
+            type: string
+        href:
+          type: string
+          format: uri
+        type:
+          type: string
+          default: null
+
+    SirenField:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [ 'hidden', 'text', 'search', 'tel', 'url', 'email', 'password', 'datetime', 'date', 'month', 'week', 'time', 'datetime-local', 'number', 'range', 'color', 'checkbox', 'radio', 'file' ]
+          default: 'text'
+        title:
+          type: string
+          default: null
+        value:
+          oneOf:
+            - type: string
+            - type: integer
+            - type: object
+            - type: array
+          default: null
+
+    SirenEntity:
+      type: object
+      properties:
+        class:
+          type: array
+          items:
+            type: string
+        rel:
+          type: array
+          items:
+            type: string
+        href:
+          type: string
+          format: uri
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/SirenLink'
+        title:
+          type: string
+          default: null
+        properties:
+          type: object
+
+    SirenAction:
+      type: object
+      properties:
+        class:
+          type: array
+          items:
+            type: string
+        name:
+          type: string
+        method:
+          type: string
+          enum: [ 'GET', 'POST', 'PUT', 'DELETE', 'PATCH' ]
+          default: 'GET'
+        href:
+          type: string
+          format: uri
+        title:
+          type: string
+          default: null
+        type:
+          type: string
+          default: 'application/x-www-form-urlencoded'
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/SirenField'
+          default: []
+
+    SirenModel:
+      type: object
+      properties:
+        class:
+          type: array
+          items:
+            type: string

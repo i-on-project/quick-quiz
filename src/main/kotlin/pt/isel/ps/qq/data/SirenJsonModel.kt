@@ -49,7 +49,7 @@ data class SirenField(
 data class SirenAction(
     @JsonProperty("class") @JsonAlias("class") val clazz: List<String> = emptyList(),
     val name: String, //required
-    val method: SirenSupportedMethods = SirenSupportedMethods.GET,
+    val method: SirenSupportedMethods = SirenSupportedMethods.POST,
     val href: String, //required
     val title: String? = null,
     val type: String = "application/x-www-form-urlencoded",
