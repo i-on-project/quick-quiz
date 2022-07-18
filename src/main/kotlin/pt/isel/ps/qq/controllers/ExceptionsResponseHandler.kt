@@ -213,7 +213,7 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
         return exceptionHandling(
             type = "LiveSessionAlreadyExists",
             title = "A Live Session already exists",
-            status = 403,
+            status = 409,
             instance = request.contextPath,
             values = values("error", ex.message)
         )
