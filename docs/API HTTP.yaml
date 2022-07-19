@@ -15,10 +15,10 @@ tags:
     description: quizzes related end points
   - name: participants management
     description: participants related end points
-  - name: history management
-    description: history related end points
   - name: templates management
     description: templates related end points
+  - name: history management
+    description: history related end points
 
 paths:
 
@@ -359,7 +359,7 @@ paths:
                   type: number
                   format: int32
                   default: 10
-                  maximum: 999
+                  maximum: 200
                   minimum: 1
                   nullable: true
                 geolocation:
@@ -1303,6 +1303,220 @@ paths:
                         default: 'MissingCookieException'
                       status:
                         default: 403
+    post:
+      tags:
+        - templates management
+      summary: Create a new template.
+      description: Creates a new template based on the json object received in request payload.
+      security:
+        - CookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - quizzes
+              properties:
+                name:
+                  type: string
+                  maxLength: 50
+                  nullable: false
+                limitOfParticipants:
+                  type: number
+                  format: int32
+                  default: 10
+                  maximum: 200
+                  minimum: 1
+                  nullable: true
+                geolocation:
+                  type: string
+                  example: '31.0978,-5.3977'
+                  nullable: true
+                radius:
+                  type: number
+                  format: int32
+                  minimum: 50
+                  maximum: 999999
+                  nullable: true
+                  default: 50
+                quizzes:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      order:
+                        type: number
+                        format: int32
+                        minimum: 0
+                        maximum: 99
+                        nullable: false
+                      question:
+                        type: string
+                        maxLength: 250
+                        nullable: false
+                      questionType:
+                        type: string
+                        enum: ['MULTIPLE_CHOICE', 'SHORT', 'LONG']
+                        default: 'SHORT'
+                        nullable: false
+                      answerChoices:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            choiceNumber:
+                              type: number
+                              format: int32
+                              minimum: 0
+                              nullable: false
+                            choiceAnswer:
+                              type: string
+                              maxLength: 150
+                              nullable: false
+                            choiceRight:
+                              type: boolean
+                              default: false
+                              nullable: false
+                        nullable: true
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+      responses:
+        201:
+          description: Successfully created a new template.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/CreateTemplateOutputModel'
+        400:
+          description: Bad request.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'BadRequest'
+                      status:
+                        default: 400
+        403:
+          description: The user is not authenticated.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'MissingCookieException'
+                      status:
+                        default: 403
+
+  /web/v1.0/auth/template/{id}:
+    get:
+      tags:
+        - templates management
+      summary: Get a specific template.
+      description: Retrieves the template specified by the id parameter.
+      security:
+        - CookieAuth: [ ]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The template identifier.
+      responses:
+        200:
+          description: Representation of the template.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/GetTemplateOutputModel'
+        403:
+          description: The user is not authenticated.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'MissingCookieException'
+                      status:
+                        default: 403
+        404:
+          description: Template not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'TemplateNotFoundException'
+                      status:
+                        default: 404
+    delete:
+      tags:
+        - templates management
+      summary: Deletes a specific template.
+      description: Deletes the template specified by the id paremeter.
+      security:
+        - CookieAuth: [ ]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The template identifier.
+      responses:
+        200:
+          description: The template was deleted successfully.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/SingleAcknowledgeOutputModel'
+        403:
+          description: The user is not authenticated.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'MissingCookieException'
+                      status:
+                        default: 403
+        404:
+          description: Template not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'TemplateNotFoundException'
+                      status:
+                        default: 404
 
   ##################### History Management #####################
   /web/v1.0/auth/history:
@@ -1682,6 +1896,72 @@ components:
                 type: number
                 format: int32
                 nullable: true
+
+    TemplateModel:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: false
+        name:
+          type: string
+          maxLength: 50
+          nullable: false
+        owner:
+          type: string
+          format: email
+          nullable: false
+        limitOfParticipants:
+          type: number
+          format: int32
+          default: 10
+          nullable: false
+        geolocation:
+          type: string
+          example: '31.0978,-5.3977'
+          nullable: true
+        radius:
+          type: number
+          format: int64
+          nullable: true
+        quizzes:
+          type: array
+          items:
+            type: object
+            properties:
+              order:
+                type: number
+                format: int32
+                minimum: 0
+                maximum: 99
+                nullable: false
+              question:
+                type: string
+                nullable: false
+              answerType:
+                type: string
+                enum: ['MULTIPLE_CHOICE', 'SHORT', 'LONG']
+                default: 'SHORT'
+                nullable: true
+              answerChoices:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    choiceNumber:
+                      type: number
+                      format: int32
+                      minimum: 0
+                      nullable: false
+                    choiceAnswer:
+                      type: string
+                      maxLength: 150
+                      nullable: false
+                    choiceRight:
+                      type: boolean
+                      default: false
+                      nullable: false
 
     ##################### Problem+json Model #####################
     ProblemJson:
@@ -2261,6 +2541,36 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/SirenLink'
+
+    CreateTemplateOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              type: object
+              properties:
+                acknowledge:
+                  type: boolean
+                  default: true
+            title:
+              type: string
+            links:
+              type: array
+              items:
+                $ref: '#/components/schemas/SirenLink'
+
+    GetTemplateOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              $ref: '#/components/schemas/TemplateModel'
+            actions:
+              type: array
+              items:
+                $ref: '#/components/schemas/SirenAction'
 
     GetAllAnswersSessionOutputModel:
       allOf:

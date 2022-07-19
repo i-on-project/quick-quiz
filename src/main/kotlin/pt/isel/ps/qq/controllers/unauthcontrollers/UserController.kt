@@ -3,7 +3,6 @@ package pt.isel.ps.qq.controllers.unauthcontrollers
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -58,7 +57,6 @@ class UserController(private val authenticationService: AuthenticationService,
         return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }
 
-    @CrossOrigin
     @PostMapping(Uris.API.Web.V1_0.NonAuth.Login.ENDPOINT)
     fun requestLogin(request: HttpServletRequest, @RequestBody userName: LoginInputModel): ResponseEntity<Any> {
         val user = authenticationService.requestLogin(userName)

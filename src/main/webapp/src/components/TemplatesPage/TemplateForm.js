@@ -119,6 +119,7 @@ export const TemplateForm = (props) => {
     }, [])
 
     const onChangeQuizQuestion = useCallback((event, idx) => {
+        if(event.target.value.length > 250) return
         setState((prev) => {
             prev.template.quizzes[idx].question = event.target.value
             return {...prev}
