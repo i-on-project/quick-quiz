@@ -11,10 +11,10 @@ import pt.isel.ps.qq.utils.Uris
 @Component
 class ParticipantResponseBuilder {
 
-    fun buildJoinSessionResponse(participantId: String): SirenModel { //TODO: New
+    fun buildJoinSessionResponse(id: String): SirenModel { //TODO: New
         return SirenModel(
             clazz = listOf("participant", "id"),
-            properties = mapOf("participantId" to participantId) )
+            properties = { val participantId = id })
     }
 
     fun buildGetAllQuizzesResponse(quizzes: List<SessionQuizDoc>): SirenModel { //TODO: New
@@ -42,6 +42,13 @@ class ParticipantResponseBuilder {
                     href = Uris.API.Web.V1_0.NonAuth.PATH.toString() //TODO: Output model required
                 )
             )
+        )
+    }
+
+    fun buildCheckInSessionResponse(participantId: String): SirenModel {
+        return SirenModel(
+            clazz = listOf("check", "participant"),
+            properties = {val value = participantId}
         )
     }
 }

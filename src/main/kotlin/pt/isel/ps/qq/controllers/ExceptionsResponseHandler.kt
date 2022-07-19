@@ -288,4 +288,32 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
             values = values("error", ex.message)
         )
     }
+
+    @ExceptionHandler(value = [GuestSessionNotFoundException::class])
+    fun exceptionHandle(
+        ex: GuestSessionNotFoundException,
+        request: WebRequest
+    ): ResponseEntity<Any> {
+        return exceptionHandling(
+            type = "GuestSessionNotFound",
+            title = "This participant doesn't exist",
+            status = 404,
+            instance = request.contextPath,
+            values = values("error", ex.message)
+        )
+    }
+
+    @ExceptionHandler(value = [MissingCookieException::class])
+    fun exceptionHandle(
+        ex: MissingCookieException,
+        request: WebRequest
+    ): ResponseEntity<Any> {
+        return exceptionHandling(
+            type = "MissingCookieException",
+            title = "Missing cookie ${ex.cookieName}",
+            status = 409,
+            instance = request.contextPath,
+            values = values("error", ex.message)
+        )
+    }
 }

@@ -13,6 +13,12 @@ tags:
     description: session related end points
   - name: quizzes management
     description: quizzes related end points
+  - name: participants management
+    description: participants related end points
+  - name: history management
+    description: history related end points
+  - name: templates management
+    description: templates related end points
 
 paths:
 
@@ -1055,6 +1061,286 @@ paths:
                       status:
                         default: 404
 
+  ##################### Participants Management #####################
+  /web/v1.0/non_auth/join_session:
+    post:
+      tags:
+        - participants management
+      summary: Let a participant join session.
+      description: Let a participant join a started session.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - sessionCode
+              properties:
+                sessionCode:
+                  type: number
+                  format: int32
+                  minimum: 0
+                  maximum: 2147483647
+                  nullable: false
+      responses:
+        200:
+          description: The participant joined the session successfully.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: InSession=3fa85f64-5717-4562-b3fc-2c963f66afa6; Max-Age=604800; Path=/; Secure; HttpOnly; SameSite=Strict
+              description: The existance of this cookie indicates that the participant is still in the session.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/JoinSessionOutputModel'
+        404:
+          description: Session not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                    - $ref: '#/components/schemas/ProblemJson'
+                    - type: object
+                      properties:
+                        type:
+                          default: 'SessionNotFoundException'
+                        status:
+                          default: 404
+        409:
+          description: The session is not started.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'SessionIllegalStatusOperationException'
+                      status:
+                        default: 409
+
+  /web/v1.0/non_auth/give_answer:
+    post:
+      tags:
+        - participants management
+      summary: Let a participant give an answer.
+      description: Let a participant give an answer to a quiz.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - guestId
+                - sessionId
+                - quizId
+              properties:
+                guestId:
+                  type: string
+                  format: uuid
+                  nullable: false
+                sessionId:
+                  type: string
+                  format: uuid
+                  nullable: false
+                quizId:
+                  type: string
+                  format: uuid
+                  nullable: false
+                answer:
+                  type: string
+                  nullable: true
+                answerChoice:
+                  type: number
+                  format: int32
+                  nullable: true
+      responses:
+        200:
+          description: The participant could give an answer successfully.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/ParticipantOutputModel'
+        404:
+          description: The participant doesn't exist.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'GuestSessionNotFound'
+                      status:
+                        default: 404
+
+  /web/v1.0/non_auth/answer/{id}:
+    get:
+      tags:
+        - participants management
+      summary: Get a specific participant.
+      description: Get all the information of a participant specified by the parameter id.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The participant identifier.
+      responses:
+        200:
+          description: Representation of the participant.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/ParticipantOutputModel'
+        404:
+          description: Participant not found.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: InSession=; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Path=/; Secure; HttpOnly;
+              description: Expire the cookie InSession.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'GuestSessionNotFound'
+                      status:
+                        default: 404
+        409:
+          description: Participant not found.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: InSession=; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Path=/; Secure; HttpOnly;
+              description: Expire the cookie InSession.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'SessionIllegalStatusOperation'
+                      status:
+                        default: 409
+
+  /web/v1.0/non_auth/is_in_session:
+    get:
+      tags:
+        - participants management
+      summary: Checks the existance of the cookie InSession.
+      description: Validates that the user contains the cookie and that the cookie is still valid.
+      responses:
+        200:
+          description: Representation of the cookie value.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/CheckInSessionOutputModel'
+        409:
+          description: Participant not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'MissingCookieException'
+                      status:
+                        default: 409
+
+  ##################### Templates Management #####################
+  /web/v1.0/auth/template:
+    get:
+      tags:
+        - templates management
+      summary: Gets all the templates of an user.
+      description: Retrieves all the templates of an user in list format. The list is iterable using the page parameter.
+      security:
+        - CookieAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          required: true
+          description: Number of the page to request
+      responses:
+        200:
+          description: A list containing all the templates of the user.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/GetAllTemplatesOutputModel'
+        403:
+          description: The user is not authenticated.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'MissingCookieException'
+                      status:
+                        default: 403
+
+  ##################### History Management #####################
+  /web/v1.0/auth/history:
+    get:
+      tags:
+        - history management
+      summary: Gets all the closed sessions of an user.
+      description: Retrieves all the closed sessions of an user in list format. The list is iterable using the page parameter.
+      security:
+        - CookieAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          required: true
+          description: Number of the page to request
+      responses:
+        200:
+          description: A list containing all the closed sessions of the user.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/GetHistoryOutputModel'
+        403:
+          description: The user is not authenticated.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'MissingCookieException'
+                      status:
+                        default: 403
+
   ##################### Multiple Tags #####################
   /web/v1.0/auth/quiz/session/{id}:
     get:
@@ -1214,6 +1500,43 @@ paths:
                       status:
                         default: 404
 
+  /web/v1.0/non_auth/quiz/session/{id}:
+    get:
+      tags:
+        - quizzes management
+        - participants management
+      summary: Gets all the quizzes for a specific participant.
+      description: Gets all the quizzes that a participant specified by the parameter id can answer.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The participant identifier.
+      responses:
+        200:
+          description: A list containing all the quizzes that the participant can answer.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/GetAllQuizzesOutputModel'
+        404:
+          description: Participant not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'GuestSessionNotFound'
+                      status:
+                        default: 404
+
+
 components:
 
   securitySchemes:
@@ -1331,6 +1654,34 @@ components:
                 type: boolean
                 default: false
                 nullable: false
+
+    ParticipantModel:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: false
+        sessionId:
+          type: string
+          format: uuid
+          nullable: false
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              quizId:
+                type: string
+                format: uuid
+                nullable: false
+              answer:
+                type: string
+                nullable: true
+              answerNumber:
+                type: number
+                format: int32
+                nullable: true
 
     ##################### Problem+json Model #####################
     ProblemJson:
@@ -1734,6 +2085,182 @@ components:
                     properties:
                       properties:
                         $ref: '#/components/schemas/QuizModel'
+
+    JoinSessionOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              type: object
+              properties:
+                participantId:
+                  type: string
+                  format: uuid
+
+    ParticipantOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              $ref: '#/components/schemas/ParticipantModel'
+            entities:
+              type: array
+              items:
+                $ref: '#/components/schemas/SirenEntity'
+
+    CheckInSessionOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              type: object
+              properties:
+                value:
+                  type: string
+                  format: uuid
+
+    GetHistoryOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              $ref: '#/components/schemas/ListOutputModel'
+            entities:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/SirenEntity'
+                  - type: object
+                    properties:
+                      properties:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            maxLength: 50
+                          descritption:
+                            type: string
+                          historyDate:
+                            type: number
+                            format: int64
+                          liveDate:
+                            type: number
+                            format: int64
+                          limitOfParticipants:
+                            type: number
+                            format: int32
+                          numberOfParticipants:
+                            type: number
+                            format: int32
+                          quizzes:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                question:
+                                  type: string
+                                order:
+                                  type: number
+                                  format: int32
+                                answerType:
+                                  type: string
+                                  enum: ['MULTIPLE_CHOICE', 'SHORT', 'LONG']
+                                  default: 'SHORT'
+                                numberOfAnswers:
+                                  type: number
+                                  format: int
+                                answerChoices:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      choiceNumber:
+                                        type: number
+                                        format: int32
+                                      choiceAnswer:
+                                        type: string
+                                      choiceRight:
+                                        type: boolean
+                                answers:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      participantId:
+                                        type: string
+                                        format: uuid
+                                      answer:
+                                        type: string
+                                      choiceNumber:
+                                        type: number
+                                        format: int32
+            links:
+              type: array
+              items:
+                $ref: '#/components/schemas/SirenLink'
+
+    GetAllTemplatesOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              $ref: '#/components/schemas/ListOutputModel'
+            entities:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/SirenEntity'
+                  - type: object
+                    properties:
+                      properties:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                          name:
+                            type: string
+                          limitOfParticipants:
+                            type: number
+                            format: int32
+                          geolocation:
+                            type: string
+                            example: '31.0978,-5.3977'
+                          radius:
+                            type: number
+                            format: int64
+                          quizzes:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                question:
+                                  type: string
+                                answerType:
+                                  type: string
+                                  enum: ['MULTIPLE_CHOICE', 'SHORT', 'LONG']
+                                  default: 'SHORT'
+                                answerChoices:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      choiceNumber:
+                                        type: number
+                                        format: int32
+                                      choiceAnswer:
+                                        type: string
+                                      choiceRight:
+                                        type: boolean
+            links:
+              type: array
+              items:
+                $ref: '#/components/schemas/SirenLink'
 
     GetAllAnswersSessionOutputModel:
       allOf:

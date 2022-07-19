@@ -6,8 +6,11 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import pt.isel.ps.qq.controllers.CookieHandler
+import pt.isel.ps.qq.controllers.ExceptionsResponseHandler
 import pt.isel.ps.qq.controllers.responsebuilders.ParticipantResponseBuilder
 import pt.isel.ps.qq.data.*
+import pt.isel.ps.qq.exceptions.GuestSessionNotFoundException
+import pt.isel.ps.qq.exceptions.MissingCookieException
 import pt.isel.ps.qq.service.AnswersService
 import pt.isel.ps.qq.service.QuizService
 import pt.isel.ps.qq.service.SessionService
@@ -46,21 +49,42 @@ class ParticipantSessionController(
         return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }
 
+    private fun expireCookieInSession(request: HttpServletRequest): HttpHeaders {
+        val expectedCookie = request.cookies.find { it.name == "InSession" }
+        val headers = HttpHeaders()
+        if (expectedCookie != null)
+            headers.add("Set-Cookie", cookie.expireCookie(expectedCookie))
+        return headers
+    }
+
     @GetMapping(Uris.API.Web.V1_0.NonAuth.GetAnswer.ENDPOINT)
     fun getParticipant(@PathVariable participantId: String, request: HttpServletRequest): ResponseEntity<Any> {
-        val participantDoc = participantService.getParticipant(participantId)
-        if (!sessionService.checkSessionIsLive(participantDoc.sessionId)) { //TODO: Use problem+json
-            val expectedCookie = request.cookies.find { it.name == "InSession" }!!
-            val headers = HttpHeaders()
-            if (expectedCookie != null)
-                headers.add("Set-Cookie", cookie.expireCookie(expectedCookie))
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .headers(headers)
+        try {
+            val participantDoc = participantService.getParticipant(participantId)
+            if (!sessionService.checkSessionIsLive(participantDoc.sessionId)) { //TODO: Use problem+json
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .headers(expireCookieInSession(request))
+                    .contentType(ProblemJson.MEDIA_TYPE)
+                    .body(ProblemJson(
+                        type = "SessionIllegalStatusOperation",
+                        title = "The status of the session is different from STARTED",
+                        status = 409,
+                        instance = request.requestURI
+                    ))
+            }
+            val body = responseBuilder.buildGetParticipantResponse(participantDoc)
+            return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
+        } catch(e: GuestSessionNotFoundException) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                .headers(expireCookieInSession(request))
                 .contentType(ProblemJson.MEDIA_TYPE)
-                .body("Session Not Found")
+                .body(ProblemJson(
+                    type = "SessionIllegalStatusOperationException",
+                    title = "The status of the session is different from STARTED",
+                    status = 409,
+                    instance = request.requestURI
+                ))
         }
-        val body = responseBuilder.buildGetParticipantResponse(participantDoc)
-        return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }
 
     @GetMapping(Uris.API.Web.V1_0.NonAuth.Quiz.SessionId.CONTROLLER_ENDPOINT)
@@ -74,8 +98,8 @@ class ParticipantSessionController(
     @GetMapping(Uris.API.Web.V1_0.NonAuth.IsInSession.ENDPOINT)
     fun checkInSessionStatus(request: HttpServletRequest): ResponseEntity<Any> {
         return when(val expectedCookie = request.cookies?.find { it.name == "InSession" }){
-            null -> ResponseEntity.noContent().build()
-            else -> ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(expectedCookie.value) //TODO: SirenMOdel Media Type
+            null -> throw MissingCookieException(cookieName = "InSession")
+            else -> ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(responseBuilder.buildCheckInSessionResponse(expectedCookie.value)) //TODO: SirenMOdel Media Type
         }
     }
 }

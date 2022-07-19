@@ -23,8 +23,11 @@ class SessionService(
     fun joinSession(input: JoinSessionInputModel): ParticipantDoc {
         //sessionRepo.updateNumberOfParticipants(input.sessionCode)
         val session = sessionRepo.findSessionDocByGuestCode(input.sessionCode)
-            ?: throw Exception("There was no session with that guest code")
-        if (session.status != QqStatus.STARTED) throw Exception("Can join only in started sessions")
+            ?: throw SessionNotFoundException("There was no session with that guest code")
+        if (session.status != QqStatus.STARTED) throw SessionIllegalStatusOperationException(
+            session.status,
+            "Can join only in started sessions"
+        )
         val guestUuid = UUID.randomUUID().toString()
         val guestSession = ParticipantDoc(id = guestUuid, sessionId = session.id)
         participantRepo.save(guestSession)
