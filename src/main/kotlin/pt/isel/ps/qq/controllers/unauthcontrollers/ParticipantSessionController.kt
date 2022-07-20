@@ -65,7 +65,7 @@ class ParticipantSessionController(
 
     @GetMapping(Uris.API.Web.V1_0.NonAuth.Quiz.SessionId.CONTROLLER_ENDPOINT)
     fun getAllQuizzesForParticipantSession(@PathVariable participantId: String): ResponseEntity<Any> {
-        val participantDoc = participantService.getParticipant(participantId) //TODO: checks here may not exist anymore
+        val participantDoc = participantService.getParticipant(participantId)
         val quizzes = quizService.getAllSessionAnswersQuizzes(participantDoc.sessionId)
         val body = responseBuilder.buildGetAllQuizzesResponse(quizzes)
         return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
@@ -75,7 +75,7 @@ class ParticipantSessionController(
     fun checkInSessionStatus(request: HttpServletRequest): ResponseEntity<Any> {
         return when(val expectedCookie = request.cookies?.find { it.name == "InSession" }){
             null -> ResponseEntity.noContent().build()
-            else -> ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(expectedCookie.value) //TODO: SirenMOdel Media Type
+            else -> ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(expectedCookie.value)
         }
     }
 }

@@ -14,7 +14,7 @@ class WebSocketConfiguration : WebSocketMessageBrokerConfigurer {
 
     override fun registerStompEndpoints(stompEndpointRegistry: StompEndpointRegistry) {
         stompEndpointRegistry.addEndpoint("/insessionws")
-            .setAllowedOriginPatterns(getAppHost())
+                .setAllowedOriginPatterns(getAppHost())
             .withSockJS()
     }
 
