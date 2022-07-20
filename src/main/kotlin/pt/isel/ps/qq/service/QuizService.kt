@@ -58,14 +58,14 @@ class QuizService(
 
     fun editQuiz(owner: String, id: String, input: EditQuizInputModel): SessionQuizDoc {
         val quizDoc = getQuizValidatingOwner(owner, id)
-        val session = getSessionValidatingTheOwner(owner, quizDoc.sessionId)
+        //val session = getSessionValidatingTheOwner(owner, quizDoc.sessionId)
         val newQuizDoc = SessionQuizDoc(quizDoc, input)
         return quizRepo.save(newQuizDoc)
     }
 
     fun updateQuizStatus(owner: String, id: String, input: UpdateQuizStatusInputModel): SessionQuizDoc {
         val quizDoc = getQuizValidatingOwner(owner, id)
-        val session = getSessionValidatingTheOwner(owner, quizDoc.sessionId)
+        //val session = getSessionValidatingTheOwner(owner, quizDoc.sessionId)
         val newQuizDoc = SessionQuizDoc(quizDoc, input.quizStatus)
         return quizRepo.save(newQuizDoc)
     }

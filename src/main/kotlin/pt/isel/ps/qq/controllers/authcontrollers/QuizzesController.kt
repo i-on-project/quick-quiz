@@ -82,6 +82,7 @@ class QuizzesController(
         val body = quizzesResponseBuilder.updateQuizStatusResponse()
         return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }
+
     @GetMapping(Uris.API.Web.V1_0.Auth.Quiz.Id.CONTROLLER_ENDPOINT)
     fun getQuizFullInformation(request: HttpServletRequest, @PathVariable id: String): ResponseEntity<Any> {
         val quiz = service.getQuizValidatingOwner(scope.getUser().userName, id)

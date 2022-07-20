@@ -225,7 +225,7 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
         return exceptionHandling(
             type = "LiveSessionAlreadyExists",
             title = "A Live Session already exists",
-            status = 403,
+            status = 409,
             instance = request.contextPath,
             values = values("error", ex.message)
         )
@@ -296,6 +296,34 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
             type = "TokenExpired",
             title = "The token is invalid, request a new email to be sent",
             status = 400,
+            instance = request.contextPath,
+            values = values("error", ex.message)
+        )
+    }
+
+    @ExceptionHandler(value = [GuestSessionNotFoundException::class])
+    fun exceptionHandle(
+        ex: GuestSessionNotFoundException,
+        request: WebRequest
+    ): ResponseEntity<Any> {
+        return exceptionHandling(
+            type = "GuestSessionNotFound",
+            title = "This participant doesn't exist",
+            status = 404,
+            instance = request.contextPath,
+            values = values("error", ex.message)
+        )
+    }
+
+    @ExceptionHandler(value = [MissingCookieException::class])
+    fun exceptionHandle(
+        ex: MissingCookieException,
+        request: WebRequest
+    ): ResponseEntity<Any> {
+        return exceptionHandling(
+            type = "MissingCookieException",
+            title = "Missing cookie ${ex.cookieName}",
+            status = 409,
             instance = request.contextPath,
             values = values("error", ex.message)
         )

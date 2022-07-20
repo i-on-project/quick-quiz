@@ -157,7 +157,7 @@ class SessionsResponseBuilder {
     fun startSessionResponse(code: Int): SirenModel{
         return SirenModel(
             clazz = listOf("LiveSession"),
-            properties = LiveSession(code.toString().padStart(9, '0')),
+            properties = LiveSession(code.toString().padStart(10, '0')),
             title = "Session went live successfully."
         )
     }

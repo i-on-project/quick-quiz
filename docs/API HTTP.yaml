@@ -9,8 +9,20 @@ servers:
 tags:
   - name: authentication
     description: authentication related end points
+  - name: session management
+    description: session related end points
+  - name: quizzes management
+    description: quizzes related end points
+  - name: participants management
+    description: participants related end points
+  - name: templates management
+    description: templates related end points
+  - name: history management
+    description: history related end points
 
 paths:
+
+  ##################### Authentication #####################
   /web/V1.0/non_auth/register:
     post:
       tags:
@@ -204,18 +216,18 @@ paths:
       summary: Unauthenticates the user.
       description: Validates the user credentials and efectively unauthenticates the user expiring the cookie Authorization.
       security:
-        - cookieAuth: []
+        - CookieAuth: []
       responses:
         200:
-          description: Successfully requested a new login and sent the email.
+          description: Successfully unauthenticated the user and deleted the cookie Authorization.
           headers:
             Set-Cookie:
               schema:
                 type: string
                 example: Authorization=; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Path=/; Secure; HttpOnly;
-              description: This is the way to expire the cookie.
-        400:
-          description: Bad request.
+              description: Expire the cookie Authorization.
+        403:
+          description: The user is not authenticated.
           content:
             application/problem+json:
               schema:
@@ -224,9 +236,9 @@ paths:
                   - type: object
                     properties:
                       type:
-                        default: 'BadRequest'
+                        default: 'MissingCookieException'
                       status:
-                        default: 400
+                        default: 403
         404:
           description: User not found.
           content:
@@ -245,15 +257,19 @@ paths:
     get:
       tags:
         - authentication
-      summary: todo.
-      description: todo
+      summary: Checks the authentication state of the user.
+      description: Validates that the user contains the cookie and that the cookie credentials are still valid.
       security:
-        - cookieAuth: []
+        - CookieAuth: []
       responses:
         200:
-          description: todo
-        400:
-          description: Bad request.
+          description: The user is authenticated.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/CheckAuthOutputModel'
+        403:
+          description: The user is not authenticated.
           content:
             application/problem+json:
               schema:
@@ -262,9 +278,9 @@ paths:
                   - type: object
                     properties:
                       type:
-                        default: 'BadRequest'
+                        default: 'MissingCookieException'
                       status:
-                        default: 400
+                        default: 403
         404:
           description: User not found.
           content:
@@ -279,64 +295,1675 @@ paths:
                       status:
                         default: 404
 
+  ##################### Sessions Management #####################
+  /web/v1.0/auth/sessions:
+    get:
+      tags:
+        - session management
+      summary: Gets all the sessions of an user.
+      description: Retrieves all the sessions of an user in list format. The list is iterable using the page parameter.
+      security:
+        - CookieAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          required: true
+          description: Number of the page to request
+      responses:
+        200:
+          description: A list containing all the sessions of the user.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/GetAllSessionOutputModel'
+        403:
+          description: The user is not authenticated.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'MissingCookieException'
+                      status:
+                        default: 403
+    post:
+      tags:
+        - session management
+      summary: Create a new session.
+      description: Creates a new session based on the json object received in request payload.
+      security:
+        - CookieAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  maxLength: 50
+                  nullable: false
+                description:
+                  type: string
+                  maxLength: 250
+                  nullable: true
+                limitOfParticipants:
+                  type: number
+                  format: int32
+                  default: 10
+                  maximum: 200
+                  minimum: 1
+                  nullable: true
+                geolocation:
+                  type: string
+                  example: '31.0978,-5.3977'
+                  nullable: true
+                radius:
+                  type: number
+                  format: int32
+                  minimum: 50
+                  maximum: 999999
+                  nullable: true
+                  default: 50
+                templateId:
+                  type: string
+                  format: uuid
+                  nullable: true
+                  default: null
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+      responses:
+        201:
+          description: Successfully created a new session.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/CreateSessionOutputModel'
+        400:
+          description: Bad request.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'BadRequest'
+                      status:
+                        default: 400
+        403:
+          description: The user is not authenticated.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'MissingCookieException'
+                      status:
+                        default: 403
+
+  /web/v1.0/auth/sessions/{id}:
+    get:
+      tags:
+        - session management
+      summary: Get a specific session.
+      description: Retrieves the session specified by the id parameter.
+      security:
+        - CookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The session identifier.
+      responses:
+        200:
+          description: Representation of the session.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/GetSessionOutputModel'
+        403:
+          description: The user is not authenticated.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'MissingCookieException'
+                      status:
+                        default: 403
+        404:
+          description: Session not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'SessionNotFoundException'
+                      status:
+                        default: 404
+    put:
+      tags:
+        - session management
+      summary: Updates a specific session.
+      description: Updates the session specified by the id paremeter, with the values of the json object received in request payload.
+      security:
+        - CookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The session identifier.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  maxLength: 50
+                  nullable: true
+                descritpion:
+                  type: string
+                  maxLength: 150
+                  nullable: true
+                limitOfParticipants:
+                  type: number
+                  format: int32
+                  minimum: 1
+                  maximum: 250
+                  nullable: true
+                geolocation:
+                  type: string
+                  example: '31.0978,-5.3977'
+                  nullable: true
+                radius:
+                  type: number
+                  format: int32
+                  minimum: 50
+                  maximum: 999999
+                  nullable: true
+                tags:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        200:
+          description: Acknowledgement of success.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/UpdateSessionOutputModel'
+        400:
+          description: Bad request.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'BadRequest'
+                      status:
+                        default: 400
+        403:
+          description: The user is not authenticated.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'MissingCookieException'
+                      status:
+                        default: 403
+        404:
+          description: Session not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'SessionNotFoundException'
+                      status:
+                        default: 404
+    delete:
+      tags:
+        - session management
+      summary: Deletes a specific session.
+      description: Deletes the session specified by the id paremeter.
+      security:
+        - CookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The session identifier.
+      responses:
+        200:
+          description: The session was deleted successfully.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/SingleAcknowledgeOutputModel'
+        403:
+          description: The user is not authenticated.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'MissingCookieException'
+                      status:
+                        default: 403
+        404:
+          description: Session not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'SessionNotFoundException'
+                      status:
+                        default: 404
+
+  /web/v1.0/auth/sessions/{id}/live:
+    post:
+      tags:
+        - session management
+      summary: Starts a session.
+      description: Starts the session specified by the id paremeter, making it visible for the participants.
+      security:
+        - CookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The session identifier.
+      responses:
+        200:
+          description: The session could be started.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/StartSessionOutputModel'
+        403:
+          description: The user is not authenticated.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'MissingCookieException'
+                      status:
+                        default: 403
+        404:
+          description: Session not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'SessionNotFoundException'
+                      status:
+                        default: 404
+        409:
+          description: Exists another session alredy started.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'LiveSessionAlreadyExists'
+                      status:
+                        default: 409
+
+  /web/v1.0/auth/sessions/{id}/close:
+    post:
+      tags:
+        - session management
+      summary: Closes a session.
+      description: Closes the session specified by the id paremeter, making it immutable.
+      security:
+        - CookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The session identifier.
+      responses:
+        200:
+          description: The session could be closed.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/SingleAcknowledgeOutputModel'
+        403:
+          description: The user is not authenticated.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'MissingCookieException'
+                      status:
+                        default: 403
+        404:
+          description: Session not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'SessionNotFoundException'
+                      status:
+                        default: 404
+        409:
+          description: The session could not be closed.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'SessionIllegalStatusOperationException'
+                      status:
+                        default: 409
+
+  /web/v1.0/auth/sessions/{id}/answers:
+    get:
+      tags:
+        - session management
+      summary: Gets all the answers.
+      description: Gets all the answers for all the quizzes present on the session specified by the id paremeter.
+      security:
+        - CookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The session identifier.
+      responses:
+        200:
+          description: A list containing all the answers for the session.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/GetAllAnswersSessionOutputModel'
+        403:
+          description: The user is not authenticated.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'MissingCookieException'
+                      status:
+                        default: 403
+        404:
+          description: Session not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'SessionNotFoundException'
+                      status:
+                        default: 404
+
+  ##################### Quizzes Management #####################
+  /web/v1.0/auth/quiz/{id}:
+    get:
+      tags:
+        - quizzes management
+      summary: Gets a specific questionaire.
+      description: Gets the questionaire specified by the parameter id.
+      security:
+        - CookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The questionaire identifier.
+      responses:
+        200:
+          description: Representation of the questionaire.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/GetQuizOutputModel'
+        403:
+          description: The user is not authenticated.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'MissingCookieException'
+                      status:
+                        default: 403
+        404:
+          description: Quiz not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'QuizNotFoundException'
+                      status:
+                        default: 404
+    put:
+      tags:
+        - quizzes management
+      summary: Updates a specific questionaire.
+      description: Updates the questionaire specified by the parameter id.
+      security:
+        - CookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The questionaire identifier.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - question
+              properties:
+                order:
+                  type: number
+                  format: int32
+                  minimum: 0
+                  maximum: 99
+                  nullable: true
+                question:
+                  type: string
+                  maxLength: 250
+                  nullable: false
+                choices:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      choiceNumber:
+                        type: number
+                        format: int32
+                        nullable: true
+                      choiceAnswer:
+                        type: string
+                        maxLength: 150
+                        nullable: false
+                      choiceRight:
+                        type: boolean
+                        default: false
+                        nullable: false
+                  nullable: false
+      responses:
+        200:
+          description: The questionaire was updated successfully.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/SirenModel'
+        400:
+          description: Bad request.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'BadRequest'
+                      status:
+                        default: 400
+        403:
+          description: The user is not authenticated.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'MissingCookieException'
+                      status:
+                        default: 403
+        404:
+          description: Quiz not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'QuizNotFoundException'
+                      status:
+                        default: 404
+    delete:
+      tags:
+        - quizzes management
+      summary: Deletes a specific questionaire.
+      description: Deletes the questionaire specified by the parameter id.
+      security:
+        - CookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The questionaire identifier.
+      responses:
+        200:
+          description: The questionaire was deleted successfully.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/SingleAcknowledgeOutputModel'
+        403:
+          description: The user is not authenticated.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'MissingCookieException'
+                      status:
+                        default: 403
+        404:
+          description: Quiz not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'QuizNotFoundException'
+                      status:
+                        default: 404
+
+  /web/v1.0/auth/quiz/{id}/updatestatus:
+    put:
+      tags:
+        - quizzes management
+      summary: Updates the status of a specific quiz.
+      description: Updates the status of the quiz specified by the parameter id.
+      security:
+        - CookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The quiz identifier.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - quizStatus
+              properties:
+                quizStatus:
+                  type: string
+                  enum: ['MULTIPLE_CHOICE', 'SHORT', 'LONG']
+                  default: 'SHORT'
+                  nullable: false
+      responses:
+        200:
+          description: The status of the quiz was updated successfully.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/SirenModel'
+        400:
+          description: Bad request.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'BadRequest'
+                      status:
+                        default: 400
+        403:
+          description: The user is not authenticated.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'MissingCookieException'
+                      status:
+                        default: 403
+        404:
+          description: Quiz not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'QuizNotFoundException'
+                      status:
+                        default: 404
+
+  ##################### Participants Management #####################
+  /web/v1.0/non_auth/join_session:
+    post:
+      tags:
+        - participants management
+      summary: Let a participant join session.
+      description: Let a participant join a started session.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - sessionCode
+              properties:
+                sessionCode:
+                  type: number
+                  format: int32
+                  minimum: 0
+                  maximum: 2147483647
+                  nullable: false
+      responses:
+        200:
+          description: The participant joined the session successfully.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: InSession=3fa85f64-5717-4562-b3fc-2c963f66afa6; Max-Age=604800; Path=/; Secure; HttpOnly; SameSite=Strict
+              description: The existance of this cookie indicates that the participant is still in the session.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/JoinSessionOutputModel'
+        404:
+          description: Session not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                    - $ref: '#/components/schemas/ProblemJson'
+                    - type: object
+                      properties:
+                        type:
+                          default: 'SessionNotFoundException'
+                        status:
+                          default: 404
+        409:
+          description: The session is not started.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'SessionIllegalStatusOperationException'
+                      status:
+                        default: 409
+
+  /web/v1.0/non_auth/give_answer:
+    post:
+      tags:
+        - participants management
+      summary: Let a participant give an answer.
+      description: Let a participant give an answer to a quiz.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - guestId
+                - sessionId
+                - quizId
+              properties:
+                guestId:
+                  type: string
+                  format: uuid
+                  nullable: false
+                sessionId:
+                  type: string
+                  format: uuid
+                  nullable: false
+                quizId:
+                  type: string
+                  format: uuid
+                  nullable: false
+                answer:
+                  type: string
+                  nullable: true
+                answerChoice:
+                  type: number
+                  format: int32
+                  nullable: true
+      responses:
+        200:
+          description: The participant could give an answer successfully.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/ParticipantOutputModel'
+        404:
+          description: The participant doesn't exist.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'GuestSessionNotFound'
+                      status:
+                        default: 404
+
+  /web/v1.0/non_auth/answer/{id}:
+    get:
+      tags:
+        - participants management
+      summary: Get a specific participant.
+      description: Get all the information of a participant specified by the parameter id.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The participant identifier.
+      responses:
+        200:
+          description: Representation of the participant.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/ParticipantOutputModel'
+        404:
+          description: Participant not found.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: InSession=; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Path=/; Secure; HttpOnly;
+              description: Expire the cookie InSession.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'GuestSessionNotFound'
+                      status:
+                        default: 404
+        409:
+          description: Participant not found.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: InSession=; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Path=/; Secure; HttpOnly;
+              description: Expire the cookie InSession.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'SessionIllegalStatusOperation'
+                      status:
+                        default: 409
+
+  /web/v1.0/non_auth/is_in_session:
+    get:
+      tags:
+        - participants management
+      summary: Checks the existance of the cookie InSession.
+      description: Validates that the user contains the cookie and that the cookie is still valid.
+      responses:
+        200:
+          description: Representation of the cookie value.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/CheckInSessionOutputModel'
+        409:
+          description: Participant not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'MissingCookieException'
+                      status:
+                        default: 409
+
+  ##################### Templates Management #####################
+  /web/v1.0/auth/template:
+    get:
+      tags:
+        - templates management
+      summary: Gets all the templates of an user.
+      description: Retrieves all the templates of an user in list format. The list is iterable using the page parameter.
+      security:
+        - CookieAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          required: true
+          description: Number of the page to request
+      responses:
+        200:
+          description: A list containing all the templates of the user.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/GetAllTemplatesOutputModel'
+        403:
+          description: The user is not authenticated.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'MissingCookieException'
+                      status:
+                        default: 403
+    post:
+      tags:
+        - templates management
+      summary: Create a new template.
+      description: Creates a new template based on the json object received in request payload.
+      security:
+        - CookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - quizzes
+              properties:
+                name:
+                  type: string
+                  maxLength: 50
+                  nullable: false
+                limitOfParticipants:
+                  type: number
+                  format: int32
+                  default: 10
+                  maximum: 200
+                  minimum: 1
+                  nullable: true
+                geolocation:
+                  type: string
+                  example: '31.0978,-5.3977'
+                  nullable: true
+                radius:
+                  type: number
+                  format: int32
+                  minimum: 50
+                  maximum: 999999
+                  nullable: true
+                  default: 50
+                quizzes:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      order:
+                        type: number
+                        format: int32
+                        minimum: 0
+                        maximum: 99
+                        nullable: false
+                      question:
+                        type: string
+                        maxLength: 250
+                        nullable: false
+                      questionType:
+                        type: string
+                        enum: ['MULTIPLE_CHOICE', 'SHORT', 'LONG']
+                        default: 'SHORT'
+                        nullable: false
+                      answerChoices:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            choiceNumber:
+                              type: number
+                              format: int32
+                              minimum: 0
+                              nullable: false
+                            choiceAnswer:
+                              type: string
+                              maxLength: 150
+                              nullable: false
+                            choiceRight:
+                              type: boolean
+                              default: false
+                              nullable: false
+                        nullable: true
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+      responses:
+        201:
+          description: Successfully created a new template.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/CreateTemplateOutputModel'
+        400:
+          description: Bad request.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'BadRequest'
+                      status:
+                        default: 400
+        403:
+          description: The user is not authenticated.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'MissingCookieException'
+                      status:
+                        default: 403
+
+  /web/v1.0/auth/template/{id}:
+    get:
+      tags:
+        - templates management
+      summary: Get a specific template.
+      description: Retrieves the template specified by the id parameter.
+      security:
+        - CookieAuth: [ ]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The template identifier.
+      responses:
+        200:
+          description: Representation of the template.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/GetTemplateOutputModel'
+        403:
+          description: The user is not authenticated.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'MissingCookieException'
+                      status:
+                        default: 403
+        404:
+          description: Template not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'TemplateNotFoundException'
+                      status:
+                        default: 404
+    delete:
+      tags:
+        - templates management
+      summary: Deletes a specific template.
+      description: Deletes the template specified by the id paremeter.
+      security:
+        - CookieAuth: [ ]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The template identifier.
+      responses:
+        200:
+          description: The template was deleted successfully.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/SingleAcknowledgeOutputModel'
+        403:
+          description: The user is not authenticated.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'MissingCookieException'
+                      status:
+                        default: 403
+        404:
+          description: Template not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'TemplateNotFoundException'
+                      status:
+                        default: 404
+
+  ##################### History Management #####################
+  /web/v1.0/auth/history:
+    get:
+      tags:
+        - history management
+      summary: Gets all the closed sessions of an user.
+      description: Retrieves all the closed sessions of an user in list format. The list is iterable using the page parameter.
+      security:
+        - CookieAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          required: true
+          description: Number of the page to request
+      responses:
+        200:
+          description: A list containing all the closed sessions of the user.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/GetHistoryOutputModel'
+        403:
+          description: The user is not authenticated.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'MissingCookieException'
+                      status:
+                        default: 403
+
+  ##################### Multiple Tags #####################
+  /web/v1.0/auth/quiz/session/{id}:
+    get:
+      tags:
+        - session management
+        - quizzes management
+      summary: Gets all quizzes.
+      description: Gets all the quizzes attached to the session specified by the id parameter.
+      security:
+        - CookieAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The session identifier.
+      responses:
+        200:
+          description: A list containing all the quizzes attached to the session.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/GetAllQuizzesOutputModel'
+        403:
+          description: The user is not authenticated.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'MissingCookieException'
+                      status:
+                        default: 403
+        404:
+          description: Session not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'SessionNotFoundException'
+                      status:
+                        default: 404
+
+  /web/v1.0/auth/sessions/{id}/quiz:
+    post:
+      tags:
+        - session management
+        - quizzes management
+      summary: Creates a new quiz.
+      description: Creates a new quiz, based on the json object received in request payload, attached to the session specified by the id parameter.
+      security:
+        - CookieAuth: [ ]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The session identifier.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - question
+                - questionType
+              properties:
+                order:
+                  type: number
+                  format: int32
+                  minimum: 0
+                  maximum: 99
+                  nullable: true
+                question:
+                  type: string
+                  maxLength: 250
+                  nullable: false
+                questionType:
+                  type: string
+                  enum: ['MULTIPLE_CHOICE', 'SHORT', 'LONG']
+                  example: 'SHORT'
+                  nullable: false
+                choices:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      choiceNumber:
+                        type: number
+                        format: int32
+                        nullable: true
+                      choiceAnswer:
+                        type: string
+                        maxLength: 150
+                        nullable: false
+                      choiceRight:
+                        type: boolean
+                        default: false
+                        nullable: false
+                  nullable: false
+      responses:
+        201:
+          description: Successfully created a new quiz.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/AddQuizToSessionOutputModel'
+        403:
+          description: The user is not authenticated.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'MissingCookieException'
+                      status:
+                        default: 403
+        400:
+          description: Bad request.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'BadRequest'
+                      status:
+                        default: 400
+        404:
+          description: Session not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'SessionNotFoundException'
+                      status:
+                        default: 404
+
+  /web/v1.0/non_auth/quiz/session/{id}:
+    get:
+      tags:
+        - quizzes management
+        - participants management
+      summary: Gets all the quizzes for a specific participant.
+      description: Gets all the quizzes that a participant specified by the parameter id can answer.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The participant identifier.
+      responses:
+        200:
+          description: A list containing all the quizzes that the participant can answer.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/GetAllQuizzesOutputModel'
+        404:
+          description: Participant not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'GuestSessionNotFound'
+                      status:
+                        default: 404
+
 
 components:
 
   securitySchemes:
-    cookieAuth:
+    CookieAuth:
       type: apiKey
       in: cookie
       name: Authorization
 
   schemas:
-    AuthenticationOutputModel:
-      allOf:
-        - $ref: '#/components/schemas/SirenModel'
-        - type: object
-          properties:
-            properties:
-              type: object
-              properties:
-                userName:
-                  type: string
-                  format: email
-                displayName:
-                  type: string
-                  maxLength: 50
-                token:
-                  type: string
-                  format: uuid
-                timeout:
-                  type: integer
-                  format: int64
-            actions:
-              type: array
-              items:
-                $ref: '#/components/schemas/SirenAction'
-            title:
-              type: string
 
-    LogmeinOutputModel:
-      allOf:
-        - $ref: '#/components/schemas/SirenModel'
-        - type: object
-          properties:
-            class:
-              type: array
-              items:
+    ##################### Data Models #####################
+    SessionModel:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: false
+        name:
+          type: string
+          maxLength: 50
+          nullable: false
+        descritpion:
+          type: string
+          maxLength: 250
+          nullable: true
+        creationDate:
+          type: number
+          format: int64
+          nullable: false
+        owner:
+          type: string
+          format: email
+          nullable: false
+        guestCode:
+          type: number
+          format: int32
+          nullable: true
+        limitOfParticipants:
+          type: number
+          format: int32
+          default: 10
+          nullable: false
+        geolocation:
+          type: number
+          nullable: true
+          example: '31.0978,-5.3977'
+        radius:
+          type: number
+          format: int32
+          nullable: true
+        liveDate:
+          type: number
+          format: int64
+          nullable: true
+        status:
+          nullable: false
+          type: string
+          enum: ['NOT_STARTED', 'STARTED', 'CLOSED']
+          default: 'NOT_STARTED'
+        tags:
+          type: array
+          items:
+            type: string
+          nullable: false
+
+    QuizModel:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: false
+        sessionId:
+          type: string
+          format: uuid
+          nullable: false
+        userOwner:
+          type: string
+          format: email
+          nullable: false
+        order:
+          type: number
+          minimum: 0
+          maximum: 99
+          format: int32
+          nullable: false
+        question:
+          type: string
+          maxLength: 250
+          nullable: false
+        answerType:
+          type: string
+          enum: ['MULTIPLE_CHOICE', 'SHORT', 'LONG']
+          nullable: false
+        quizStatus:
+          type: string
+          enum: ['NOT_STARTED', 'STARTED', 'CLOSED']
+          nullable: false
+        answerChoices:
+          type: array
+          items:
+            type: object
+            properties:
+              choiceNumber:
+                type: number
+                format: int32
+                minimum: 0
+                nullable: false
+              choiceAnswer:
                 type: string
-            properties:
-              type: object
-              properties:
-                userName:
-                  type: string
-                  format: email
-                displayName:
-                  type: string
-                  maxLength: 50
-            title:
-              type: string
+                maxLength: 150
+                nullable: false
+              choiceRight:
+                type: boolean
+                default: false
+                nullable: false
 
+    ParticipantModel:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: false
+        sessionId:
+          type: string
+          format: uuid
+          nullable: false
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              quizId:
+                type: string
+                format: uuid
+                nullable: false
+              answer:
+                type: string
+                nullable: true
+              answerNumber:
+                type: number
+                format: int32
+                nullable: true
+
+    TemplateModel:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: false
+        name:
+          type: string
+          maxLength: 50
+          nullable: false
+        owner:
+          type: string
+          format: email
+          nullable: false
+        limitOfParticipants:
+          type: number
+          format: int32
+          default: 10
+          nullable: false
+        geolocation:
+          type: string
+          example: '31.0978,-5.3977'
+          nullable: true
+        radius:
+          type: number
+          format: int64
+          nullable: true
+        quizzes:
+          type: array
+          items:
+            type: object
+            properties:
+              order:
+                type: number
+                format: int32
+                minimum: 0
+                maximum: 99
+                nullable: false
+              question:
+                type: string
+                nullable: false
+              answerType:
+                type: string
+                enum: ['MULTIPLE_CHOICE', 'SHORT', 'LONG']
+                default: 'SHORT'
+                nullable: true
+              answerChoices:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    choiceNumber:
+                      type: number
+                      format: int32
+                      minimum: 0
+                      nullable: false
+                    choiceAnswer:
+                      type: string
+                      maxLength: 150
+                      nullable: false
+                    choiceRight:
+                      type: boolean
+                      default: false
+                      nullable: false
+
+    ##################### Problem+json Model #####################
     ProblemJson:
       type: object
       properties:
@@ -355,7 +1982,9 @@ components:
         instance:
           type: string
           format: uri
+          example: 'https://www.example.com/'
 
+    ##################### Siren Model #####################
     SirenLink:
       type: object
       properties:
@@ -373,6 +2002,7 @@ components:
         href:
           type: string
           format: uri
+          example: 'https://www.example.com/'
         type:
           type: string
           default: null
@@ -411,15 +2041,7 @@ components:
         href:
           type: string
           format: uri
-        links:
-          type: array
-          items:
-            $ref: '#/components/schemas/SirenLink'
-        title:
-          type: string
-          default: null
-        properties:
-          type: object
+          example: 'https://www.example.com/'
 
     SirenAction:
       type: object
@@ -437,6 +2059,7 @@ components:
         href:
           type: string
           format: uri
+          example: 'https://www.example.com/'
         title:
           type: string
           default: null
@@ -456,3 +2079,529 @@ components:
           type: array
           items:
             type: string
+
+    ##################### Generic Siren Responses #####################
+    ListOutputModel:
+      type: object
+      properties:
+        size:
+          type: number
+          format: int32
+        total:
+          type: number
+          format: int32
+        pageSize:
+          type: number
+          format: int32
+          default: 10
+
+    SingleAcknowledgeOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              type: object
+              properties:
+                acknowledge:
+                  type: boolean
+                  default: true
+            title:
+              type: string
+
+    ##################### Specific Siren Responses #####################
+    AuthenticationOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              type: object
+              properties:
+                userName:
+                  type: string
+                  format: email
+                displayName:
+                  type: string
+                  maxLength: 50
+                token:
+                  type: string
+                  format: uuid
+                timeout:
+                  type: integer
+                  format: int64
+            actions:
+              type: array
+              items:
+                $ref: '#/components/schemas/SirenAction'
+            title:
+              type: string
+
+    LogmeinOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              type: object
+              properties:
+                userName:
+                  type: string
+                  format: email
+                displayName:
+                  type: string
+                  maxLength: 50
+            title:
+              type: string
+
+    CheckAuthOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            propperties:
+              type: object
+              properties:
+                userName:
+                  type: string
+                  format: email
+                displayName:
+                  type: string
+                  maxLength: 50
+            title:
+              type: string
+
+    GetAllSessionOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              $ref: '#/components/schemas/ListOutputModel'
+            actions:
+              type: array
+              items:
+                $ref: '#/components/schemas/SirenAction'
+            links:
+              type: array
+              items:
+                $ref: '#/components/schemas/SirenLink'
+            entities:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/SirenEntity'
+                  - type: object
+                    properties:
+                      properties:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            nullable: false
+                          name:
+                            type: string
+                            nullable: false
+                          status:
+                            type: string
+                            enum: [ 'NOT_STARTED', 'STARTED', 'CLOSED' ]
+                            default: 'NOT_STARTED'
+                          description:
+                            type: string
+                            nullable: true
+                      links:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/SirenLink'
+
+    CreateSessionOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              $ref: '#/components/schemas/SessionModel'
+            title:
+              type: string
+            links:
+              $ref: '#/components/schemas/SirenLink'
+
+    GetSessionOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              type: object
+              properties:
+                name:
+                  type: string
+                  maxLength: 50
+                  nullable: false
+                descritpion:
+                  type: string
+                  maxLength: 250
+                  nullable: true
+                creationDate:
+                  type: number
+                  format: int64
+                  nullable: false
+                guestCode:
+                  type: number
+                  format: int32
+                  nullable: true
+                limitOfParticipants:
+                  type: number
+                  format: int32
+                  default: 10
+                  nullable: false
+                geolocation:
+                  type: number
+                  nullable: true
+                  example: '31.0978,-5.3977'
+                radius:
+                  type: number
+                  format: int32
+                  nullable: true
+                liveDate:
+                  type: number
+                  format: int64
+                  nullable: true
+                status:
+                  nullable: false
+                  type: string
+                  enum: [ 'NOT_STARTED', 'STARTED', 'CLOSED' ]
+                  default: 'NOT_STARTED'
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  nullable: false
+            actions:
+              type: array
+              items:
+                $ref: '#/components/schemas/SirenAction'
+            links:
+              type: array
+              items:
+                $ref: '#/components/schemas/SirenLink'
+
+    UpdateSessionOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              type: object
+              properties:
+                acknowledge:
+                  type: boolean
+                  default: true
+            title:
+              type: string
+            links:
+              type: array
+              items:
+                $ref: '#/components/schemas/SirenLink'
+
+    StartSessionOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              type: object
+              properties:
+                guestCode:
+                  type: string
+                  maxLength: 10
+            title:
+              type: string
+
+    AddQuizToSessionOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+            entities:
+              type: array
+              items:
+                $ref: '#/components/schemas/SirenEntity'
+            title:
+              type: string
+            links:
+              type: array
+              items:
+                $ref: '#/components/schemas/SirenLink'
+
+    GetQuizOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              $ref: '#/components/schemas/QuizModel'
+
+    GetAllQuizzesOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              $ref: '#/components/schemas/ListOutputModel'
+            entities:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/SirenEntity'
+                  - type: object
+                    properties:
+                      properties:
+                        $ref: '#/components/schemas/QuizModel'
+
+    JoinSessionOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              type: object
+              properties:
+                participantId:
+                  type: string
+                  format: uuid
+
+    ParticipantOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              $ref: '#/components/schemas/ParticipantModel'
+            entities:
+              type: array
+              items:
+                $ref: '#/components/schemas/SirenEntity'
+
+    CheckInSessionOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              type: object
+              properties:
+                value:
+                  type: string
+                  format: uuid
+
+    GetHistoryOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              $ref: '#/components/schemas/ListOutputModel'
+            entities:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/SirenEntity'
+                  - type: object
+                    properties:
+                      properties:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            maxLength: 50
+                          descritption:
+                            type: string
+                          historyDate:
+                            type: number
+                            format: int64
+                          liveDate:
+                            type: number
+                            format: int64
+                          limitOfParticipants:
+                            type: number
+                            format: int32
+                          numberOfParticipants:
+                            type: number
+                            format: int32
+                          quizzes:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                question:
+                                  type: string
+                                order:
+                                  type: number
+                                  format: int32
+                                answerType:
+                                  type: string
+                                  enum: ['MULTIPLE_CHOICE', 'SHORT', 'LONG']
+                                  default: 'SHORT'
+                                numberOfAnswers:
+                                  type: number
+                                  format: int
+                                answerChoices:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      choiceNumber:
+                                        type: number
+                                        format: int32
+                                      choiceAnswer:
+                                        type: string
+                                      choiceRight:
+                                        type: boolean
+                                answers:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      participantId:
+                                        type: string
+                                        format: uuid
+                                      answer:
+                                        type: string
+                                      choiceNumber:
+                                        type: number
+                                        format: int32
+            links:
+              type: array
+              items:
+                $ref: '#/components/schemas/SirenLink'
+
+    GetAllTemplatesOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              $ref: '#/components/schemas/ListOutputModel'
+            entities:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/SirenEntity'
+                  - type: object
+                    properties:
+                      properties:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                          name:
+                            type: string
+                          limitOfParticipants:
+                            type: number
+                            format: int32
+                          geolocation:
+                            type: string
+                            example: '31.0978,-5.3977'
+                          radius:
+                            type: number
+                            format: int64
+                          quizzes:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                question:
+                                  type: string
+                                answerType:
+                                  type: string
+                                  enum: ['MULTIPLE_CHOICE', 'SHORT', 'LONG']
+                                  default: 'SHORT'
+                                answerChoices:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      choiceNumber:
+                                        type: number
+                                        format: int32
+                                      choiceAnswer:
+                                        type: string
+                                      choiceRight:
+                                        type: boolean
+            links:
+              type: array
+              items:
+                $ref: '#/components/schemas/SirenLink'
+
+    CreateTemplateOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              type: object
+              properties:
+                acknowledge:
+                  type: boolean
+                  default: true
+            title:
+              type: string
+            links:
+              type: array
+              items:
+                $ref: '#/components/schemas/SirenLink'
+
+    GetTemplateOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              $ref: '#/components/schemas/TemplateModel'
+            actions:
+              type: array
+              items:
+                $ref: '#/components/schemas/SirenAction'
+
+    GetAllAnswersSessionOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              $ref: '#/components/schemas/ListOutputModel'
+            entities:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/SirenEntity'
+                  - type: object
+                    properties:
+                      properties:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                          answers:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                quizId:
+                                  type: string
+                                  format: uuid
+                                answer:
+                                  type: string
+                                answerNumber:
+                                  type: number
+                                  format: int

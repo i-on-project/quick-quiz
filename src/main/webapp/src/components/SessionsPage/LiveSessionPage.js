@@ -157,7 +157,7 @@ export const LiveSession = () => {
                         <Card.Title>Description: {session.description}</Card.Title>
                         <Card.Title>Guest code: {session.guestCode}</Card.Title>
                         <Card.Title>Participants: {answers_state.data == null ? 'unknown' : answers_state.data.entities.length} / {session.limitOfParticipants}</Card.Title>
-                        <Card.Title><Timer content={'Elapsed time: '} start={session.creationDate}/></Card.Title></Col>
+                        <Card.Title><Timer content={'Elapsed time: '} time={session.liveDate}/></Card.Title></Col>
                         <Col></Col>
                     </Card>
                 </Row>
