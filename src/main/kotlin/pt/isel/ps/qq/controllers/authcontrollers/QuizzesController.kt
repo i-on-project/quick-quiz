@@ -115,22 +115,12 @@ class QuizzesController(
         @PathVariable id: String,
         @Valid @RequestBody input: AddQuizToSessionInputModel
     ): ResponseEntity<Any> {
-        // return try {
         val quiz = service.addQuizToSession(scope.getUser().userName, id, input)
         val body = quizzesResponseBuilder.addQuizzResponse(getBaseUrlHostFromRequest(request), quiz.sessionId, quiz.id)
-        return ResponseEntity.created(Uris.API.Web.V1_0.Auth.Quiz.Id.make(quiz.id)).contentType(SirenModel.MEDIA_TYPE)
-            .body(body)
-        /* } catch (ex: SessionNotFoundException) {
-             exHandler.exceptionHandle(request, id, ex)
-         } catch (ex: SessionAuthorizationException) {
-             exHandler.exceptionHandle(request, id, ex)
-         } catch (ex: SessionIllegalStatusOperationException) {
-             exHandler.exceptionHandle(request, id, ex)
-         } catch (ex: AtLeast2Choices) {
-             exHandler.exceptionHandle(request, id, ex)
-         } catch (ex: AtLeast1CorrectChoice) {
-             exHandler.exceptionHandle(request, id, ex)
-         }*/
+        return ResponseEntity
+                    .created(Uris.API.Web.V1_0.Auth.Quiz.Id.make(quiz.id))
+                    .contentType(SirenModel.MEDIA_TYPE).body(body)
+
     }
 
 }

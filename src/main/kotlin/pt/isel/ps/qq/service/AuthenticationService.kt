@@ -28,7 +28,7 @@ class AuthenticationService(
     }
 
     fun register(input: RegisterInputModel): UserDoc {
-        val userName = input.userName.lowercase().trim().substring(IntRange(0, 49))
+        val userName = input.userName.lowercase().trim()
         val registeredUser = userRepo.findById(userName)
 
         if (!registeredUser.isEmpty) {

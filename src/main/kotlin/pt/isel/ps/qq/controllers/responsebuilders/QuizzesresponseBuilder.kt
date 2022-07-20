@@ -10,7 +10,7 @@ class QuizzesresponseBuilder {
     fun addQuizzResponse(host: String, sessionId: String, quizId: String): SirenModel{ //TODO: Added id to property
         return SirenModel(
             clazz = listOf("Quiz"),
-            properties = {val id = quizId},
+            properties = mapOf("id" to quizId),
             entities = listOf(
                 SirenEntity(
                     rel = listOf("session"), links = listOf(

@@ -52,8 +52,7 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
             type = "BadRequest",
             title = "Data is missing from request",
             status = 400,
-            instance = request.contextPath,
-            values = mapOf("user" to scope.getUser().userName)
+            instance = request.contextPath
         )
     }
     /**Catch All**/
@@ -66,8 +65,7 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
             type = "InternalError",
             title = "An Unknown error occurred",
             status = 500,
-            instance = request.contextPath,
-            values = mapOf("user" to scope.getUser().userName)
+            instance = request.contextPath
         )
     }
 
@@ -81,8 +79,7 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
             type = "BadRequest",
             title = "Data is missing from request",
             status = 400,
-            instance = request.contextPath,
-            values = mapOf("user" to scope.getUser().userName)
+            instance = request.contextPath
         )
     }
 
@@ -95,8 +92,7 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
             type = "InternalError",
             title = "An Unknown error occurred",
             status = 500,
-            instance = request.contextPath,
-            values = mapOf("user" to scope.getUser().userName)
+            instance = request.contextPath
         )
     }
     private fun values(id: String?, message: String?) =
@@ -325,7 +321,7 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
             title = "Missing cookie ${ex.cookieName}",
             status = 409,
             instance = request.contextPath,
-            values = values("error", ex.message)
+            values = mapOf("error" to ex.message)
         )
     }
 }

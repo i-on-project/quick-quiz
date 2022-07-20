@@ -14,7 +14,8 @@ class ParticipantResponseBuilder {
     fun buildJoinSessionResponse(id: String): SirenModel { //TODO: New
         return SirenModel(
             clazz = listOf("participant", "id"),
-            properties = { val participantId = id })
+            properties = mapOf("participantId" to  id )
+        )
     }
 
     fun buildGetAllQuizzesResponse(quizzes: List<SessionQuizDoc>): SirenModel { //TODO: New
@@ -48,7 +49,7 @@ class ParticipantResponseBuilder {
     fun buildCheckInSessionResponse(participantId: String): SirenModel {
         return SirenModel(
             clazz = listOf("check", "participant"),
-            properties = {val value = participantId}
+            properties = mapOf("participantId" to participantId)
         )
     }
 }

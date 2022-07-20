@@ -116,10 +116,11 @@ class ApiIntegrationTest() {
     fun isNotInSessionAndBodyIsEmpty() {
         val path = Uris.API.Web.V1_0.NonAuth.IsInSession.PATH
 
-        getRequestNoCookie(path)
+        val result = getRequestNoCookie(path)
             .andExpect(cookie().doesNotExist("InSession"))
-            .andExpect(status().isNoContent)
-            .andExpect(content().string(""))
+            .andExpectProblemJsonMediaType()
+            .andExpect(status().isConflict)
+            .andExpect(jsonPath("$.type").value("MissingCookieException"))
     }
 
     @Order(100)
@@ -131,7 +132,8 @@ class ApiIntegrationTest() {
 
         getRequestWithCookie(path, cookie)
             .andExpect(status().isOk)
-            .andExpect(content().string("TestSessionId"))
+            .andExpectSirenMediaType()
+            .andExpect(jsonPath("$.properties.participantId").value("TestSessionId"))
     }
 
 
