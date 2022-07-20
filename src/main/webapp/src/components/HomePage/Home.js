@@ -1,17 +1,15 @@
 import * as React from "react";
-import {useCallback, useContext, useState} from "react";
+import {useCallback, useState} from "react";
 import {Container, Row, Card, Button, Form, Spinner} from "react-bootstrap"
 import {Navigate} from "react-router-dom"
 import {parse_body, request} from "../../utils/Request";
 import {Notification} from "../Notification";
-import {ParticipantContext} from "../ParticipantContext";
 import {PreviousSession} from "./PreviousSession";
 import {stringOnlyDigits} from "../../utils/StringUtils";
 
 const uri = '/api/web/v1.0/non_auth/join_session'
 export const Home = () => {
 
-    const [{participant_id}, setContext] = useContext(ParticipantContext)
     const [state, setState] = useState({code: "", loading: false, problem: null})
 
     const onChangeHandler = useCallback((event) => {
@@ -26,7 +24,6 @@ export const Home = () => {
 
         const success_func = (data) => {
             setState((prev) => { return {...prev, loading: false, redirect: data.properties.participantId}})
-            setContext((prev) => { return {...prev, participant_id: data.participantId}})
         }
 
         const failed_func = (problem) => {
@@ -34,16 +31,13 @@ export const Home = () => {
         }
 
         request(uri, {method: 'POST', ...parse_body({sessionCode: value})}, {success: success_func, failed: failed_func})
-    }, [setContext])
+    }, [])
 
     const onCloseHandler = useCallback(() => {
         setState((prev) => { return {...prev, problem: null}})
     }, [])
 
     if(state.redirect != null) return <Navigate to={`/insession/${state.redirect}`}/>
-
-    let previous_session = null
-    if(participant_id != null) previous_session = <PreviousSession participant_id={participant_id}/>
 
     let submit_button = <Button variant="success" type="submit">Submit</Button>
     if(state.loading) submit_button = <Button variant="success" type="submit" disabled={true}>
@@ -54,7 +48,7 @@ export const Home = () => {
         <React.Fragment>
             <Container>
                 <Row><Notification problem={state.problem} onClose={onCloseHandler}/></Row>
-                <Row>{previous_session}</Row>
+                <Row><PreviousSession/></Row>
                 <Row><Card>
                     <Card.Title>Join a Quiz Session</Card.Title>
                     <Card.Body><Form onSubmit={onSubmitHandler}>
