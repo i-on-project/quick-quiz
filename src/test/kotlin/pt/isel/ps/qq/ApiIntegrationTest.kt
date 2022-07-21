@@ -128,12 +128,13 @@ class ApiIntegrationTest() {
     fun isInSessionAndReceivesSessionId() {
         val path = Uris.API.Web.V1_0.NonAuth.IsInSession.PATH
 
-        val cookie = Cookie("InSession", "TestSessionId")
+        val cookie = Cookie("InSession", "participantId&sessionId")
 
         getRequestWithCookie(path, cookie)
             .andExpect(status().isOk)
             .andExpectSirenMediaType()
-            .andExpect(jsonPath("$.properties.participantId").value("TestSessionId"))
+            .andExpect(jsonPath("$.properties.participantId").value("participantId"))
+            .andExpect(jsonPath("$.properties.sessionId").value("sessionId"))
     }
 
 

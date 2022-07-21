@@ -42,7 +42,7 @@ data class SessionOutputModel(
     )
 }
 
-data class ParticipantHistoryOutpuModel(
+data class ParticipantHistoryOutputModel(
     val sessionName: String,
     val sessionDescription: String?,
     val sessionDate: Long,
@@ -52,9 +52,8 @@ data class ParticipantHistoryOutpuModel(
         sessionName = doc.name,
         sessionDescription = doc.description,
         sessionDate = doc.historyDate,
-        quizzes = doc.quizzes.map { q -> SessionQuizzes(q, participantId) },
-
-        )
+        quizzes = doc.quizzes.map { q -> SessionQuizzes(q, participantId) }
+    )
 }
 
 data class SessionQuizzes(

@@ -103,10 +103,13 @@ export const LiveSession = () => {
     const notifyQuizChange = useCallback(() => {
         if(webSocketClient == null) return
         if(webSocketConnected === false) return
-        webSocketClient.sendMessage(`/topic/insession/${id}`, 'Q')
+        webSocketClient.sendMessage(`/topic/insession/${id}`, 'M')
     }, [webSocketClient, webSocketConnected, id])
 
-    const onMessageHandler = useCallback(() => {setMessages(prev => { return {...prev, newMessages: true}})}, [])
+    const onMessageHandler = useCallback(message => {
+        console.log(message)
+        if(message === 'M') setMessages(prev => { return {...prev, newMessages: true}})
+    }, [])
 
     const onClickCloseSession = useCallback(() => {
         const link = getActionHref(session_state.data.actions, 'Stop-Session')

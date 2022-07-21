@@ -37,11 +37,15 @@ export const ParticipantPage = () => {
     const onCloseQuizzesHandler = useCallback(() => setQuizzes(prev => {return {...prev, problem: null}}), [])
     const onConnectionHandler = useCallback(() => setWebSocketConnected(true), [])
 
+    const onMessageHandler = useCallback(message => {
+        if(message === 'M') loadQuizzes()
+    }, [loadQuizzes])
+
     const refWebSocket = useCallback((client) => setWebSocketClient(client), [])
     const notifyAnswerChange = useCallback(() => {
         if(webSocketClient == null) return
         if(answers.data == null) return
-        webSocketClient.sendMessage(`/queue/insession/${answers.data.properties.sessionId}`, 'A')
+        webSocketClient.sendMessage(`/queue/insession/${answers.data.properties.sessionId}`, 'M')
     }, [webSocketClient, answers])
 
     useEffect(() => {
@@ -63,7 +67,7 @@ export const ParticipantPage = () => {
             return <Row key={elem.properties.id}><AnswerQuizCard quiz={elem.properties} answer={answer} reload={loadAnswers} notify={notifyAnswerChange}/></Row>
         })}
         {answers.data == null ? null :
-            <SockJsClient url={webSocketUri} topics={webSocketTopic(answers.data.properties.sessionId)} onConnect={onConnectionHandler} onMessage={loadQuizzes} ref={refWebSocket} />
+            <SockJsClient url={webSocketUri} topics={webSocketTopic(answers.data.properties.sessionId)} onConnect={onConnectionHandler} onMessage={onMessageHandler} ref={refWebSocket} />
         }
     </Container>
 

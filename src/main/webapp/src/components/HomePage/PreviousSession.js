@@ -8,20 +8,21 @@ const uri = (id) => `/api/web/v1.0/non_auth/sessionStatus/${id}`
 const url = '/api/web/v1.0/non_auth/is_in_session'
 export const PreviousSession = () => {
 
-    const [state, setState] = useState({participant_id: null, loading: true})
+    const [state, setState] = useState({ids: null, loading: true})
+    console.log(state)
 
     useEffect(() => {
         const func_obj = {
-            success: (data) => setState({participant_id: data.properties.participantId, loading: false}),
-            failed: () => setState({participant_id: null, loading: false})
+            success: (data) => setState({ids: data.properties, loading: false}),
+            failed: () => setState({ids: null, loading: false})
         }
         request(url, {method: 'GET'}, func_obj)
     }, [])
 
-    if(state.participant_id != null) return <PreviousSessionCard participant_id={state.participant_id}/>
+    if(state.ids != null) return <PreviousSessionCard ids={state.ids}/>
 }
 
-const InPreviousSessionCard = ({participant_id}) => {
+const InPreviousSessionCard = ({participantId, sessionId}) => {
 
     const [state, setState] = useState({content: null, loading: true})
 
@@ -30,7 +31,7 @@ const InPreviousSessionCard = ({participant_id}) => {
         const s_func = (data) => {
             setState({
                 content: <Fragment>
-                    <Link className="btn btn-success" to={`/insession/${participant_id}`}>Join session</Link>
+                    <Link className="btn btn-success" to={`/insession/${participantId}`}>Join session</Link>
                     <p><strong>Status:</strong> Visible for participants</p>
                 </Fragment>,
                 loading: false
@@ -39,15 +40,15 @@ const InPreviousSessionCard = ({participant_id}) => {
         const f_func = () => {
             setState({
                 content: <Fragment>
-                    <Button variant="success" disabled={true}>Join session</Button>
+                    <Link className="btn btn-success" to={`/results/${participantId}/${sessionId}`}>Show results</Link>
                     <p><strong>Status:</strong> Not visible for participants</p>
                 </Fragment>,
                 loading: false
             })
         }
         const func_obj = {success: s_func, failed: f_func}
-        return request(uri(participant_id), {method: 'GET'}, func_obj).cancel
-    }, [participant_id])
+        return request(uri(participantId), {method: 'GET'}, func_obj).cancel
+    }, [participantId])
 
     if(state.loading) return
 
@@ -63,6 +64,7 @@ const InPreviousSessionCard = ({participant_id}) => {
 
 const MemorablePreviousSession = React.memo(InPreviousSessionCard)
 
-const PreviousSessionCard = ({participant_id}) => {
-    return(<MemorablePreviousSession participant_id={participant_id}/>)
+const PreviousSessionCard = ({ids}) => {
+    const {participantId,sessionId} = ids
+    return(<MemorablePreviousSession participantId={participantId} sessionId={sessionId}/>)
 }
