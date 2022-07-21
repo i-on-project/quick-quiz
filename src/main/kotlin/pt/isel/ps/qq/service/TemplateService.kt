@@ -14,8 +14,8 @@ class TemplateService(
     private val templateRepo: TemplateRepository,
 ) : MainDataService(sessionRepo, templateRepo) {
 
-    fun templatesDocumentsCount(): Long {
-        return templateRepo.count()
+    fun templatesDocumentsCount(owner: String): Long {
+        return templateRepo.countTemplateDocByOwner(owner)
     }
 
     fun createTemplate(owner: String, input: CreateTemplateInputModel): TemplateDoc {

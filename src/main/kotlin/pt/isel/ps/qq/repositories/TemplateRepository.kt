@@ -8,4 +8,5 @@ import pt.isel.ps.qq.repositories.docs.TemplateDoc
 @Repository
 interface TemplateRepository: MongoRepository<TemplateDoc, String> {
     fun findTemplateDocsByOwner(owner: String, pageable: Pageable): List<TemplateDoc>
+    fun countTemplateDocByOwner(owner: String): Long
 }

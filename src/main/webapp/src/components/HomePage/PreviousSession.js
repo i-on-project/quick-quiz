@@ -1,15 +1,14 @@
 import * as React from "react";
 import {Fragment, useEffect, useState} from "react";
 import {Link} from "react-router-dom";
-import {Button, Card} from "react-bootstrap";
-import {request} from "../../utils/Request";
+import {Card} from "react-bootstrap";
+import {request, request_no_content} from "../../utils/Request";
 
 const uri = (id) => `/api/web/v1.0/non_auth/sessionStatus/${id}`
 const url = '/api/web/v1.0/non_auth/is_in_session'
 export const PreviousSession = () => {
 
     const [state, setState] = useState({ids: null, loading: true})
-    console.log(state)
 
     useEffect(() => {
         const func_obj = {
@@ -28,10 +27,10 @@ const InPreviousSessionCard = ({participantId, sessionId}) => {
 
     useEffect(() => {
         setState((prev) => { return {...prev, loading: true}})
-        const s_func = (data) => {
+        const s_func = () => {
             setState({
                 content: <Fragment>
-                    <Link className="btn btn-success" to={`/insession/${participantId}`}>Join session</Link>
+                    <Link className="btn btn-success" to={`/insession/${participantId}`}>Rejoin session</Link>
                     <p><strong>Status:</strong> Visible for participants</p>
                 </Fragment>,
                 loading: false
@@ -47,8 +46,8 @@ const InPreviousSessionCard = ({participantId, sessionId}) => {
             })
         }
         const func_obj = {success: s_func, failed: f_func}
-        return request(uri(participantId), {method: 'GET'}, func_obj).cancel
-    }, [participantId])
+        return request_no_content(uri(participantId), {method: 'GET'}, func_obj).cancel
+    }, [participantId, sessionId])
 
     if(state.loading) return
 

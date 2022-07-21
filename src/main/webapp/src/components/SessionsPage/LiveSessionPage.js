@@ -100,6 +100,7 @@ export const LiveSession = () => {
     const onConnectionHandler = useCallback(() => setWebSocketConnected(true), [])
 
     const refWebSocket = useCallback((client) => setWebSocketClient(client), [])
+
     const notifyQuizChange = useCallback(() => {
         if(webSocketClient == null) return
         if(webSocketConnected === false) return
@@ -115,7 +116,10 @@ export const LiveSession = () => {
         const link = getActionHref(session_state.data.actions, 'Stop-Session')
         if(link != null) {
             const func_obj = {
-                success: () => {setRedirect('/sessions')},
+                success: () => {
+                    notifyQuizChange()
+                    setRedirect('/sessions')
+                },
                 failed: () => alert('Session could not be closed')
             }
             return request_no_content(link, {method: 'POST'}, func_obj).fetch
