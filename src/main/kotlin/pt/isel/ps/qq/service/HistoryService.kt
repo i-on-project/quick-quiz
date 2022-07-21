@@ -2,7 +2,7 @@ package pt.isel.ps.qq.service
 
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
-import pt.isel.ps.qq.data.ParticipantHistoryOutpuModel
+import pt.isel.ps.qq.data.ParticipantHistoryOutputModel
 import pt.isel.ps.qq.exceptions.SessionNotFound
 import pt.isel.ps.qq.repositories.HistoryRepository
 import pt.isel.ps.qq.repositories.SessionRepository
@@ -24,9 +24,9 @@ class HistoryService(sessionRepo: SessionRepository,
         return historyRepo.findHistoryDocsByOwner(user, PageRequest.of(page, PAGE_SIZE))
     }
 
-    fun getHistory(participantId: String, sessionId: String): ParticipantHistoryOutpuModel {
+    fun getHistory(participantId: String, sessionId: String): ParticipantHistoryOutputModel {
         val doc = historyRepo.findHistoryDocById(sessionId) ?: throw SessionNotFound()
-        return ParticipantHistoryOutpuModel(doc, participantId)
+        return ParticipantHistoryOutputModel(doc, participantId)
     }
 
 

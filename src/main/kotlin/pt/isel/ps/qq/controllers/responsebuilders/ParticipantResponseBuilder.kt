@@ -16,7 +16,7 @@ class ParticipantResponseBuilder {
         )
     }
 
-    fun getParticipantHistoryResponse(participantHistory: ParticipantHistoryOutpuModel): SirenModel{
+    fun getParticipantHistoryResponse(participantHistory: ParticipantHistoryOutputModel): SirenModel{
         return SirenModel(
             clazz = listOf( "History", "Participant"),
             properties = participantHistory
@@ -51,10 +51,10 @@ class ParticipantResponseBuilder {
         )
     }
 
-    fun buildCheckInSessionResponse(participantId: String): SirenModel {
+    fun buildCheckInSessionResponse(participantId: String, sessionId: String): SirenModel {
         return SirenModel(
             clazz = listOf("check", "participant"),
-            properties = mapOf("participantId" to participantId),
+            properties = mapOf("participantId" to participantId, "sessionId" to sessionId),
             title = "Participant Session",
 
         )

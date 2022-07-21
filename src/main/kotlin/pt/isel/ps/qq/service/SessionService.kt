@@ -98,7 +98,7 @@ class SessionService(
             ) > 0
         ) throw LiveSessionAlreadyExists()
 
-        var session = getSessionValidatingTheOwner(username, id)
+        val session = getSessionValidatingTheOwner(username, id)
 
         updateSessionStatus(session, QqStatus.STARTED, generated)
 
@@ -120,19 +120,20 @@ class SessionService(
 
         sessionRepo.deleteById(session.id)
         quizList.forEach { quizRepo.deleteById(it.id) }
+        participants.forEach { participantRepo.deleteById(it.id) }
         return toReturn
     }
 
     private fun updateSessionStatus(session: SessionDoc, status: QqStatus, sessionCode: Int?) {
         val updatedSession = SessionDoc(session, status, sessionCode)
-
         sessionRepo.save(updatedSession)
-
     }
 
     fun deleteSession(user: String, id: String) {
         getSessionValidatingTheOwner(user, id)
         sessionRepo.deleteById(id)
+        val quizList = quizRepo.findQuizDocsBySessionId(id)
+        quizList.forEach { quizRepo.deleteById(it.id) }
     }
 
     fun getAllSessions(user: String, page: Int): List<SessionDoc> {

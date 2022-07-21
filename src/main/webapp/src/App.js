@@ -15,6 +15,7 @@ import {History} from "./components/HistoryPage/HistoryPage";
 import {Templates} from "./components/TemplatesPage/TemplatesPage";
 import {Template} from "./components/TemplatesPage/TemplatePage";
 import {PageNotFound} from "./components/PageNotFound";
+import {ShowResults} from "./components/ParticipantPage/ShowResultsPage"
 
 const App = () => {
     return (
@@ -27,6 +28,7 @@ const App = () => {
                         <Route path="/login" element={<Login/>}/>
                         <Route path="/register" element={<Register/>}/>
                         <Route path="/insession/:id" element={<ParticipantPage/>}/>
+                        <Route path="/results/:participantId/:sessionId" element={<ShowResults/>}/>
 
                         <Route path="/sessions" element={<LoginVerifier><Sessions/></LoginVerifier>}/>
                         <Route path="/session/:id" element={<LoginVerifier><Session/></LoginVerifier>}/>

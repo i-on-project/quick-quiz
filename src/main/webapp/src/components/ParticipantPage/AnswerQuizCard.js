@@ -6,6 +6,7 @@ import {AnswerForm} from "./AnswerForm";
 
 export const AnswerQuizCard = ({quiz, answer, reload, notify}) => {
 
+    console.log(quiz)
     const [modal, setModal] = useState(false)
 
     const onClickHandler = useCallback(() => setModal(true), [])
@@ -22,20 +23,18 @@ export const AnswerQuizCard = ({quiz, answer, reload, notify}) => {
     let button_content = null
     const content = answer.answer == null ? 'Answer' : 'Edit answer'
     if(answer.sessionId == null) button_content = <Button><Spinner animation="border"/></Button>
-    else if(quiz.quizState === 'STARTED') button_content = <Card.Body>
-        <Button onClick={onClickHandler}>{content}</Button>
-        <Modal show={modal}>
-            <Modal.Header closeButton onClick={onCloseHandler}>
-                <Modal.Title>{content}</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <AnswerForm onClose={onCloseHandler} quiz={quiz} sessionId={answer.sessionId} reload={reload} notify={notify}/>
-            </Modal.Body>
-        </Modal>
-    </Card.Body>
+    else if(quiz.quizStatus === 'STARTED') button_content = <Card.Body>
+            <Button onClick={onClickHandler}>{content}</Button>
+            <Modal show={modal}>
+                <Modal.Header closeButton onClick={onCloseHandler}>
+                    <Modal.Title>{content}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <AnswerForm onClose={onCloseHandler} quiz={quiz} sessionId={answer.sessionId} reload={reload} notify={notify}/>
+                </Modal.Body>
+            </Modal>
+        </Card.Body>
     else button_content = <Button disabled={true}>{content}</Button>
-
-
 
     return(
         <Card>
