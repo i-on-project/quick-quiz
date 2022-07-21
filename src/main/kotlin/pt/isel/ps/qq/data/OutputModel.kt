@@ -61,13 +61,15 @@ data class SessionQuizzes(
     val answerType: QuestionType,
     val answer: String?,
     val choices: List<MultipleChoice> = emptyList(),
+    val answetNumber: Int?
 
     ) {
     constructor(quiz: HistoryQuiz, participantId: String) : this(
         question = quiz.question,
         answerType = quiz.answerType,
         choices = quiz.answerChoices,
-        answer = quiz.answers.firstOrNull { a -> a.participantId == participantId }?.answer
+        answer = quiz.answers.firstOrNull { a -> a.participantId == participantId }?.answer,
+        answetNumber= quiz.answers.firstOrNull { a -> a.participantId == participantId }?.choiceNumber
 
     )
 }
