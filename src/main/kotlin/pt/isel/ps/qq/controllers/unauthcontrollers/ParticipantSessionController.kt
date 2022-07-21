@@ -37,7 +37,7 @@ class ParticipantSessionController(
         val headers = HttpHeaders()
         headers.add(
             "Set-Cookie",
-            cookie.createCookie("InSession", "${participantDoc.id},${participantDoc.sessionId}", Duration.ofDays(7).toSeconds()) //TODO: Change time for this cookie
+            cookie.createCookie("InSession", "${participantDoc.id}-${participantDoc.sessionId}", Duration.ofDays(7).toSeconds()) //TODO: Change time for this cookie
         )
         return ResponseEntity.ok().headers(headers)
             .contentType(SirenModel.MEDIA_TYPE)
@@ -99,6 +99,7 @@ class ParticipantSessionController(
 
     @GetMapping(Uris.API.Web.V1_0.NonAuth.IsInSession.ENDPOINT)
     fun checkInSessionStatus(request: HttpServletRequest): ResponseEntity<Any> {
+        println(request.cookies)
         return when(val expectedCookie = request.cookies?.find { it.name == "InSession" }){
             null -> throw MissingCookieException(cookieName = "InSession")
             else -> ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(responseBuilder.buildCheckInSessionResponse(expectedCookie.value)) 

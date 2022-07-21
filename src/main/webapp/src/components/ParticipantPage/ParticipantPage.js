@@ -7,7 +7,7 @@ import {request} from "../../utils/Request";
 import {Notification} from "../Notification";
 import {AnswerQuizCard} from "./AnswerQuizCard";
 
-const webSocketUri = '/insessionws'
+const webSocketUri = '/insession.ws'
 const webSocketTopic = (sessionId) => [`/topic/insession/${sessionId}`]
 const answer_uri = (id) => `/api/web/v1.0/non_auth/answer/${id}`
 const quizzes_uri = (id) => `/api/web/v1.0/non_auth/quiz/session/${id}`

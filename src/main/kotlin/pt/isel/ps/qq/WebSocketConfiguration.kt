@@ -13,12 +13,15 @@ import pt.isel.ps.qq.utils.getAppHost
 class WebSocketConfiguration : WebSocketMessageBrokerConfigurer {
 
     override fun registerStompEndpoints(stompEndpointRegistry: StompEndpointRegistry) {
-        stompEndpointRegistry.addEndpoint("/insessionws")
-                .setAllowedOriginPatterns(getAppHost())
+        println("Allowed Origins ${getAppHost()}")
+        stompEndpointRegistry
+            .addEndpoint("/insession.ws")
             .withSockJS()
     }
 
     override fun configureMessageBroker(registry: MessageBrokerRegistry) {
         registry.enableSimpleBroker("/topic/", "/queue/")
     }
+
+
 }

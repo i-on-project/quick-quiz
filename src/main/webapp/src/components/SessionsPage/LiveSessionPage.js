@@ -15,7 +15,7 @@ import {ActionButton} from "../ActionButon";
 
 const href_unknown_problem = new ProblemJson("InvalidRequest", "The uri to fetch the data is unknown")
 const uri = (id) => `/api/web/v1.0/auth/sessions/${id}`
-const webSocketUri = '/insessionws'
+const webSocketUri = '/insession.ws'
 const webSocketTopic = (id) => [`/queue/insession/${id}`]
 export const LiveSession = () => {
 
