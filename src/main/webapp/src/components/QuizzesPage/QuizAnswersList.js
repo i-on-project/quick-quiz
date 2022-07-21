@@ -11,7 +11,7 @@ export const QuizAnswersList = ({quiz, answers}) => {
         answers.forEach(e => {
             const answer = e.properties.answers.find(elem => elem.quizId === quiz.id)
             if(answer != null) {
-                stats[answer.answerNumber] += 1
+                stats[answer.choiceNumber] += 1
                 ++ans_counter
             }
         })

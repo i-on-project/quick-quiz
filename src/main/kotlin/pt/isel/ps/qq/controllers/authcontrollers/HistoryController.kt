@@ -30,7 +30,7 @@ class HistoryController(
     fun getHistory(request: HttpServletRequest, @RequestParam page: Int?): ResponseEntity<Any> {
         val idx = page ?: 0
         val history = service.getHistory(scope.getUser().userName, idx)
-        val total = service.historyDocumentCount()
+        val total = service.historyDocumentCount(scope.getUser().userName)
         val body = historyResponseBuilder.getAllHistoryResponse(idx, getBaseUrlHostFromRequest(request), total, calculateLastPage(total), history)
         return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }

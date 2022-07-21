@@ -1,6 +1,5 @@
 package pt.isel.ps.qq.controllers
 
-
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.dao.DataAccessResourceFailureException
@@ -10,13 +9,13 @@ import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.context.request.ServletWebRequest
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.NoHandlerFoundException
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import pt.isel.ps.qq.UserInfoScope
 import pt.isel.ps.qq.data.ProblemJson
 import pt.isel.ps.qq.exceptions.*
-import javax.servlet.http.HttpServletRequest
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
@@ -48,11 +47,12 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
         status: HttpStatus,
         request: WebRequest
     ): ResponseEntity<Any> {
+        request as ServletWebRequest
         return exceptionHandling(
             type = "BadRequest",
             title = "Data is missing from request",
             status = 400,
-            instance = request.contextPath
+            instance = request.request.requestURI
         )
     }
     /**Catch All**/
@@ -61,11 +61,12 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
         status: HttpStatus,
         request: WebRequest
     ): ResponseEntity<Any> {
+        request as ServletWebRequest
         return exceptionHandling(
             type = "InternalError",
             title = "An Unknown error occurred",
             status = 500,
-            instance = request.contextPath
+            instance = request.request.requestURI
         )
     }
 
@@ -75,11 +76,12 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
         status: HttpStatus,
         request: WebRequest
     ): ResponseEntity<Any> {
+        request as ServletWebRequest
         return exceptionHandling(
             type = "BadRequest",
             title = "Data is missing from request",
             status = 400,
-            instance = request.contextPath
+            instance = request.request.requestURI
         )
     }
 
@@ -88,27 +90,30 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
         ex: Exception,
         request: WebRequest
     ): ResponseEntity<Any> {
+        request as ServletWebRequest
         return exceptionHandling(
             type = "InternalError",
             title = "An Unknown error occurred",
             status = 500,
-            instance = request.contextPath
+            instance = request.request.requestURI
         )
     }
-    private fun values(id: String?, message: String?) =
-        mapOf<String, Any?>("user" to scope.getUser().userName, "id" to id, "message" to message)
+    private fun values(id: String? = null, message: String?= null) =
+        mapOf<String, Any?>("user" to scope.getUserOrNull()?.userName, "id" to id, "message" to message)
 
     @ExceptionHandler(value = [SessionNotFoundException::class])
     fun exceptionHandle(
         ex: SessionNotFoundException,
         request: WebRequest
     ): ResponseEntity<Any> {
+        request as ServletWebRequest
         return exceptionHandling(
             type = "SessionNotFoundException",
             title = "This session doesn't exist",
             status = 404,
-            instance = request.contextPath,
-            values = mapOf("user" to scope.getUser().userName, "message" to ex.message)
+            instance = request.request.requestURI,
+            detail = ex.message,
+            values = values()
         )
     }
 
@@ -118,12 +123,14 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
         ex: QuizNotFoundException,
         request: WebRequest
     ): ResponseEntity<Any> {
+        request as ServletWebRequest
         return exceptionHandling(
             type = "QuizNotFoundException",
             title = "This quiz doesn't exist",
             status = 404,
-            instance = request.contextPath,
-            values = mapOf("user" to scope.getUser().userName, "message" to ex.message)
+            instance = request.request.requestURI,
+            detail = ex.message,
+            values = values()
         )
     }
 
@@ -132,12 +139,14 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
         ex: SessionAuthorizationException,
         request: WebRequest
     ): ResponseEntity<Any> {
+        request as ServletWebRequest
         return exceptionHandling(
             type = "SessionAuthorizationException",
             title = "You don't have authority over this session",
             status = 403,
-            instance = request.contextPath,
-            values = values("error", ex.message)
+            instance = request.request.requestURI,
+            detail = ex.message,
+            values = values()
         )
     }
 
@@ -146,12 +155,14 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
         ex: QuizAuthorizationException,
         request: WebRequest
     ): ResponseEntity<Any> {
+        request as ServletWebRequest
         return exceptionHandling(
             type = "QuizAuthorizationException",
             title = "You don't have authority over this quiz",
             status = 403,
-            instance = request.contextPath,
-            values = values("error", ex.message)
+            instance = request.request.requestURI,
+            detail = ex.message,
+            values = values()
         )
     }
 
@@ -160,12 +171,14 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
         ex: ImpossibleGenerationException,
         request: WebRequest
     ): ResponseEntity<Any> {
+        request as ServletWebRequest
         return exceptionHandling(
             type = "ImpossibleGenerationException",
             title = "Was not possible generate a pin code for your session",
             status = 409,
-            instance = request.contextPath,
-            values = values("error", ex.message)
+            instance = request.request.requestURI,
+            detail = ex.message,
+            values = values()
         )
     }
 
@@ -174,14 +187,14 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
         ex: SessionIllegalStatusOperationException,
         request: WebRequest
     ): ResponseEntity<Any> {
-        val map = values("error", ex.message).toMutableMap()
-        map["status"] = ex.status.toString()
+        request as ServletWebRequest
         return exceptionHandling(
             type = "SessionIllegalStatusOperationException",
             title = "The session status is: ${ex.status}",
             status = 409,
-            instance = request.contextPath,
-            values = map
+            instance = request.request.requestURI,
+            detail = ex.message,
+            values = values("status", ex.status.toString())
         )
     }
 
@@ -190,12 +203,14 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
         ex: AtLeast2Choices,
         request: WebRequest
     ): ResponseEntity<Any> {
+        request as ServletWebRequest
         return exceptionHandling(
             type = "AtLeast2Choices",
             title = "A multiple choice question requires at least 2 choices",
             status = 400,
-            instance = request.contextPath,
-            values = values("id", ex.message)
+            instance = request.request.requestURI,
+            detail = ex.message,
+            values = values()
         )
     }
 
@@ -204,12 +219,14 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
         ex: AtLeast1CorrectChoice,
         request: WebRequest
     ): ResponseEntity<Any> {
+        request as ServletWebRequest
         return exceptionHandling(
             type = "AtLeast1CorrectChoice",
             title = "A multiple choice question requires at least 1 of the choices to be correct",
             status = 400,
-            instance = request.contextPath,
-            values = values("error", ex.message)
+            instance = request.request.requestURI,
+            detail = ex.message,
+            values = values()
         )
     }
 
@@ -218,12 +235,14 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
         ex: LiveSessionAlreadyExists,
         request: WebRequest
     ): ResponseEntity<Any> {
+        request as ServletWebRequest
         return exceptionHandling(
             type = "LiveSessionAlreadyExists",
             title = "A Live Session already exists",
             status = 409,
-            instance = request.contextPath,
-            values = values("error", ex.message)
+            instance = request.request.requestURI,
+            detail = ex.message,
+            values = values()
         )
     }
 
@@ -232,11 +251,12 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
         ex: DataAccessResourceFailureException,
         request: WebRequest
     ): ResponseEntity<Any> {
+        request as ServletWebRequest
         return exceptionHandling(
             type = "DataAccessResourceFailureException",
             title = "One of the services is currently unavailable",
             status = 502,
-            instance = request.contextPath,
+            instance = request.request.requestURI,
             values = mapOf("message" to ex.message)
         )
     }
@@ -246,12 +266,14 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
         ex: UserAlreadyExistsException,
         request: WebRequest
     ): ResponseEntity<Any> {
+        request as ServletWebRequest
         return exceptionHandling(
             type = "UserAlreadyExists",
             title = "A user with this email already exists",
             status = 409,
-            instance = request.contextPath,
-            values = values("error", ex.message)
+            instance = request.request.requestURI,
+            detail = ex.message,
+            values = values()
         )
     }
 
@@ -260,12 +282,14 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
         ex: PendingValidationException,
         request: WebRequest
     ): ResponseEntity<Any> {
+        request as ServletWebRequest
         return exceptionHandling(
             type = "PendingValidation",
             title = "Please check your email to validate your user",
             status = 409,
-            instance = request.contextPath,
-            values = values("error", ex.message)
+            instance = request.request.requestURI,
+            detail = ex.message,
+            values = values()
         )
     }
 
@@ -274,12 +298,14 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
         ex: UserNotFoundException,
         request: WebRequest
     ): ResponseEntity<Any> {
+        request as ServletWebRequest
         return exceptionHandling(
             type = "UserNotFound",
             title = "The email is not registered.",
             status = 404,
-            instance = request.contextPath,
-            values = values("error", ex.message)
+            instance = request.request.requestURI,
+            detail = ex.message,
+            values = values()
         )
     }
 
@@ -288,12 +314,14 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
         ex: TokenExpiredException,
         request: WebRequest
     ): ResponseEntity<Any> {
+        request as ServletWebRequest
         return exceptionHandling(
             type = "TokenExpired",
             title = "The token is invalid, request a new email to be sent",
             status = 400,
-            instance = request.contextPath,
-            values = values("error", ex.message)
+            instance = request.request.requestURI,
+            detail = ex.message,
+            values = values()
         )
     }
 
@@ -302,12 +330,14 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
         ex: GuestSessionNotFoundException,
         request: WebRequest
     ): ResponseEntity<Any> {
+        request as ServletWebRequest
         return exceptionHandling(
             type = "GuestSessionNotFound",
             title = "This participant doesn't exist",
             status = 404,
-            instance = request.contextPath,
-            values = values("error", ex.message)
+            instance = request.request.requestURI,
+            detail = ex.message,
+            values = values()
         )
     }
 
@@ -316,12 +346,14 @@ class ExceptionsResponseHandler(private val scope: UserInfoScope) : ResponseEnti
         ex: MissingCookieException,
         request: WebRequest
     ): ResponseEntity<Any> {
+        request as ServletWebRequest
         return exceptionHandling(
             type = "MissingCookieException",
             title = "Missing cookie ${ex.cookieName}",
             status = 409,
-            instance = request.contextPath,
-            values = mapOf("error" to ex.message)
+            instance = request.request.requestURI,
+            detail = ex.message,
+            values = values()
         )
     }
 }

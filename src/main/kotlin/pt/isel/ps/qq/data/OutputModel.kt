@@ -43,34 +43,27 @@ data class SessionOutputModel(
 }
 
 data class ParticipantHistoryOutputModel(
-    val sessionName: String,
-    val sessionDescription: String?,
-    val sessionDate: Long,
+    val date: Long,
     val quizzes: List<SessionQuizzes> = emptyList()
 ) {
     constructor(doc: HistoryDoc, participantId: String) : this(
-        sessionName = doc.name,
-        sessionDescription = doc.description,
-        sessionDate = doc.historyDate,
+        date = doc.historyDate,
         quizzes = doc.quizzes.map { q -> SessionQuizzes(q, participantId) }
     )
 }
 
 data class SessionQuizzes(
     val question: String,
+    val order: Int = 0,
     val answerType: QuestionType,
-    val answer: String?,
-    val choices: List<MultipleChoice> = emptyList(),
-    val answetNumber: Int?
-
-    ) {
+    val answers: List<Answer>,
+    val answerChoices: List<MultipleChoice> = emptyList()
+) {
     constructor(quiz: HistoryQuiz, participantId: String) : this(
         question = quiz.question,
         answerType = quiz.answerType,
-        choices = quiz.answerChoices,
-        answer = quiz.answers.firstOrNull { a -> a.participantId == participantId }?.answer,
-        answetNumber= quiz.answers.firstOrNull { a -> a.participantId == participantId }?.choiceNumber
-
+        answerChoices = quiz.answerChoices,
+        answers = listOf(Answer(quiz.answers, participantId))
     )
 }
 
@@ -171,8 +164,14 @@ data class AnswersOutputModel(
 data class Answer(
     val quizId: String,
     val answer: String? = null,
-    val answerNumber: Int? = null
-)
+    val choiceNumber: Int? = null
+) {
+    constructor(answers: List<HistoryAnswer>, participantId: String): this(
+        quizId = participantId,
+        answer = answers.firstOrNull{ elem -> elem.participantId == participantId }?.answer,
+        choiceNumber = answers.firstOrNull{ elem -> elem.participantId == participantId }?.choiceNumber
+    )
+}
 
 data class ParticipantOutputModel(
     val participantId: String

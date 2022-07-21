@@ -6,7 +6,6 @@ import {AnswerForm} from "./AnswerForm";
 
 export const AnswerQuizCard = ({quiz, answer, reload, notify}) => {
 
-    console.log(quiz)
     const [modal, setModal] = useState(false)
 
     const onClickHandler = useCallback(() => setModal(true), [])

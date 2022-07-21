@@ -26,7 +26,7 @@ class TemplatesController (private val service: TemplateService,
     fun getAllTemplatesFromUser(request: HttpServletRequest, @RequestParam pageNumber: Int?): ResponseEntity<Any> {
         val page = pageNumber ?: 0
         val templates = service.getAllTemplates(scope.getUser().userName, page)
-        val total = service.templatesDocumentsCount()
+        val total = service.templatesDocumentsCount(scope.getUser().userName)
         val body = templatesResponseBuilder.getAllTemplatesResponse(page, getBaseUrlHostFromRequest(request), total, calculateLastPage(total), templates)
         return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }

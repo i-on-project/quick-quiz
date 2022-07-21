@@ -56,6 +56,8 @@ export const AnswerForm = (props) => {
         <Form.Control as="textarea" rows={size == null ? 7 : 3} placeholder="Answer" type="text" onChange={onChangeHandler}/>
     </Form.Group>
 
+
+    console.log(state)
     return(
         <Form onSubmit={onSubmitHandler}>
             <Notification problem={notification} onClose={onCloseHandler}/>

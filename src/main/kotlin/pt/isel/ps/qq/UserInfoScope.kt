@@ -12,4 +12,5 @@ class UserInfoScope {
 
     fun getUser(): UserDoc = user!!
     fun setUser(user: UserDoc) { this.user = user }
+    fun getUserOrNull(): UserDoc? = user
 }

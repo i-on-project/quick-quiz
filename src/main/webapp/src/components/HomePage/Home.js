@@ -14,6 +14,7 @@ export const Home = () => {
 
     const onChangeHandler = useCallback((event) => {
         const value = stringOnlyDigits(event.target.value)
+        if(parseInt(value) > 2147483647) return
         setState((prev) => { return {...prev, code: value}})
     }, [])
 

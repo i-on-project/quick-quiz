@@ -4,11 +4,16 @@ import org.springframework.stereotype.Service
 import pt.isel.ps.qq.data.GiveAnswerInputModel
 import pt.isel.ps.qq.exceptions.GuestSessionNotFoundException
 import pt.isel.ps.qq.repositories.ParticipantRepository
+import pt.isel.ps.qq.repositories.SessionRepository
 import pt.isel.ps.qq.repositories.docs.Answer
 import pt.isel.ps.qq.repositories.docs.ParticipantDoc
+import pt.isel.ps.qq.repositories.docs.QqStatus
 
 @Service
-class AnswersService(private val answerRepo: ParticipantRepository,) {
+class AnswersService(
+    private val sessionRepo: SessionRepository,
+    private val answerRepo: ParticipantRepository
+) {
 
     fun giveAnswer(input: GiveAnswerInputModel): ParticipantDoc {
 
@@ -29,5 +34,11 @@ class AnswersService(private val answerRepo: ParticipantRepository,) {
         val participantDoc = answerRepo.findById(answerId) //TODO: add checks here
         if(participantDoc.isEmpty) throw GuestSessionNotFoundException()
         return participantDoc.get()
+    }
+
+    fun checkSessionIsLiveNonAuth(participantId: String): Boolean {
+        val opt = answerRepo.findById(participantId)
+        if(opt.isEmpty) return false
+        return sessionRepo.countSessionDocByIdAndStatus(opt.get().sessionId, QqStatus.STARTED) > 0
     }
 }

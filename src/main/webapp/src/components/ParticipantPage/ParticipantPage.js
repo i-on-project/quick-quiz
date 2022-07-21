@@ -35,6 +35,7 @@ export const ParticipantPage = () => {
     }, [id])
 
     const onCloseQuizzesHandler = useCallback(() => setQuizzes(prev => {return {...prev, problem: null}}), [])
+    const onCloseAnswerHandler = useCallback(() => setAnswers(prev => {return {...prev, problem: null}}), [])
     const onConnectionHandler = useCallback(() => setWebSocketConnected(true), [])
 
     const onMessageHandler = useCallback(message => {
@@ -77,10 +78,10 @@ export const ParticipantPage = () => {
     </Fragment>
 
     return(
-        <Fragment>
-            <Notification problem={quizzes.problem} onClose={onCloseQuizzesHandler}/>
+        <Container>
+            <Row><Notification problem={quizzes.problem} onClose={onCloseQuizzesHandler}/></Row>
             <h1 className={"text-center mb-5 mt-3"}>Participant: {id}</h1>
-            {webSocketConnected === false ?
+            {webSocketConnected === false && quizzes.data != null ?
                 <Container>
                     <hr/>
                     <Row>
@@ -90,7 +91,7 @@ export const ParticipantPage = () => {
                     <hr/>
                 </Container> : null
             }
-            {main_content}
-        </Fragment>
+            <Row>{main_content}</Row>
+        </Container>
     )
 }

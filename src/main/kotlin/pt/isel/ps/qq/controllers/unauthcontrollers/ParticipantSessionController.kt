@@ -10,7 +10,9 @@ import pt.isel.ps.qq.controllers.ExceptionsResponseHandler
 import pt.isel.ps.qq.controllers.responsebuilders.ParticipantResponseBuilder
 import pt.isel.ps.qq.data.*
 import pt.isel.ps.qq.exceptions.GuestSessionNotFoundException
+import pt.isel.ps.qq.exceptions.IllegalStatusOperationException
 import pt.isel.ps.qq.exceptions.MissingCookieException
+import pt.isel.ps.qq.repositories.docs.QqStatus
 import pt.isel.ps.qq.service.AnswersService
 import pt.isel.ps.qq.service.HistoryService
 import pt.isel.ps.qq.service.QuizService
@@ -114,5 +116,12 @@ class ParticipantSessionController(
         val body = responseBuilder.getParticipantHistoryResponse(participantHistory)
 
         return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
+    }
+
+    @GetMapping(Uris.API.Web.V1_0.NonAuth.SessionStatus.ENDPOINT)
+    fun getSessionStatus(@PathVariable participantId: String): ResponseEntity<Void> {
+        val isStarted = participantService.checkSessionIsLiveNonAuth(participantId)
+        if(!isStarted) throw IllegalStatusOperationException(QqStatus.CLOSED)
+        return ResponseEntity.ok().build()
     }
 }

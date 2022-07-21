@@ -70,8 +70,8 @@ class QuizService(
         return quizRepo.save(newQuizDoc)
     }
 
-    fun getAllSessionQuizzes(sessionid: String): List<SessionQuizDoc> {
-        return quizRepo.findQuizDocsBySessionId(sessionid)
+    fun getAllSessionQuizzes(sessionId: String): List<SessionQuizDoc> {
+        return quizRepo.findQuizDocsBySessionId(sessionId)
     }
 
     fun getAllSessionAnswersQuizzes(sessionId: String): List<SessionQuizDoc> {
