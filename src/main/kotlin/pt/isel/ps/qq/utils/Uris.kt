@@ -87,6 +87,13 @@ object Uris {
                         private val TEMPLATE = UriTemplate(PATH)
                         fun make(id: String): URI = TEMPLATE.expand(mapOf("participantId" to id))
                     }
+
+                    object ParticipantHistory {
+                        const val ENDPOINT = "/history/{participantId}/{sessionId}"
+                        const val PATH = "${NonAuth.PATH}$ENDPOINT"
+                        private val TEMPLATE = UriTemplate(PATH)
+                        fun make(participantId: String, sessionId: String): URI = TEMPLATE.expand(mapOf("participantId" to participantId, "sessionId" to sessionId))
+                    }
                 }
 
                 object Auth {
@@ -196,7 +203,7 @@ object Uris {
 
                             }
                         }
-                        /*TODO:Review this endpoint -> may make more sense in Sessions*/
+
                         object SessionId {
                             const val ENDPOINT = "/session/{sessionId}"
                             const val PATH = "${Quiz.PATH}$ENDPOINT"

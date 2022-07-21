@@ -42,6 +42,37 @@ data class SessionOutputModel(
     )
 }
 
+data class ParticipantHistoryOutpuModel(
+    val sessionName: String,
+    val sessionDescription: String?,
+    val sessionDate: Long,
+    val quizzes: List<SessionQuizzes> = emptyList()
+) {
+    constructor(doc: HistoryDoc, participantId: String) : this(
+        sessionName = doc.name,
+        sessionDescription = doc.description,
+        sessionDate = doc.historyDate,
+        quizzes = doc.quizzes.map { q -> SessionQuizzes(q, participantId) },
+
+        )
+}
+
+data class SessionQuizzes(
+    val question: String,
+    val answerType: QuestionType,
+    val answer: String?,
+    val choices: List<MultipleChoice> = emptyList(),
+
+    ) {
+    constructor(quiz: HistoryQuiz, participantId: String) : this(
+        question = quiz.question,
+        answerType = quiz.answerType,
+        choices = quiz.answerChoices,
+        answer = quiz.answers.firstOrNull { a -> a.participantId == participantId }?.answer
+
+    )
+}
+
 data class RequestLoginOutputModel(
     val userName: String,
     val displayName: String? = null,

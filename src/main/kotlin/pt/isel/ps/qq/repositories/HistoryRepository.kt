@@ -8,4 +8,5 @@ import pt.isel.ps.qq.repositories.docs.HistoryDoc
 @Repository
 interface HistoryRepository: MongoRepository<HistoryDoc, String> {
     fun findHistoryDocsByOwner(owner: String, pageable: Pageable): List<HistoryDoc>
+    fun findHistoryDocById(id: String): HistoryDoc?
 }

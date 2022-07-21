@@ -1,9 +1,7 @@
 package pt.isel.ps.qq.controllers.responsebuilders
 
 import org.springframework.stereotype.Component
-import pt.isel.ps.qq.data.ListInfo
-import pt.isel.ps.qq.data.SirenEntity
-import pt.isel.ps.qq.data.SirenModel
+import pt.isel.ps.qq.data.*
 import pt.isel.ps.qq.repositories.docs.ParticipantDoc
 import pt.isel.ps.qq.repositories.docs.SessionQuizDoc
 import pt.isel.ps.qq.utils.Uris
@@ -15,6 +13,13 @@ class ParticipantResponseBuilder {
         return SirenModel(
             clazz = listOf("participant", "id"),
             properties = mapOf("participantId" to  id )
+        )
+    }
+
+    fun getParticipantHistoryResponse(participantHistory: ParticipantHistoryOutpuModel): SirenModel{
+        return SirenModel(
+            clazz = listOf( "History", "Participant"),
+            properties = participantHistory
         )
     }
 
@@ -49,7 +54,9 @@ class ParticipantResponseBuilder {
     fun buildCheckInSessionResponse(participantId: String): SirenModel {
         return SirenModel(
             clazz = listOf("check", "participant"),
-            properties = mapOf("participantId" to participantId)
+            properties = mapOf("participantId" to participantId),
+            title = "Participant Session",
+
         )
     }
 }

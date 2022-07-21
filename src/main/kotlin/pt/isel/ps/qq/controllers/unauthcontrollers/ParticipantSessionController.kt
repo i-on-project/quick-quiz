@@ -12,6 +12,7 @@ import pt.isel.ps.qq.data.*
 import pt.isel.ps.qq.exceptions.GuestSessionNotFoundException
 import pt.isel.ps.qq.exceptions.MissingCookieException
 import pt.isel.ps.qq.service.AnswersService
+import pt.isel.ps.qq.service.HistoryService
 import pt.isel.ps.qq.service.QuizService
 import pt.isel.ps.qq.service.SessionService
 import pt.isel.ps.qq.utils.Uris
@@ -25,6 +26,7 @@ class ParticipantSessionController(
     private val participantService: AnswersService,
     private val sessionService: SessionService,
     private val quizService: QuizService,
+    private val historyService: HistoryService,
     private val responseBuilder: ParticipantResponseBuilder,
     private val cookie: CookieHandler
 ) {
@@ -35,7 +37,7 @@ class ParticipantSessionController(
         val headers = HttpHeaders()
         headers.add(
             "Set-Cookie",
-            cookie.createCookie("InSession", participantDoc.id, Duration.ofDays(7).toSeconds()) //TODO: Change time for this cookie
+            cookie.createCookie("InSession", "${participantDoc.id},${participantDoc.sessionId}", Duration.ofDays(7).toSeconds()) //TODO: Change time for this cookie
         )
         return ResponseEntity.ok().headers(headers)
             .contentType(SirenModel.MEDIA_TYPE)
@@ -101,5 +103,13 @@ class ParticipantSessionController(
             null -> throw MissingCookieException(cookieName = "InSession")
             else -> ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(responseBuilder.buildCheckInSessionResponse(expectedCookie.value)) 
         }
+    }
+
+    @GetMapping(Uris.API.Web.V1_0.NonAuth.ParticipantHistory.ENDPOINT)
+    fun getParticipantHistorySession(@PathVariable participantId: String, @PathVariable sessionId: String): ResponseEntity<Any> {
+        val participantHistory = historyService.getHistory(participantId, sessionId)
+        val body = responseBuilder.getParticipantHistoryResponse(participantHistory)
+
+        return ResponseEntity.ok().contentType(SirenModel.MEDIA_TYPE).body(body)
     }
 }

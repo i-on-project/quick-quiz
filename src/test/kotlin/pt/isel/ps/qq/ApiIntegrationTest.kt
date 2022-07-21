@@ -508,6 +508,20 @@ class ApiIntegrationTest() {
             .andReturn()
     }
 
+    @Order(24)
+    @Test
+    fun getHistoricSessionForParticipant() {
+        val path =  "/api/web/v1.0/non_auth/history/${testUser?.participantId}/${testUser?.sessionId}"
+
+        val result = getRequestNoCookie(path)
+            .andExpect(status().isOk)
+            .andExpectSirenMediaType()
+            .andReturn()
+        val responseObj = objectMapper.readValue(result.response.contentAsByteArray, SirenModel::class.java)
+
+    }
+
+
     @Order(44)
     @Test
     fun isAbleToCreateTemplate() {
