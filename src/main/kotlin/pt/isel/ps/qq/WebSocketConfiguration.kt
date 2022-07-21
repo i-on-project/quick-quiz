@@ -13,9 +13,9 @@ import pt.isel.ps.qq.utils.getAppHost
 class WebSocketConfiguration : WebSocketMessageBrokerConfigurer {
 
     override fun registerStompEndpoints(stompEndpointRegistry: StompEndpointRegistry) {
-        println("Allowed Origins ${getAppHost()}")
         stompEndpointRegistry
             .addEndpoint("/insession.ws")
+            .setAllowedOriginPatterns(getAppHost())
             .withSockJS()
     }
 
