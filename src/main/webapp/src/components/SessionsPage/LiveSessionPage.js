@@ -4,13 +4,14 @@ import {Button, Card, Col, Container, Modal, Row, Spinner} from "react-bootstrap
 import {Link, Navigate, useParams} from "react-router-dom";
 import SockJsClient from 'react-stomp';
 import {Notification} from "../Notification";
-import {request} from "../../utils/Request";
+import {request, request_no_content} from "../../utils/Request";
 import {getActionHref, getLinksFromEntity, getLinksHref} from "../../utils/SirenJson";
 import {ProblemJson} from "../../utils/ProblemJson";
 import {Timer} from "../TickingTimer";
 import {NewQuizModal} from "../QuizzesPage/NewQuizModal";
 import {SortQuizzesEntities} from "../../utils/models/QuizModel";
 import {MutableQuizCard} from "../QuizzesPage/MutableQuizCard";
+import {ActionButton} from "../ActionButon";
 
 const href_unknown_problem = new ProblemJson("InvalidRequest", "The uri to fetch the data is unknown")
 const uri = (id) => `/api/web/v1.0/auth/sessions/${id}`
@@ -29,6 +30,7 @@ export const LiveSession = () => {
     const [webSocketConnected, setWebSocketConnected] = useState(false)
 
     const [modal, setModal] = useState(false)
+    const [redirect, setRedirect] = useState(null)
 
     const loadSession = useCallback(() => {
         setSessionState(prev => { return {...prev, loading: true}})
@@ -106,6 +108,18 @@ export const LiveSession = () => {
 
     const onMessageHandler = useCallback(() => {setMessages(prev => { return {...prev, newMessages: true}})}, [])
 
+    const onClickCloseSession = useCallback(() => {
+        const link = getActionHref(session_state.data.actions, 'Stop-Session')
+        if(link != null) {
+            const func_obj = {
+                success: () => {setRedirect('/sessions')},
+                failed: () => alert('Session could not be closed')
+            }
+            return request_no_content(link, {method: 'POST'}, func_obj).fetch
+        }
+        return Promise.resolve()
+    }, [session_state.data])
+
     useEffect(() => {
         return loadSession().cancel
     }, [loadSession])
@@ -128,13 +142,16 @@ export const LiveSession = () => {
                 setMessages({lastTimeFetch: Date.now(), newMessages: false})
                 loadAnswers()
             } else {
-                return () => clearTimeout(setTimeout(() => {
+                const timeout = setTimeout(() => {
                     setMessages({lastTimeFetch: Date.now(), newMessages: false})
                     loadAnswers()
-                }, 1000 - elapsedTime))
+                }, 1000 - elapsedTime)
+                return () => clearTimeout(timeout)
             }
         }
     }, [messages, loadAnswers])
+
+    if(redirect != null) return <Navigate to={redirect}/>
 
     const spinner = <div className="ms-3 text-center"><Spinner animation="border" style={{width: "3rem", height: "3rem"}}/></div>
 
@@ -151,6 +168,7 @@ export const LiveSession = () => {
             const session = session_state.data.properties
             if(session.status !== 'STARTED') return <Navigate to={`/session/${session.id}`} />
             session_content = <Container>
+                <Row><ActionButton variant='success' className='mt-3' perform={onClickCloseSession} content="Close session"/></Row>
                 <Row>
                     <Card className={"mt-3"}>
                         <Col><Card.Title>Name: {session.name}</Card.Title>

@@ -1,7 +1,7 @@
 import * as React from "react"
 import {Fragment, useCallback, useState} from "react";
 import {Modal} from "react-bootstrap";
-import {parse_body, request_no_content} from "../../utils/Request";
+import {parse_body, request} from "../../utils/Request";
 import {Notification} from "../Notification";
 import {SessionForm} from "./SessionForm";
 
@@ -10,8 +10,8 @@ export const NewSessionModal = (props) => {
     const [state, setState] = useState({problem: null})
 
     const createSession = useCallback((input_model) => {
-        const s_func = () => {
-            props.reload()
+        const s_func = (data) => {
+            props.reload(data.properties.id)
             props.onClose()
         }
         const f_func = (problem) => {
@@ -20,7 +20,7 @@ export const NewSessionModal = (props) => {
             })
         }
         const func_obj = {success: s_func, failed: f_func}
-        request_no_content(props.href, {method: 'POST', ...parse_body(input_model)}, func_obj)
+        request(props.href, {method: 'POST', ...parse_body(input_model)}, func_obj)
     }, [props])
 
     const onCloseHandler = useCallback(() => {

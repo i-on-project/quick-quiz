@@ -6,18 +6,17 @@ import {NewSessionModal} from "./NewSessionModal";
 import {SessionCard} from "./SessionCard";
 import {request} from "../../utils/Request";
 import {getActionHref, getLinksFromEntity} from "../../utils/SirenJson";
+import {Navigate} from "react-router-dom";
 
 const page_size = 10
 const uri = '/api/web/v1.0/auth/sessions?page='
 export const Sessions = () => {
-    console.log("in Sessions")
 
     const [state, setState] = useState({data: null, loading: true, problem: null})
     const [pages, setPages] = useState({page: 0, totalPages: 1})
     const [modal, setModal] = useState(false)
 
     const loadPage = useCallback(() => {
-        console.log("loadpage")
         setState((prev) => { return {...prev, loading: true}})
         const s_func = (data) => {
             setState((prev) => { return {...prev,
@@ -40,9 +39,12 @@ export const Sessions = () => {
     }, [pages.page])
 
     useEffect(() => {
-        console.log("useEffect")
         return loadPage()
     }, [loadPage])
+
+    const redirectToSession = useCallback((id) => {
+        setState(prev => { return {...prev, redirect: `/session/${id}`}})
+    }, [])
 
     const onCloseHandler = useCallback(() => {
         setState((prev) => { return {...prev, problem: null}})
@@ -68,6 +70,8 @@ export const Sessions = () => {
         })
     }, [])
 
+    if(state.redirect != null) return <Navigate to={state.redirect}/>
+
     let main_content = null
     let session_list = null
     if(state.loading) main_content = <div className="text-center"><Spinner animation="border" style={{width: "3rem", height: "3rem"}}/></div>
@@ -91,7 +95,7 @@ export const Sessions = () => {
 
     let modal_content = null
     if(modal) modal_content = <Modal show={true}>
-        <NewSessionModal reload={loadPage} href={getActionHref(state.data.actions, "Create-Session")} onClose={modalCloseHandler}/>
+        <NewSessionModal reload={redirectToSession} href={getActionHref(state.data.actions, "Create-Session")} onClose={modalCloseHandler}/>
     </Modal>
 
     return (

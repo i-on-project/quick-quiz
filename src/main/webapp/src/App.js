@@ -2,7 +2,6 @@ import * as React from "react";
 import {BrowserRouter, Route, Routes} from "react-router-dom";
 import {UserProvider} from "./components/UserContext";
 import {NavigationBar} from "./components/Navbar";
-import {ParticipantProvider} from "./components/ParticipantContext";
 import {Home} from "./components/HomePage/Home";
 import {LogMeIn} from "./components/LogmeinPage";
 import {Login} from "./components/LoginPage";
@@ -22,7 +21,6 @@ const App = () => {
         <BrowserRouter>
             <UserProvider>
                 <NavigationBar/>
-                <ParticipantProvider>
                     <Routes>
                         <Route path="/" element={<Home/>} />
                         <Route path="/logmein" element={<LogMeIn/>}/>
@@ -39,7 +37,6 @@ const App = () => {
 
                         <Route path="*" element={<PageNotFound/>}/>
                     </Routes>
-                </ParticipantProvider>
             </UserProvider>
         </BrowserRouter>
     )
