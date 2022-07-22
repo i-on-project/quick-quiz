@@ -12,6 +12,7 @@ import pt.isel.ps.qq.data.*
 import pt.isel.ps.qq.exceptions.GuestSessionNotFoundException
 import pt.isel.ps.qq.exceptions.IllegalStatusOperationException
 import pt.isel.ps.qq.exceptions.MissingCookieException
+import pt.isel.ps.qq.exceptions.SessionIllegalStatusOperationException
 import pt.isel.ps.qq.repositories.docs.QqStatus
 import pt.isel.ps.qq.service.AnswersService
 import pt.isel.ps.qq.service.HistoryService
@@ -121,7 +122,7 @@ class ParticipantSessionController(
     @GetMapping(Uris.API.Web.V1_0.NonAuth.SessionStatus.ENDPOINT)
     fun getSessionStatus(@PathVariable participantId: String): ResponseEntity<Void> {
         val isStarted = participantService.checkSessionIsLiveNonAuth(participantId)
-        if(!isStarted) throw IllegalStatusOperationException(QqStatus.CLOSED)
-        return ResponseEntity.ok().build()
+        if(!isStarted) throw SessionIllegalStatusOperationException(QqStatus.CLOSED)
+        return ResponseEntity.noContent().build()
     }
 }

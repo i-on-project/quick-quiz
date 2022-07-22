@@ -386,6 +386,13 @@ paths:
       responses:
         201:
           description: Successfully created a new session.
+          headers:
+            location:
+              schema:
+                type: string
+                format: uri
+                example: '/api/web/v1.0/auth/sessions/{id}'
+              description: The uri where the session can be obtained where the id parameter is the actual session identifier
           content:
             application/vnd.siren+json:
               schema:
@@ -1246,6 +1253,18 @@ paths:
         - participants management
       summary: Checks the existance of the cookie InSession.
       description: Validates that the user contains the cookie and that the cookie is still valid.
+      parameters:
+        - in: cookie
+          name: InSession
+          schema:
+            type: string
+            format: uuid
+          required: false
+          description: The cookie to be evaluated.
+          examples:
+            example:
+              value: '3fa85f64-5717-4562-b3fc-2c963f66afa6&3fa85f64-5717-4562-b3fc-2c963f66afa6'
+              summary: There are 2 uuids separated by '&'. The first is the participant id and the second the session id
       responses:
         200:
           description: Representation of the cookie value.
@@ -1264,6 +1283,37 @@ paths:
                     properties:
                       type:
                         default: 'MissingCookieException'
+                      status:
+                        default: 409
+
+  /api/web/v1.0/non_auth/sessionStatus/{id}:
+    get:
+      tags:
+        - participants management
+      summary: Get the status of the session that the participant is in.
+      description: Gets the status of the session that the participant specified by the parameter id is in.
+      parameters:
+        - in: path
+          name: pid
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The participant identifier.
+      responses:
+        204:
+          description: The status of the session is STARTED.
+        404:
+          description: The session status is not STARTED.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'SessionIllegalStatusOperationException'
                       status:
                         default: 409
 
@@ -1389,6 +1439,13 @@ paths:
       responses:
         201:
           description: Successfully created a new template.
+          headers:
+            location:
+              schema:
+                type: string
+                format: uri
+                example: '/api/web/v1.0/auth/template/{id}'
+              description: The uri where the template can be obtained where the id parameter is the actual template identifier
           content:
             application/vnd.siren+json:
               schema:
@@ -1670,6 +1727,13 @@ paths:
       responses:
         201:
           description: Successfully created a new quiz.
+          headers:
+            location:
+              schema:
+                type: string
+                format: uri
+                example: '/api/web/v1.0/auth/quiz/{id}'
+              description: The uri where the quiz can be obtained where the id parameter is the actual quiz identifier
           content:
             application/vnd.siren+json:
               schema:
@@ -1750,6 +1814,48 @@ paths:
                       status:
                         default: 404
 
+  /api/web/v1.0/non_auth/history/{pid}/{sid}:
+    get:
+      tags:
+        - history management
+        - participants management
+      summary: Gets the past responses and quizzes for a participant in a closed session.
+      description: Gets all the responses and quizzes that a participant specified by the parameter pid answered in the closed session specified by the parameter sid.
+      parameters:
+        - in: path
+          name: pid
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The participant identifier.
+        - in: path
+          name: sid
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The session identifier.
+      responses:
+        200:
+          description: Representation of the participant history for that session.
+          content:
+            application/vnd.siren+json:
+              schema:
+                $ref: '#/components/schemas/GetParticipantHistoryOutputModel'
+        404:
+          description: Session not found.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemJson'
+                  - type: object
+                    properties:
+                      type:
+                        default: 'SessionNotFound'
+                      status:
+                        default: 404
 
 components:
 
@@ -2571,6 +2677,57 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/SirenAction'
+
+    GetParticipantHistoryOutputModel:
+      allOf:
+        - $ref: '#/components/schemas/SirenModel'
+        - type: object
+          properties:
+            properties:
+              type: object
+              properties:
+                date:
+                  type: number
+                  format: int64
+                quizzes:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      question:
+                        type: string
+                      order:
+                        type: number
+                        format: int32
+                      answerType:
+                        type: string
+                        enum: ['MULTIPLE_CHOICE', 'SHORT', 'LONG']
+                        default: 'SHORT'
+                      answers:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            quizId:
+                              type: string
+                              format: uuid
+                            answer:
+                              type: string
+                            choiceNumber:
+                              type: number
+                              format: int32
+                      answerChoices:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            choiceNumber:
+                              type: number
+                              format: int32
+                            choiceAnswer:
+                              type: string
+                            choiceRight:
+                              type: boolean
 
     GetAllAnswersSessionOutputModel:
       allOf:
